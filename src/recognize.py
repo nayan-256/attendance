@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime
 
 # Load trained encodings
-encoding_file = "C:\\Users\\attar\\OneDrive\\Desktop\\project\\Attendance_System\\models\\encoding.pickle"
+encoding_file = "C:\\Users\\attar\\OneDrive\\Desktop\\project\\Attendance_System\\models\\encodings.pickle"
 data = pickle.loads(open(encoding_file, "rb").read())
 
 # Connect to database
