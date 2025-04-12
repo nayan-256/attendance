@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register User</title>
+    <style>body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }</style>
+    <style>table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 10px; }</style>
+
+</head>
+<body>
+    <h2>Register New Student</h2>
+    
+    <form id="registerForm" method="POST" enctype="multipart/form-data">
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Student ID:</label><br>
+        <input type="text" name="student_id" required><br><br>
+        <!-- Camera Section -->
+        <video id="video" width="320" height="240" autoplay></video><br>
+        <button type="button" onclick="captureImage()">📸 Capture Image</button><br><br>
+        
+        <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+        <input type="hidden" name="captured_image" id="captured_image">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedInput = document.getElementById('captured_image');
+
+        // Access webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+        
+        function captureImage() {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            capturedInput.value = dataURL;
+            alert("Image captured! Now submit the form.");
+        }
+    </script>
+</body>
+</html>
