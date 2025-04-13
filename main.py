@@ -50,6 +50,8 @@ init_db()
 def home():
     return render_template('index.html')
     
+from flask import flash, redirect, render_template, request, session, url_for
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -60,8 +62,9 @@ def login():
             session['logged_in'] = True
             return redirect(url_for('home'))
         else:
-            flash('Invalid credentials', 'error')
+            flash('Invalid username or password', 'error')  # Flash the error message
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -157,24 +160,30 @@ def dashboard():
      conn.close()
      return render_template('dashboard.html', records=records)
 
-@app.route('/checkin')
+@app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
-    known_face_encodings, known_face_names = load_encoded_faces()
-    name = recognize_face(known_face_encodings, known_face_names)
-    if name:
-        mark_attendance(name, status="Check-In")
-        return f"{name} checked in successfully!"
-    return "Face not recognized."
+    if request.method == 'POST':
+        known_face_encodings, known_face_names = load_encoded_faces()
+        name = recognize_face(known_face_encodings, known_face_names)
+        if name:
+            mark_attendance(name, status="Check-In")
+            return render_template('checkin.html', result=f"{name} checked in successfully!")
+        return render_template('checkin.html', result="Face not recognized.")
+    return render_template('checkin.html', result=None)
 
 
-@app.route('/checkout')
+
+@app.route('/checkout', methods=['GET', 'POST'])
 def checkout_attendance():
-    known_face_encodings, known_face_names = load_encoded_faces()
-    name = recognize_face(known_face_encodings, known_face_names)
-    if name:
-        mark_attendance(name, status="Check-Out")
-        return f"{name} checked out successfully!"
-    return "Face not recognized."
+    if request.method == 'POST':
+        known_face_encodings, known_face_names = load_encoded_faces()
+        name = recognize_face(known_face_encodings, known_face_names)
+        if name:
+            mark_attendance(name, status="Check-Out")
+            return render_template('checkout.html', result=f"{name} checked out successfully!")
+        return render_template('checkout.html', result="Face not recognized.")
+    return render_template('checkout.html', result=None)
+
 
 
 @app.route('/students')

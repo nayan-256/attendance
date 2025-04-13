@@ -1,48 +1,140 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Register User</title>
-    <style>body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }</style>
-    <style>table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 10px; }</style>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 40px;
+        background: url("https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+      }
 
-</head>
-<body>
-    <h2>Register New Student</h2>
-    
+      h2 {
+        color: #ffd700;
+        text-shadow: 2px 2px 5px #000;
+        text-align: center;
+        animation: fadeInDown 1s ease-in-out;
+        margin-bottom: 30px;
+      }
+
+      form {
+        background: rgba(0, 0, 0, 0.6); /* semi-transparent background */
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 400px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="submit"],
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      input[type="text"] {
+        background: #fff;
+        color: #333;
+      }
+
+      button {
+        background: #28a745;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #218838;
+      }
+
+      video,
+      canvas {
+        display: block;
+        margin: 0 auto 15px auto;
+        border-radius: 8px;
+      }
+
+      @keyframes fadeInDown {
+        0% {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🎓 Register New Student</h2>
+
     <form id="registerForm" method="POST" enctype="multipart/form-data">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
+      <label>Name:</label>
+      <input type="text" name="name" required />
 
-        <label>Student ID:</label><br>
-        <input type="text" name="student_id" required><br><br>
-        <!-- Camera Section -->
-        <video id="video" width="320" height="240" autoplay></video><br>
-        <button type="button" onclick="captureImage()">📸 Capture Image</button><br><br>
-        
-        <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
-        <input type="hidden" name="captured_image" id="captured_image">
+      <label>Student ID:</label>
+      <input type="text" name="student_id" required />
 
-        <button type="submit">Submit</button>
+      <video id="video" width="320" height="240" autoplay></video>
+      <button type="button" onclick="captureImage()">📸 Capture Image</button>
+
+      <canvas
+        id="canvas"
+        width="320"
+        height="240"
+        style="display: none"
+      ></canvas>
+      <input type="hidden" name="captured_image" id="captured_image" />
+
+      <button type="submit">✅ Submit</button>
     </form>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const capturedInput = document.getElementById('captured_image');
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const capturedInput = document.getElementById("captured_image");
 
-        // Access webcam
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-            });
-        
-        function captureImage() {
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/jpeg');
-            capturedInput.value = dataURL;
-            alert("Image captured! Now submit the form.");
-        }
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          alert("Failed to access webcam: " + err);
+        });
+
+      function captureImage() {
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedInput.value = canvas.toDataURL("image/jpeg");
+        alert("📸 Image captured! Now click Submit.");
+      }
     </script>
-</body>
+  </body>
 </html>

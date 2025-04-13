@@ -11,64 +11,94 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
   <style>
-    body {
-      background: linear-gradient(to right, #cfd9df, #e2ebf0); /* Smooth gradient background */
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    .bg-image {
+      background-size: cover;
+      background-position: center;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: start;
+      position: relative;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.85);
       padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 600px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
 
     h1 {
-      color: #004d80;
-      margin-bottom: 40px;
+      font-weight: bold;
+      color: #003366;
+      margin-bottom: 30px;
+      opacity: 0.95;
     }
 
-    .btn-custom {
+    nav a {
       margin: 10px;
-      padding: 12px 25px;
-      border-radius: 8px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: transform 0.2s, background-color 0.3s;
+      min-width: 180px;
+      opacity: 0.9;
     }
 
-    .btn-custom:hover {
-      transform: translateY(-2px);
-      background-color: #006080 !important;
-    }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
+    nav a:hover {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <div class="text-center animate__animated animate__fadeInDown">
-    <h1>🎓 Face Recognition Attendance System</h1>
+
+  <!-- Conditional Background Image -->
+  <div class="bg-image" style="
+    background-image: url(
+      {% if session.get('logged_in') %}
+      'https://comp.gcoej.ac.in/images/IMG_20180203_142209.jpg'                            /* Admin dashboard image */
+      {% else %}
+        'https://images.shiksha.com/mediadata/images/1552470087php0wzgEA.jpeg'           /* Home page image */
+      {% endif %}
+    );
+  ">
+    <div class="overlay"></div>
+
+    <!-- Content -->
+    <div class="container animate__animated animate__fadeIn">
+      {% if not session.get('logged_in') %}
+        <h1>🎯 Your Face is Your ID: Welcome to Attendance System</h1>
+      {% else %}
+        <h1>👨‍💼 Admin Dashboard: Manage Attendance & Users</h1>
+      {% endif %}
+
+      <nav>
+        <a href="/register" class="btn btn-primary">Register User</a>
+        <a href="/checkin" class="btn btn-success">Check-in</a>
+        <a href="/checkout" class="btn btn-warning">Check-out</a>
+
+        {% if session.get('logged_in') %}
+          <a href="/dashboard" class="btn btn-info">View Attendance</a>
+          <a href="/students" class="btn btn-dark">Registered Students</a>
+          <a href="/logout" class="btn btn-danger">Logout</a>
+        {% else %}
+          <a href="/login" class="btn btn-secondary">Admin Login</a>
+        {% endif %}
+      </nav>
+    </div>
   </div>
 
-  <nav class="animate__animated animate__fadeInUp">
-    <a href="/register" class="btn btn-primary btn-custom">Register User</a>
-    <a href="/checkin" class="btn btn-success btn-custom">Check-in</a>
-    <a href="/checkout" class="btn btn-warning btn-custom">Check-out</a>
-
-    {% if session.get('logged_in') %}
-      <a href="/dashboard" class="btn btn-info btn-custom">View Attendance</a>
-      <a href="/students" class="btn btn-dark btn-custom">View Registered Students</a>
-      <a href="/logout" class="btn btn-danger btn-custom">Logout</a>
-    {% else %}
-      <a href="/login" class="btn btn-secondary btn-custom">Admin Login</a>
-    {% endif %}
-  </nav>
-
-  <!-- Optional JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
