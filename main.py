@@ -233,7 +233,7 @@ def load_encoded_faces():
     return known_encodings, known_names
 
 
-def recognize_face(known_encodings, known_names):
+def recognize_face(known_encodings, known_names, tolerance=0.5):
     cap = cv2.VideoCapture(0)
     success, frame = cap.read()
     cap.release()
@@ -241,15 +241,26 @@ def recognize_face(known_encodings, known_names):
     if not success:
         return None
 
-    face_locations = face_recognition.face_locations(frame)
-    face_encodings = face_recognition.face_encodings(frame, face_locations)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(rgb_frame)
+
+    if not face_locations:
+        return None
+
+    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
     for encoding in face_encodings:
-        matches = face_recognition.compare_faces(known_encodings, encoding)
-        if True in matches:
-            return known_names[matches.index(True)]
+        distances = face_recognition.face_distance(known_encodings, encoding)
+        min_distance = min(distances)
+        if min_distance < tolerance:
+            best_match_index = distances.tolist().index(min_distance)
+            return known_names[best_match_index]
+        else:
+            print("Face found but not matching any registered user")
+            return None
 
     return None
+
 
 if __name__ == '__main__':
     app.run(debug=True)
