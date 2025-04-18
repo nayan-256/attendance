@@ -73,13 +73,24 @@ def logout():
 
 # === Routes ===
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         name = request.form['name']
         student_id = request.form['student_id']
         image_data = request.form['captured_image']
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+
+        # 🔍 Check for existing student ID
+        cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+        existing_user = cur.fetchone()
+
+        if existing_user:
+            conn.close()
+            # 🔁 Send user back to the form with a message
+            return render_template('register.html', error="🚫 Student ID already registered!")
 
         if image_data:
             header, encoded = image_data.split(',', 1)
@@ -93,9 +104,7 @@ def register():
             with open(filepath, 'wb') as f:
                 f.write(image_bytes)
 
-            # Save to database with student ID
-            conn = sqlite3.connect('database.db')
-            cur = conn.cursor()
+            # ✅ Save to database
             cur.execute("INSERT INTO users (name, student_id, image_path) VALUES (?, ?, ?)",
                         (name, student_id, filepath))
             conn.commit()
@@ -103,7 +112,9 @@ def register():
 
             return redirect(url_for('home'))
 
+    # GET or fallback render
     return render_template('register.html')
+
 
 
 @app.route('/attendance')

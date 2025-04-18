@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Register User</title>
+    
+
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
@@ -51,7 +53,7 @@
         color: #333;
       }
 
-      button {
+      button,button {
         background: #28a745;
         color: #fff;
         cursor: pointer;
@@ -60,6 +62,7 @@
       button:hover {
         background: #218838;
       }
+      
 
       video,
       canvas {
@@ -100,6 +103,10 @@
 
       <label>Student ID:</label>
       <input type="text" name="student_id" required />
+      {% if error %}
+        <p style="color: red; text-align: center;">{{ error }}</p>
+      {% endif %}
+
 
       <video id="video" width="320" height="240" autoplay></video>
       <button type="button" onclick="captureImage()">📸 Capture Image</button>
@@ -113,6 +120,10 @@
       <input type="hidden" name="captured_image" id="captured_image" />
 
       <button type="submit">✅ Submit</button>
+      <button type="button" onclick="goBack()">← Back</button>
+
+
+      </button>
     </form>
 
     <script>
@@ -128,6 +139,11 @@
         .catch((err) => {
           alert("Failed to access webcam: " + err);
         });
+
+      function goBack() {
+          // You can customize this to redirect to a specific page instead
+          window.history.back();
+      }
 
       function captureImage() {
         const context = canvas.getContext("2d");
