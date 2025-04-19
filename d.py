@@ -1,29 +1,53 @@
 import sqlite3
+import os
 
 DATABASE_PATH = 'database.db'
 
-# Function to delete a specific user's record from users and attendance tables
-def delete_user_record(name):
+def delete_user_record(student_id):
     try:
-        # Connect to the database
+        print(f"🔍 Connecting to database: {DATABASE_PATH}")
         conn = sqlite3.connect(DATABASE_PATH)
         cur = conn.cursor()
 
-        # Delete user's attendance records
-        cur.execute("DELETE FROM attendance WHERE user_id = (SELECT id FROM users WHERE name = ?)", (name,))
-        
-        # Delete the user record
-        cur.execute("DELETE FROM users WHERE name = ?", (name,))
-        
-        # Commit the changes
+        # Fetch user info
+        cur.execute("SELECT id, name, image_path FROM users WHERE student_id = ?", (student_id,))
+        result = cur.fetchone()
+
+        if not result:
+            print(f"🚫 No user found with student ID: {student_id}")
+            return
+
+        user_id, name, image_path = result
+        print(f"✅ Found user: {name} (ID: {user_id})")
+
+        confirm = input(f"Are you sure you want to delete '{name}' (ID: {student_id}) and all their data? (yes/no): ").lower()
+        if confirm != 'yes':
+            print("❌ Deletion cancelled.")
+            return
+
+        # Delete attendance
+        cur.execute("DELETE FROM attendance WHERE user_id = ?", (user_id,))
+        print(f"🗑️ Deleted attendance for user_id {user_id}")
+
+        # Delete user
+        cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        print(f"🗑️ Deleted user with id {user_id}")
+
+        # Delete image
+        if image_path and os.path.exists(image_path):
+            os.remove(image_path)
+            print(f"🗑️ Deleted image: {image_path}")
+        else:
+            print(f"⚠️ Image not found: {image_path}")
+
         conn.commit()
-        print(f"Record for user {name} deleted successfully!")
+        print("✅ All records deleted successfully.")
+
     except sqlite3.Error as e:
-        print(f"Error while deleting record for {name}: {e}")
+        print(f"⚠️ SQLite error: {e}")
     finally:
         conn.close()
 
-# Call the function to delete a specific user's record
 if __name__ == '__main__':
-    user_name = input("Enter the name of the user to delete: ")
-    delete_user_record(user_name)
+    student_id = input("Enter the student ID of the user to delete: ").strip()
+    delete_user_record(student_id)
