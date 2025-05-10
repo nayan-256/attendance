@@ -1,5 +1,6 @@
 import os
 import cv2
+import pickle
 import face_recognition
 import numpy as np
 import sqlite3
@@ -151,25 +152,67 @@ def attendance():
 
     conn.close()
     return render_template('attendance.html')
-
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-     if not session.get('logged_in'):
-        return redirect(url_for('login'))
-     conn = sqlite3.connect('database.db')
-     cur = conn.cursor()
-     cur.execute('''
-        SELECT users.name, 
-           DATE(attendance.timestamp) AS date, 
-           TIME(attendance.timestamp) AS time, 
-           attendance.status 
-        FROM attendance 
-        JOIN users ON attendance.user_id = users.id 
-        ORDER BY attendance.timestamp DESC
-     ''')
-     records = cur.fetchall()
-     conn.close()
-     return render_template('dashboard.html', records=records)
+    # Ensure the user is logged in before proceeding
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))  # Redirect to login page if not logged in
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    # Fetch all unique names and dates for the dropdowns
+    cur.execute('SELECT DISTINCT name FROM users')
+    names = cur.fetchall()
+    
+    cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
+    dates = cur.fetchall()
+    
+    # If a search is submitted, filter the records based on name and date
+    records = []
+    if request.method == 'POST':
+        selected_name = request.form.get('name')
+        selected_date = request.form.get('date')
+        
+        # Query for attendance records filtered by name and/or date
+        query = '''
+            SELECT users.name, 
+                   DATE(attendance.timestamp) AS date, 
+                   TIME(attendance.timestamp) AS time, 
+                   attendance.status 
+            FROM attendance 
+            JOIN users ON attendance.user_id = users.id
+        '''
+        conditions = []
+        params = []
+        
+        if selected_name:
+            conditions.append("users.name = ?")
+            params.append(selected_name)
+        
+        if selected_date:
+            conditions.append("DATE(attendance.timestamp) = ?")
+            params.append(selected_date)
+        
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        query += " ORDER BY attendance.timestamp DESC"
+        
+        cur.execute(query, tuple(params))
+        records = cur.fetchall()
+        
+        # If no records are found, display a "not found" message
+        if not records:
+            not_found = True
+        else:
+            not_found = False
+    else:
+        not_found = False
+    
+    conn.close()
+    return render_template('dashboard.html', records=records, names=names, dates=dates, not_found=not_found)
+
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
