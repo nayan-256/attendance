@@ -6,7 +6,7 @@ import numpy as np
 import sqlite3
 import base64
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, flash, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -152,6 +152,7 @@ def attendance():
 
     conn.close()
     return render_template('attendance.html')
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     # Ensure the user is logged in before proceeding
@@ -247,10 +248,40 @@ def show_students():
         
      conn = sqlite3.connect('database.db')
      cur = conn.cursor()
-     cur.execute("SELECT name, student_id, image_path FROM users")
+     cur.execute("SELECT name, student_id, image_path, id FROM users")
      students = cur.fetchall()
      conn.close()
      return render_template('students.html', students=students)
+
+@app.route('/delete_student_by_id', methods=['POST'])
+def delete_student_by_id():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    student_id = request.form.get('student_id')
+
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+
+    # Get image path for deletion
+    cur.execute("SELECT image_path FROM users WHERE student_id = ?", (student_id,))
+    result = cur.fetchone()
+
+    if result:
+        image_path = result[0]
+        if image_path and os.path.exists(image_path):
+            os.remove(image_path)
+
+        # Delete records
+        cur.execute("DELETE FROM attendance WHERE student_id = ?", (student_id,))
+        cur.execute("DELETE FROM users WHERE student_id = ?", (student_id,))
+        conn.commit()
+        flash(f"✅ Student ID {student_id} deleted successfully.", "success")
+    else:
+        flash(f"❌ No student found with ID {student_id}.", "danger")
+    conn.close()
+    return redirect(url_for('show_students'))
+
 
 def mark_attendance(name, status):
     conn = sqlite3.connect('database.db')
