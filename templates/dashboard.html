@@ -57,7 +57,7 @@
     </style>
 </head>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.select2').select2({
             placeholder: "Search for a student",
             allowClear: true
@@ -68,6 +68,15 @@
 <body>
     <div class="container mt-5 animate__animated animate__fadeIn">
         <h2 class="text-center text-primary mb-4">📅 Attendance Records</h2>
+        <div class="row mb-3">
+            <div class="col text-end">
+                <form action="{{ url_for('download_excel') }}" method="get">
+                    <button type="submit" class="btn btn-outline-primary">
+                        📥 Download Attendance Excel
+                    </button>
+                </form>
+            </div>
+        </div>
 
         <!-- Search Form -->
         <form method="POST" class="mb-4">
@@ -120,6 +129,7 @@
                 </tbody>
             </table>
         </div>
+
 
         <a href="/" class="btn btn-outline-primary back-btn">⬅ Back to Home</a>
     </div>

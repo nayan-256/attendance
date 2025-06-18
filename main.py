@@ -6,8 +6,10 @@ import numpy as np
 import sqlite3
 import base64
 import csv
+import pandas as pd
 from datetime import datetime
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -347,27 +349,17 @@ def recognize_face(known_encodings, known_names, tolerance=0.5):
 
     return None
 
-@app.route('/export_attendance')
-def export_attendance():
+@app.route('/download_excel')
+def download_excel():
+    # Assuming you store attendance in a database
     conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT u.name, u.image_path, a.status, a.timestamp
-        FROM attendance a
-        JOIN users u ON a.user_id = u.id
-        ORDER BY a.timestamp DESC
-    """)
-    rows = cursor.fetchall()
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
     conn.close()
 
-    filename = 'attendance_export.csv'
-    with open(filename, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Name', 'Image Path', 'Status', 'Timestamp'])
-        writer.writerows(rows)
+    file_path = 'static/attendance_data.xlsx'
+    df.to_excel(file_path, index=False)
 
-    return send_file(filename, as_attachment=True)
+    return send_file(file_path, as_attachment=True)
 
 
 if __name__ == '__main__':
