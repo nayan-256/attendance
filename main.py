@@ -4,6 +4,8 @@ import pickle
 import face_recognition
 import numpy as np
 import sqlite3
+import matplotlib.pyplot as plt
+import io
 import base64
 import csv
 import pandas as pd
@@ -32,7 +34,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         timestamp TEXT,
-        status TEXT,
+        status TEXT DEFAULT 'Present',
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
     cur.execute('''CREATE TABLE IF NOT EXISTS admin (
@@ -52,6 +54,17 @@ def init_db():
     cur.execute("SELECT * FROM admin WHERE username='admin'")
     if not cur.fetchone():
         cur.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ('admin', 'admin123'))  # Change this in production
+
+    # Create teachers table
+    cur.execute('''CREATE TABLE IF NOT EXISTS teachers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )''')
+    # Insert a default teacher for testing
+    cur.execute("SELECT * FROM teachers WHERE username='teacher1'")
+    if not cur.fetchone():
+        cur.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", ('teacher1', 'teacher123'))
     conn.commit()
     conn.close()
 
@@ -83,7 +96,29 @@ def logout():
     session.pop('logged_in', None)
     return redirect(url_for('home'))
 
-# === Routes ===
+@app.route('/teacher_login', methods=['GET', 'POST'])
+def teacher_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM teachers WHERE username=? AND password=?", (username, password))
+        teacher = cur.fetchone()
+        conn.close()
+        if teacher:
+            session['teacher_logged_in'] = True
+            session['teacher_username'] = username
+            return redirect(url_for('teacher_dashboard'))
+        else:
+            flash('Invalid teacher credentials', 'error')
+    return render_template('teacher_login.html')
+
+@app.route('/teacher_logout')
+def teacher_logout():
+    session.pop('teacher_logged_in', None)
+    session.pop('teacher_username', None)
+    return redirect(url_for('teacher_login'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -160,11 +195,12 @@ def attendance():
         if True in matches:
             matched_id = known_ids[matches.index(True)]
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cur.execute("INSERT INTO attendance (user_id, timestamp) VALUES (?, ?)", (matched_id, timestamp))
+            cur.execute("INSERT INTO attendance (user_id, timestamp, status) VALUES (?, ?, ?)", (matched_id, timestamp, "Present"))
             conn.commit()
 
     conn.close()
     return render_template('attendance.html')
+
 @app.route('/view_attendance', methods=['GET', 'POST'])
 def view_attendance():
     conn = sqlite3.connect('database.db')
@@ -267,6 +303,43 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', records=records, names=names, dates=dates, not_found=not_found)
 
+
+@app.route('/teacher_dashboard', methods=['GET', 'POST'])
+def teacher_dashboard():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute('SELECT name, id FROM users')
+    students = cur.fetchall()
+    graph = None
+    selected_student = None
+    labels = []
+    values = []
+    colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f']  # You can add more colors if needed
+    legend_labels = []
+    if request.method == 'POST':
+        student_id = request.form.get('student_id')
+        selected_student = student_id
+        cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (student_id,))
+        records = cur.fetchall()
+        if records:
+            labels = [r[0] for r in records]
+            values = [r[1] for r in records]
+            legend_labels = [f"{label} ({value})" for label, value in zip(labels, values)]
+            plt.figure(figsize=(5,5))
+            patches, texts, autotexts = plt.pie(values, labels=labels, colors=colors[:len(labels)], autopct='%1.1f%%', startangle=140)
+            plt.legend(patches, legend_labels, loc="best")
+            plt.title('Attendance Distribution')
+            plt.axis('equal')
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', bbox_inches="tight")
+            buf.seek(0)
+            graph = base64.b64encode(buf.getvalue()).decode()
+            buf.close()
+            plt.close()
+    conn.close()
+    return render_template('teacher_dashboard.html', students=students, graph=graph, selected_student=selected_student)
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
