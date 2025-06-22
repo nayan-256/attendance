@@ -40,6 +40,14 @@ def init_db():
         username TEXT UNIQUE,
         password TEXT
     )''')
+    cur.execute("PRAGMA table_info(users)")
+    existing_cols = [col[1] for col in cur.fetchall()]
+    
+    if 'class_year' not in existing_cols:
+        cur.execute("ALTER TABLE users ADD COLUMN class_year TEXT")
+    if 'department' not in existing_cols:
+        cur.execute("ALTER TABLE users ADD COLUMN department TEXT")
+
     # Insert default admin if not exists
     cur.execute("SELECT * FROM admin WHERE username='admin'")
     if not cur.fetchone():
@@ -82,6 +90,8 @@ def register():
     if request.method == 'POST':
         name = request.form['name']
         student_id = request.form['student_id']
+        class_year = request.form['class_year']
+        department = request.form['department']
         image_data = request.form['captured_image']
 
         conn = sqlite3.connect('database.db')
@@ -109,8 +119,8 @@ def register():
                 f.write(image_bytes)
 
             # ✅ Save to database
-            cur.execute("INSERT INTO users (name, student_id, image_path) VALUES (?, ?, ?)",
-                        (name, student_id, filepath))
+            cur.execute("INSERT INTO users (name, student_id, class_year,department, image_path) VALUES (?, ?, ?, ?,?)",
+                    (name, student_id, class_year,department, filepath))
             conn.commit()
             conn.close()
 
@@ -155,6 +165,43 @@ def attendance():
 
     conn.close()
     return render_template('attendance.html')
+@app.route('/view_attendance', methods=['GET', 'POST'])
+def view_attendance():
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+
+    # Get filter values from the form
+    name = request.form.get('name')
+    class_year = request.form.get('class_year')
+    department = request.form.get('department')
+
+    # Base query
+    query = '''
+        SELECT u.name, u.student_id, u.class_year, u.department,
+               a.timestamp
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        WHERE 1=1
+    '''
+    params = []
+
+    if name:
+        query += " AND u.name LIKE ?"
+        params.append(f"%{name}%")
+
+    if class_year:
+        query += " AND u.class_year = ?"
+        params.append(class_year)
+
+    if department:
+        query += " AND u.department = ?"
+        params.append(department)
+
+    cur.execute(query, params)
+    records = cur.fetchall()
+    conn.close()
+
+    return render_template("attendance.html", records=records)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -180,10 +227,13 @@ def dashboard():
         
         # Query for attendance records filtered by name and/or date
         query = '''
-            SELECT users.name, 
-                   DATE(attendance.timestamp) AS date, 
-                   TIME(attendance.timestamp) AS time, 
-                   attendance.status 
+            SELECT 
+                users.name,
+                users.class_year, 
+                users.department, 
+                DATE(attendance.timestamp) AS date, 
+                TIME(attendance.timestamp) AS time, 
+                attendance.status 
             FROM attendance 
             JOIN users ON attendance.user_id = users.id
         '''
@@ -351,16 +401,34 @@ def recognize_face(known_encodings, known_names, tolerance=0.5):
 
 @app.route('/download_excel')
 def download_excel():
-    # Assuming you store attendance in a database
     conn = sqlite3.connect('database.db')
-    df = pd.read_sql_query("SELECT * FROM attendance", conn)
+
+    # ✅ Join attendance with users to get all the required info
+    df = pd.read_sql_query("""
+        SELECT 
+            users.name,
+            users.student_id,
+            users.class_year,
+            users.department,
+            attendance.timestamp,
+            attendance.status
+        FROM attendance
+        JOIN users ON attendance.user_id = users.id
+        ORDER BY attendance.timestamp DESC
+    """, conn)
+
+    # ✅ Optional: Split timestamp into Date and Time
+    df['Date'] = pd.to_datetime(df['timestamp']).dt.date
+    df['Time'] = pd.to_datetime(df['timestamp']).dt.time
+    df.drop(columns=['timestamp'], inplace=True)
+
     conn.close()
 
+    # ✅ Save to Excel
     file_path = 'static/attendance_data.xlsx'
     df.to_excel(file_path, index=False)
 
     return send_file(file_path, as_attachment=True)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

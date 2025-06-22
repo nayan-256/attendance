@@ -91,6 +91,29 @@
                     </select>
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label">Class Year</label>
+                    <select name="class_year" class="form-select">
+                        <option value="">-- Select Class Year --</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Department</label>
+                    <select name="department" class="form-select">
+                        <option value="">-- Select Department --</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="ENTC">ENTC</option>
+                        <option value="Instrumentation">Instrumentation</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
                     <label for="date" class="form-label">Select Date</label>
                     <input type="date" id="date" name="date" class="form-control">
                 </div>
@@ -107,11 +130,14 @@
         {% endif %}
 
         <!-- Attendance Records Table -->
+        {% if records %}
         <div class="table-responsive">
             <table class="table table-bordered table-hover shadow-sm">
                 <thead class="table-primary">
                     <tr>
                         <th>Name</th>
+                        <th>Class Year</th>
+                        <th>Department</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Status</th>
@@ -120,15 +146,20 @@
                 <tbody>
                     {% for record in records %}
                     <tr>
-                        <td>{{ record[0] }}</td>
-                        <td>{{ record[1] }}</td>
-                        <td>{{ record[2] }}</td>
-                        <td>{{ record[3] }}</td>
+                        <td>{{ record[0] }}</td> <!-- Name -->
+                        <td>{{ record[1] }}</td> <!-- Class Year -->
+                        <td>{{ record[2] }}</td> <!-- Department -->
+                        <td>{{ record[3] }}</td> <!-- Date -->
+                        <td>{{ record[4] }}</td> <!-- Time -->
+                        <td>{{ record[5] }}</td> <!-- Status -->
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <p class="text-danger text-center mt-3">No records found.</p>
+        {% endif %}
 
 
         <a href="/" class="btn btn-outline-primary back-btn">⬅ Back to Home</a>
