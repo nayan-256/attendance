@@ -99,8 +99,8 @@ def logout():
 @app.route('/teacher_login', methods=['GET', 'POST'])
 def teacher_login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form['username']        #Username: teacher1
+        password = request.form['password']        #Password: teacher123
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
         cur.execute("SELECT * FROM teachers WHERE username=? AND password=?", (username, password))
@@ -303,44 +303,68 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', records=records, names=names, dates=dates, not_found=not_found)
 
-
 @app.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
     if not session.get('teacher_logged_in'):
         return redirect(url_for('teacher_login'))
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
-    cur.execute('SELECT name, id FROM users')
+    cur.execute('SELECT id, name, student_id FROM users')
     students = cur.fetchall()
     graph = None
     selected_student = None
     labels = []
     values = []
-    colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f']  # You can add more colors if needed
     legend_labels = []
+    attendance_dates = []
     if request.method == 'POST':
         student_id = request.form.get('student_id')
-        selected_student = student_id
-        cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (student_id,))
-        records = cur.fetchall()
-        if records:
-            labels = [r[0] for r in records]
-            values = [r[1] for r in records]
-            legend_labels = [f"{label} ({value})" for label, value in zip(labels, values)]
-            plt.figure(figsize=(5,5))
-            patches, texts, autotexts = plt.pie(values, labels=labels, colors=colors[:len(labels)], autopct='%1.1f%%', startangle=140)
-            plt.legend(patches, legend_labels, loc="best")
-            plt.title('Attendance Distribution')
-            plt.axis('equal')
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png', bbox_inches="tight")
-            buf.seek(0)
-            graph = base64.b64encode(buf.getvalue()).decode()
-            buf.close()
-            plt.close()
-    conn.close()
-    return render_template('teacher_dashboard.html', students=students, graph=graph, selected_student=selected_student)
+        student_name = request.form.get('student_name')
+        # Prefer ID if provided, else use name
+        if student_id:
+            cur.execute('SELECT id, name FROM users WHERE id=?', (student_id,))
+            student = cur.fetchone()
+        elif student_name:
+            cur.execute('SELECT id, name FROM users WHERE name=?', (student_name,))
+            student = cur.fetchone()
+        else:
+            student = None
 
+        if student:
+            selected_student = student[0]
+            # Pie chart data
+            cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
+            records = cur.fetchall()
+            if records:
+                labels = [r[0] for r in records]
+                values = [r[1] for r in records]
+                legend_labels = [f"{label} ({value})" for label, value in zip(labels, values)]
+                plt.figure(figsize=(5,5))
+                patches, texts, autotexts = plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
+                plt.legend(patches, legend_labels, loc="best")
+                plt.title('Attendance Distribution')
+                plt.axis('equal')
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png', bbox_inches="tight")
+                buf.seek(0)
+                graph = base64.b64encode(buf.getvalue()).decode()
+                buf.close()
+                plt.close()
+            # Theory attendance dates (status = 'Present' or 'Check-In')
+            cur.execute('''
+                SELECT DATE(timestamp) FROM attendance
+                WHERE user_id=? AND (status='Present' OR status='Check-In')
+                ORDER BY timestamp DESC
+            ''', (selected_student,))
+            attendance_dates = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return render_template(
+        'teacher_dashboard.html',
+        students=students,
+        graph=graph,
+        selected_student=selected_student,
+        attendance_dates=attendance_dates
+    )
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
     if request.method == 'POST':
