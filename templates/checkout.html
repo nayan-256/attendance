@@ -10,7 +10,6 @@
   <style>
     body {
       background: linear-gradient(135deg, #e54cbf, #bde032);
-      /* Gradient background */
       background-size: cover;
       background-position: center;
       height: 100vh;
@@ -26,18 +25,35 @@
       border-radius: 15px;
       text-align: center;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      min-width: 350px;
+      max-width: 95vw;
     }
 
     #result {
       font-size: 1.2rem;
       margin-top: 20px;
     }
+    #statusMsg {
+      min-height: 2.5em;
+    }
+    .face-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: #e54cbf;
+      animation: bounceIn 1s;
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 
 <body>
   <div class="box animate__animated animate__zoomIn">
-    <h2 class="mb-4">👋 Face Recognition Check-Out</h2>
+    <div class="face-icon animate__animated animate__bounceIn">👋</div>
+    <h2 class="mb-4">Face Recognition Check-Out</h2>
 
     {% if result %}
     <div id="result" class="alert alert-success animate__animated animate__fadeIn">
@@ -58,45 +74,37 @@
       const utterance = new SpeechSynthesisUtterance(speakText);
       speechSynthesis.speak(utterance);
 
-      // Optional: Redirect after speaking
-      setTimeout(() => {
+      utterance.onend = function() {
         window.location.href = "/";
-      }, 6000);
+      };
     </script>
     {% else %}
-
-    <form method="POST">
-      <button id="checkoutBtn" type="submit" class="btn btn-warning btn-lg text-white">
-        <span id="btnText">Start Check-Out</span>
-        <div id="spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
-      </button>
-    </form>
     <div id="statusMsg" class="mt-4 text-muted animate__animated"></div>
-    {% endif %}
-  </div>
-
-  <script>
-    const btn = document.getElementById("checkoutBtn");
-    const statusMsg = document.getElementById("statusMsg");
-    const spinner = document.getElementById("spinner");
-
-    if (btn) {
-      btn.addEventListener("click", () => {
-        document.getElementById("btnText").innerText = "Scanning Face...";
-        spinner.classList.remove("d-none");
-        statusMsg.innerHTML = "Step 1: Please face the camera.";
+    <div id="spinner" class="spinner-border spinner-border-lg text-warning mt-4" role="status" style="display:none;"></div>
+    <script>
+      // Start process immediately on page load
+      window.addEventListener("DOMContentLoaded", function() {
+        const statusMsg = document.getElementById("statusMsg");
+        const spinner = document.getElementById("spinner");
+        spinner.style.display = "inline-block";
+        statusMsg.innerHTML = "Initializing camera and scanning face. Please wait...";
         statusMsg.classList.add("animate__fadeIn");
 
+        // Simulate slow analysis (e.g., 4 seconds)
         setTimeout(() => {
-          statusMsg.innerHTML = "Step 2: Verifying identity...";
+          statusMsg.innerHTML = "Analyzing and verifying identity. Please hold still...";
         }, 2000);
 
         setTimeout(() => {
-          statusMsg.innerHTML = "Step 3: Finalizing check-out...";
+          // Submit the form automatically after analysis
+          const form = document.createElement("form");
+          form.method = "POST";
+          document.body.appendChild(form);
+          form.submit();
         }, 4000);
       });
-    }
-  </script>
+    </script>
+    {% endif %}
+  </div>
 </body>
-
 </html>

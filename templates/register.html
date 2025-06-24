@@ -1,177 +1,185 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Register User</title>
 
-<head>
-  <title>Register User</title>
-
-
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 40px;
-      background: url("https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80") no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-    }
-
-    h2 {
-      color: #ffd700;
-      text-shadow: 2px 2px 5px #000;
-      text-align: center;
-      animation: fadeInDown 1s ease-in-out;
-      margin-bottom: 30px;
-    }
-
-    form {
-      background: rgba(0, 0, 0, 0.6);
-      /* semi-transparent background */
-      padding: 25px;
-      border-radius: 15px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-    }
-
-    label {
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="submit"],
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-
-    input[type="text"] {
-      background: #fff;
-      color: #333;
-    }
-
-    button,
-    button {
-      background: #28a745;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #218838;
-    }
-
-
-    video,
-    canvas {
-      display: block;
-      margin: 0 auto 15px auto;
-      border-radius: 8px;
-    }
-
-    @keyframes fadeInDown {
-      0% {
-        opacity: 0;
-        transform: translateY(-30px);
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 40px;
+        background: url("https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
       }
 
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
+      h2 {
+        color: #ffd700;
+        text-shadow: 2px 2px 5px #000;
+        text-align: center;
+        animation: fadeInDown 1s ease-in-out;
+        margin-bottom: 30px;
       }
 
-      100% {
-        opacity: 1;
-        transform: translateY(0);
+      form {
+        background: rgba(0, 0, 0, 0.6);
+        /* semi-transparent background */
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 400px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
       }
-    }
-  </style>
-</head>
 
-<body>
-  <h2>🎓 Register New Student</h2>
+      label {
+        font-weight: bold;
+      }
 
-  <form id="registerForm" method="POST" enctype="multipart/form-data">
-    <label>Name:</label>
-    <input type="text" name="name" required />
+      input[type="text"],
+      select,
+      input[type="submit"],
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
 
-    <label>Student ID:</label>
-    <input type="text" name="student_id" required />
+      input[type="text"] {
+        background: #fff;
+        color: #333;
+      }
 
-    <label>Class Year:</label>
-    <select name="class_year" required>
-      <option value="" disabled selected>Select Class Year</option>
-      <option value="1st Year">1st Year</option>
-      <option value="2nd Year">2nd Year</option>
-      <option value="3rd Year">3rd Year</option>
-      <option value="4th Year">4th Year</option>
-    </select><br>
-    <label>Select Department</label>
-    <select name="department">
-      <option value="">-- All Departments --</option>
-      <option value="Computer">Computer</option>
-      <option value="Electrical">Electrical</option>
-      <option value="Civil">Civil</option>
-      <option value="ENTC">ENTC</option>
-      <option value="Instrumentation">Instrumentation</option>
-    </select>
-     <!-- <button type="submit">🔍 Filter</button> -->
+      select {
+        background: #fff;
+        color: #333;
+      }
 
-    {% if error %}
-    <p style="color: red; text-align: center;">{{ error }}</p>
-    {% endif %}
+      button,
+      button {
+        background: #28a745;
+        color: #fff;
+        cursor: pointer;
+      }
 
+      button:hover {
+        background: #218838;
+      }
 
-    <video id="video" width="320" height="240" autoplay></video>
-    <button type="button" onclick="captureImage()">📸 Capture Image</button>
+      video,
+      canvas {
+        display: block;
+        margin: 0 auto 15px auto;
+        border-radius: 8px;
+      }
 
-    <canvas id="canvas" width="320" height="240" style="display: none"></canvas>
-    <input type="hidden" name="captured_image" id="captured_image" />
+      @keyframes fadeInDown {
+        0% {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
 
-    <button type="submit">✅ Submit</button>
-    <button type="button" onclick="goBack()">← Back</button>
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
+      @keyframes fadeInUp {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
 
-    </button>
-  </form>
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const capturedInput = document.getElementById("captured_image");
+  <body>
+    <h2>🎓 Register New Student</h2>
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        video.srcObject = stream;
-      })
-      .catch((err) => {
-        alert("Failed to access webcam: " + err);
-      });
+    <form id="registerForm" method="POST" enctype="multipart/form-data">
+      <label>Name:</label>
+      <input type="text" name="name" required />
 
-    function goBack() {
-      // You can customize this to redirect to a specific page instead
-      window.history.back();
-    }
+      <label>Student ID:</label>
+      <input type="text" name="student_id" required />
 
-    function captureImage() {
-      const context = canvas.getContext("2d");
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      capturedInput.value = canvas.toDataURL("image/jpeg");
-      alert("📸 Image captured! Now click Submit.");
-    }
-  </script>
-</body>
+      <div style="display: flex; gap: 10px">
+        <div style="flex: 1">
+          <label>Class Year:</label>
+          <select name="class_year" required>
+            <option value="" disabled selected>Select Class Year</option>
+            <option value="1st Year">First Year</option>
+            <option value="2nd Year">Second Year</option>
+            <option value="3rd Year">Third Year</option>
+            <option value="4th Year">Final Year</option>
+          </select>
+        </div>
+        <div style="flex: 1">
+          <label>Department:</label>
+          <select name="department" required>
+            <option value="" disabled selected>Select Department</option>
+            <option value="Computer">Computer</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Civil">Civil</option>
+            <option value="ENTC">ENTC</option>
+            <option value="Instrumentation">Instrumentation</option>
+            <option value="Mechanical">Mechanical</option>
+          </select>
+        </div>
+      </div>
 
+      {% if error %}
+      <p style="color: red; text-align: center">{{ error }}</p>
+      {% endif %}
+
+      <video id="video" width="320" height="240" autoplay></video>
+      <button type="button" onclick="captureImage()">📸 Capture Image</button>
+
+      <canvas
+        id="canvas"
+        width="320"
+        height="240"
+        style="display: none"
+      ></canvas>
+      <input type="hidden" name="captured_image" id="captured_image" />
+
+      <button type="submit">✅ Submit</button>
+      <button type="button" onclick="goBack()">← Back</button>
+    </form>
+    <script>
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const capturedInput = document.getElementById("captured_image");
+
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          alert("Failed to access webcam: " + err);
+        });
+
+      function goBack() {
+        window.history.back();
+      }
+
+      function captureImage() {
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedInput.value = canvas.toDataURL("image/jpeg");
+        alert("📸 Image captured! Now click Submit.");
+      }
+    </script>
+  </body>
 </html>
