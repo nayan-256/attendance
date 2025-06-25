@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">👩‍🎓 Student Profile</h2>
+
+    <!-- ✅ Add Edit Button Here (top right) -->
+    <div class="text-end mb-3">
+      <a href="/edit_profile" class="btn btn-primary">✏️ Edit Profile</a>
+    </div>
+
+    <table class="table table-bordered">
+      <tr><th>Name:</th><td>{{ user.name }}</td></tr>
+      <tr><th>Student ID:</th><td>{{ user.student_id }}</td></tr>
+      <tr><th>Class Year:</th><td>{{ user.class_year }}</td></tr>
+      <tr><th>Department:</th><td>{{ user.department }}</td></tr>
+      <tr>
+        <th>Photo:</th>
+        <td>
+          <img src="{{ url_for('static', filename=user.image_path.split('static/')[-1]) }}"
+               alt="Profile Image" width="120" class="img-thumbnail">
+        </td>
+      </tr>
+    </table>
+    <a href="/edit_profile" class="btn btn-primary">✏️ Edit Profile</a>
+
+    <a href="/" class="btn btn-secondary mt-3">⬅ Back to Home</a>
+  </div>
+</body>
+</html>

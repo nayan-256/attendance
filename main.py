@@ -25,11 +25,16 @@ ADMIN_PASSWORD = 'admin123'
 def init_db():
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
+
+    # Create users table
     cur.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
+        student_id TEXT,  -- Make sure student_id exists
         image_path TEXT
     )''')
+
+    # Create attendance table
     cur.execute('''CREATE TABLE IF NOT EXISTS attendance (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
@@ -37,23 +42,29 @@ def init_db():
         status TEXT DEFAULT 'Present',
         FOREIGN KEY(user_id) REFERENCES users(id)
     )''')
+
+    # Create admin table
     cur.execute('''CREATE TABLE IF NOT EXISTS admin (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password TEXT
     )''')
+
+    # Check existing columns in users table
     cur.execute("PRAGMA table_info(users)")
     existing_cols = [col[1] for col in cur.fetchall()]
-    
+
     if 'class_year' not in existing_cols:
         cur.execute("ALTER TABLE users ADD COLUMN class_year TEXT")
     if 'department' not in existing_cols:
         cur.execute("ALTER TABLE users ADD COLUMN department TEXT")
+    if 'password' not in existing_cols:
+        cur.execute("ALTER TABLE users ADD COLUMN password TEXT")   # ✅ Add this line
 
     # Insert default admin if not exists
     cur.execute("SELECT * FROM admin WHERE username='admin'")
     if not cur.fetchone():
-        cur.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ('admin', 'admin123'))  # Change this in production
+        cur.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ('admin', 'admin123'))
 
     # Create teachers table
     cur.execute('''CREATE TABLE IF NOT EXISTS teachers (
@@ -61,10 +72,12 @@ def init_db():
         username TEXT UNIQUE,
         password TEXT
     )''')
-    # Insert a default teacher for testing
+
+    # Insert a default teacher
     cur.execute("SELECT * FROM teachers WHERE username='teacher1'")
     if not cur.fetchone():
         cur.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", ('teacher1', 'teacher123'))
+
     conn.commit()
     conn.close()
 
@@ -76,6 +89,51 @@ def home():
     return render_template('index.html')
     
 from flask import flash, redirect, render_template, request, session, url_for
+@app.route('/student_dashboard')
+def student_dashboard():
+    student_id = session.get('student_id')
+    if not student_id:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Get student info
+    cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+    student = cur.fetchone()
+
+    # Get recent attendance
+    cur.execute('''
+        SELECT DATE(timestamp) AS date, TIME(timestamp) AS time, status
+        FROM attendance
+        WHERE user_id = ?
+        ORDER BY timestamp DESC
+        LIMIT 10
+    ''', (student['id'],))
+    attendance_records = cur.fetchall()
+
+    conn.close()
+    return render_template('student_dashboard.html', student=student, attendance_records=attendance_records)
+@app.route('/student_login', methods=['GET', 'POST'])
+def student_login():
+    if request.method == 'POST':
+        student_id = request.form['student_id']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE student_id=? AND password=?", (student_id, password))
+        user = cur.fetchone()
+        conn.close()
+
+        if user:
+            session['student_id'] = student_id
+            return redirect(url_for('profile'))  # or student_dashboard if you have that
+        else:
+            flash("Invalid credentials", "danger")
+
+    return render_template('student_login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -94,6 +152,11 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('logged_in', None)             # Admin
+    session.pop('teacher_logged_in', None)     # Teacher
+    session.pop('teacher_username', None)      # Optional, if used
+    session.pop('student_id', None)            # ✅ Student logout
+
     return redirect(url_for('home'))
 
 @app.route('/teacher_login', methods=['GET', 'POST'])
@@ -127,6 +190,7 @@ def register():
         student_id = request.form['student_id']
         class_year = request.form['class_year']
         department = request.form['department']
+        password = request.form['password']
         image_data = request.form['captured_image']
 
         conn = sqlite3.connect('database.db')
@@ -154,15 +218,63 @@ def register():
                 f.write(image_bytes)
 
             # ✅ Save to database
-            cur.execute("INSERT INTO users (name, student_id, class_year,department, image_path) VALUES (?, ?, ?, ?,?)",
-                    (name, student_id, class_year,department, filepath))
+            cur.execute("INSERT INTO users (name, student_id, class_year,department,password, image_path) VALUES (?, ?, ?, ?,?,?)",
+                    (name, student_id, class_year,department,password, filepath))
             conn.commit()
             conn.close()
+            session['student_id'] = student_id   # ✅ Add this line
 
-            return redirect(url_for('home'))
+            return redirect(url_for('profile'))
 
     # GET or fallback render
     return render_template('register.html')
+
+@app.route('/profile')
+def profile():
+    student_id = session.get('student_id')  # assuming student logs in and session is set
+    if not student_id:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+    user = cur.fetchone()
+    conn.close()
+
+    return render_template('profile.html', user=user)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    student_id = session.get('student_id')
+    if not student_id:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        class_year = request.form['class_year']
+        department = request.form['department']
+
+        # ✅ Update the database
+        cur.execute("""
+            UPDATE users SET name = ?, class_year = ?, department = ? WHERE student_id = ?
+        """, (name, class_year, department, student_id))
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('profile'))
+
+    # GET: load existing user data
+    cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+    user = cur.fetchone()
+    conn.close()
+
+    return render_template('edit_profile.html', user=user)
 
 
 
