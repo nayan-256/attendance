@@ -1,33 +1,96 @@
-<!-- templates/student_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Student Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0eafc, #cfdef3 80%);
+      min-height: 100vh;
+    }
+    .dashboard-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 36px 32px 28px 32px;
+      max-width: 700px;
+      margin: 60px auto 0 auto;
+      animation: fadeInUp 1s;
+    }
+    .attendance-table th, .attendance-table td {
+      vertical-align: middle;
+      text-align: center;
+    }
+    .status-present {
+      color: #198754;
+      font-weight: bold;
+      letter-spacing: 1px;
+      animation: pulse 1s infinite alternate;
+    }
+    .status-absent {
+      color: #dc3545;
+      font-weight: bold;
+      letter-spacing: 1px;
+      animation: shakeX 1s;
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px);}
+      100% { opacity: 1; transform: translateY(0);}
+    }
+    @keyframes pulse {
+      0% { text-shadow: 0 0 0 #198754; }
+      100% { text-shadow: 0 0 8px #198754; }
+    }
+    @media (max-width: 800px) {
+      .dashboard-card {
+        padding: 18px 8px 18px 8px;
+      }
+    }
+  </style>
 </head>
-<body class="container mt-4">
-  <h2>Welcome, {{ student.name }}</h2>
-  <p><strong>Class:</strong> {{ student.class_year }} | <strong>Department:</strong> {{ student.department }}</p>
+<body>
+  <div class="dashboard-card animate__animated animate__fadeInUp">
+    <div class="text-center mb-4">
+      <span class="fs-1 text-primary animate__animated animate__bounceIn">📊</span>
+      <h2 class="fw-bold mb-1">Welcome, {{ student.name }}</h2>
+      <div class="text-muted mb-2" style="font-size:1.1rem;">
+        <span class="badge bg-info-subtle text-dark me-2">{{ student.class_year }}</span>
+        <span class="badge bg-success-subtle text-dark">{{ student.department }}</span>
+      </div>
+    </div>
 
-  <h4>Recent Attendance</h4>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Date</th><th>Time</th><th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for record in attendance_records %}
-        <tr>
-          <td>{{ record['date'] }}</td>
-          <td>{{ record['time'] }}</td>
-          <td>{{ record['status'] }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+    <h4 class="mb-3 text-secondary animate__animated animate__fadeInDown">Recent Attendance</h4>
+    <div class="table-responsive">
+      <table class="table table-hover attendance-table align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in attendance_records %}
+            <tr class="animate__animated animate__fadeInUp">
+              <td>{{ record['date'] }}</td>
+              <td>{{ record['time'] }}</td>
+              <td>
+                {% if record['status']|lower == 'present' %}
+                  <span class="status-present">Present</span>
+                {% else %}
+                  <span class="status-absent">Absent</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-grid gap-2 mt-4">
+      <a class="btn btn-secondary btn-lg animate__animated animate__fadeInLeft" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </div>
 </body>
 </html>

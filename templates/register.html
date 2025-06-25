@@ -103,37 +103,51 @@
   <h2>🎓 Register New Student</h2>
 
   <form id="registerForm" method="POST" enctype="multipart/form-data">
-    <label>Name:</label>
-    <input type="text" name="name" required />
+    <!-- Name and Student ID side by side, full width on desktop -->
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 180px;">
+        <label>Name:</label>
+        <input type="text" name="name" required style="width: 100%;"/>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <label>Student ID:</label>
+        <input type="text" name="student_id" required style="width: 100%;"/>
+      </div>
+    </div>
 
-    <label>Student ID:</label>
-    <input type="text" name="student_id" required />
-
-    <label>Class Year:</label>
-    <select name="class_year" required>
-      <option value="" disabled selected>Select Class Year</option>
-      <option value="1st Year">1st Year</option>
-      <option value="2nd Year">2nd Year</option>
-      <option value="3rd Year">3rd Year</option>
-      <option value="4th Year">4th Year</option>
-    </select><br>
-    <label>Select Department</label>
-    <select name="department">
-      <option value="">-- All Departments --</option>
-      <option value="Computer">Computer</option>
-      <option value="Electrical">Electrical</option>
-      <option value="Civil">Civil</option>
-      <option value="ENTC">ENTC</option>
-      <option value="Instrumentation">Instrumentation</option>
-    </select><br>
-    <!-- <button type="submit">🔍 Filter</button> -->
-    <label>Password</label>
-    <input type="password" name="password" class="form-control" required>
+    <!-- Class Year, Department, Password side by side -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 180px;">
+        <label>Class Year:</label>
+        <select name="class_year" required style="width: 100%; padding: 10px; border-radius: 8px; border: none; margin-bottom: 15px; font-size: 16px;">
+          <option value="" disabled selected>Select Class Year</option>
+          <option value="1st Year">First Year</option>
+          <option value="2nd Year">Second Year</option>
+          <option value="3rd Year">Third Year</option>
+          <option value="4th Year">Final Year</option>
+        </select>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <label>Department:</label>
+        <select name="department" required style="width: 100%; padding: 10px; border-radius: 8px; border: none; margin-bottom: 15px; font-size: 16px;">
+          <option value="" disabled selected>Select Department</option>
+          <option value="Computer">Computer</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Civil">Civil</option>
+          <option value="ENTC">ENTC</option>
+          <option value="Instrumentation">Instrumentation</option>
+          <option value="Mechanical">Mechanical</option>
+        </select>
+      </div>
+      <div style="flex: 1; min-width: 180px;">
+        <label>Password:</label>
+        <input type="password" name="password" required style="width: 100%; padding: 10px; border-radius: 8px; border: none; margin-bottom: 15px; font-size: 16px; background: #fff; color: #333;" />
+      </div>
+    </div>
 
     {% if error %}
     <p style="color: red; text-align: center;">{{ error }}</p>
     {% endif %}
-
 
     <video id="video" width="320" height="240" autoplay></video>
     <button type="button" onclick="captureImage()">📸 Capture Image</button>
@@ -143,30 +157,31 @@
 
     <button type="submit">✅ Submit</button>
     <button type="button" onclick="goBack()">← Back</button>
-
-
-    </button>
   </form>
-
   <script>
+    function goBack() {
+      window.history.back();
+    }
+    // Webcam capture functionality
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const capturedInput = document.getElementById("captured_image");
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        video.srcObject = stream;
-      })
-      .catch((err) => {
-        alert("Failed to access webcam: " + err);
-      });
-
-    function goBack() {
-      // You can customize this to redirect to a specific page instead
-      window.history.back();
+    // Start webcam stream
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(function (err) {
+          alert("Could not access the camera. Please allow camera access.");
+        });
+    } else {
+      alert("getUserMedia not supported in this browser.");
     }
 
+    // Capture image from video
     function captureImage() {
       const context = canvas.getContext("2d");
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -175,5 +190,4 @@
     }
   </script>
 </body>
-
 </html>

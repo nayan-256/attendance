@@ -61,15 +61,15 @@
 
 <body>
   <!-- Conditional Background Image -->
-  <div class="bg-image" style="
-    background-image: url(
-      {% if session.get('logged_in') %}
+ <div class="bg-image" style="
+  background-image: url(
+    {% if session.get('logged_in') %}
       'https://comp.gcoej.ac.in/images/IMG_20180203_142209.jpg'
-      {% else %}
+    {% else %}
       'https://images.shiksha.com/mediadata/images/1552470087php0wzgEA.jpeg'
-      {% endif %}
-    );
-  ">
+    {% endif %}
+  );
+">
     <div class="overlay"></div>
     <!-- Content -->
     <div class="container animate__animated animate__fadeIn">
@@ -78,35 +78,42 @@
       {% else %}
       <h1>👨‍💼 Admin Dashboard: Manage Attendance & Users</h1>
       {% endif %}
-      <nav>
-        <!-- Common buttons (for all users) -->
-        <a href="/register" class="btn btn-success">Register User</a>
-        <a href="/checkin" class="btn btn-primary">Check-in</a>
-        <a href="/checkout" class="btn btn-info">Check-out</a>
-
+            <nav>
+        {% if not session.get('logged_in') and not session.get('teacher_logged_in') and not session.get('student_id') %}
+          <!-- Show on home page (no one logged in) -->
+          <a href="/register" class="btn btn-success">Register User</a>
+          <a href="/checkin" class="btn btn-primary">Check-in</a>
+          <a href="/checkout" class="btn btn-info">Check-out</a>
+        {% elif session.get('logged_in') or session.get('teacher_logged_in') %}
+          <!-- Show for admin or teacher -->
+          <a href="/register" class="btn btn-success">Register User</a>
+          <a href="/checkin" class="btn btn-primary">Check-in</a>
+          <a href="/checkout" class="btn btn-info">Check-out</a>
+        {% endif %}
+      
         <!-- Admin View -->
         {% if session.get('logged_in') %}
-        <a href="/dashboard" class="btn btn-warning">View Attendance</a>
-        <a href="/students" class="btn btn-secondary">Registered Students</a>
-        <a href="/logout" class="btn btn-danger">Logout (Admin)</a>
-
+          <a href="/dashboard" class="btn btn-warning">View Attendance</a>
+          <a href="/students" class="btn btn-secondary">Registered Students</a>
+          <a href="/logout" class="btn btn-danger">Logout (Admin)</a>
+      
         <!-- Teacher View -->
         {% elif session.get('teacher_logged_in') %}
-        <a href="/teacher_dashboard" class="btn btn-warning">Teacher Dashboard</a>
-        <a href="/teacher_logout" class="btn btn-danger">Logout (Teacher)</a>
-
+          <a href="/teacher_dashboard" class="btn btn-warning">Teacher Dashboard</a>
+          <a href="/teacher_logout" class="btn btn-danger">Logout (Teacher)</a>
+      
         <!-- Student View -->
         {% elif session.get('student_id') %}
-        <a href="/student_dashboard" class="btn btn-info">Student Dashboard</a>
-        <a href="/profile" class="btn btn-outline-primary">View Profile</a>
-        <a href="/edit_profile" class="btn btn-outline-warning">Edit Profile</a>
-        <a href="/logout" class="btn btn-danger">Logout (Student)</a>
-
+          <a href="/student_dashboard" class="btn btn-info">Student Dashboard</a>
+          <a href="/profile" class="btn btn-outline-primary">View Profile</a>
+          <a href="/edit_profile" class="btn btn-outline-warning">Edit Profile</a>
+          <a href="/logout" class="btn btn-danger">Logout (Student)</a>
+      
         <!-- Guest View -->
         {% else %}
-        <a href="/login" class="btn btn-secondary">Admin Login</a>
-        <a href="/teacher_login" class="btn btn-dark">Teacher Login</a>
-        <a href="/student_login" class="btn btn-outline-success">Student Login</a> <!-- ✅ MOVE HERE -->
+          <a href="/login" class="btn btn-secondary">Admin Login</a>
+          <a href="/teacher_login" class="btn btn-dark">Teacher Login</a>
+          <a href="/student_login" class="btn btn-outline-success">Student Login</a>
         {% endif %}
       </nav>
 

@@ -88,7 +88,7 @@ init_db()
 def home():
     return render_template('index.html')
     
-from flask import flash, redirect, render_template, request, session, url_for
+
 @app.route('/student_dashboard')
 def student_dashboard():
     student_id = session.get('student_id')
@@ -115,6 +115,7 @@ def student_dashboard():
 
     conn.close()
     return render_template('student_dashboard.html', student=student, attendance_records=attendance_records)
+
 @app.route('/student_login', methods=['GET', 'POST'])
 def student_login():
     if request.method == 'POST':
@@ -134,6 +135,7 @@ def student_login():
             flash("Invalid credentials", "danger")
 
     return render_template('student_login.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -275,7 +277,6 @@ def edit_profile():
     conn.close()
 
     return render_template('edit_profile.html', user=user)
-
 
 
 @app.route('/attendance')
