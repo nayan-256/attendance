@@ -130,11 +130,17 @@ def student_login():
 
         if user:
             session['student_id'] = student_id
-            return redirect(url_for('profile'))  # or student_dashboard if you have that
+            return redirect(url_for('student_home'))  # ✅ Redirect to new home screen
         else:
             flash("Invalid credentials", "danger")
 
     return render_template('student_login.html')
+
+@app.route('/student_home')
+def student_home():
+    if 'student_id' not in session:
+        return redirect(url_for('student_login'))
+    return render_template('student_home.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -212,7 +218,7 @@ def register():
             image_bytes = base64.b64decode(encoded)
 
             filename = f"{name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename).replace('\\','/')
 
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -233,19 +239,32 @@ def register():
 
 @app.route('/profile')
 def profile():
-    student_id = session.get('student_id')  # assuming student logs in and session is set
+    student_id = session.get('student_id')
     if not student_id:
-        return redirect(url_for('login'))
+        flash("Please login first.", "warning")
+        return redirect(url_for('student_login'))
 
     conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
+    conn.row_factory =sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
-    user = cur.fetchone()
+    row = cur.fetchone()
     conn.close()
 
-    return render_template('profile.html', user=user)
+    if row:
+        user = {
+            'name': row['name'],
+            'student_id': row['student_id'],
+            'class_year': row['class_year'],
+            'department': row['department'],
+            'image_path': row['image_path'].replace('\\','/') if row['image_path'] else 'default_profile.png'
+        }
+        return render_template('profile.html', user=user)
+    else:
+        flash("Student profile not found", "danger")
+        return redirect(url_for('profile'))
 
+  
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
     student_id = session.get('student_id')
@@ -639,6 +658,8 @@ def download_excel():
     df.to_excel(file_path, index=False)
 
     return send_file(file_path, as_attachment=True)
+
+print(app.url_map)
 
 if __name__ == '__main__':
     app.run(debug=True)
