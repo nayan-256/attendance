@@ -84,8 +84,8 @@
           <a href="/register" class="btn btn-success">Register User</a>
           <a href="/checkin" class="btn btn-primary">Check-in</a>
           <a href="/checkout" class="btn btn-info">Check-out</a>
-        {% elif session.get('logged_in') or session.get('teacher_logged_in') %}
-          <!-- Show for admin or teacher -->
+                {% elif session.get('teacher_logged_in') %}
+          <!-- Show for teacher only -->
           <a href="/register" class="btn btn-success">Register User</a>
           <a href="/checkin" class="btn btn-primary">Check-in</a>
           <a href="/checkout" class="btn btn-info">Check-out</a>

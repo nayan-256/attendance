@@ -103,19 +103,27 @@ def student_dashboard():
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
     student = cur.fetchone()
 
-    # Get recent attendance
+    # Get recent attendance (ignore status from DB)
     cur.execute('''
-        SELECT DATE(timestamp) AS date, TIME(timestamp) AS time, status
+        SELECT DATE(timestamp) AS date, TIME(timestamp) AS time
         FROM attendance
         WHERE user_id = ?
         ORDER BY timestamp DESC
         LIMIT 10
     ''', (student['id'],))
-    attendance_records = cur.fetchall()
+    db_records = cur.fetchall()
+
+    # Always set status to "Present"
+    attendance_records = []
+    for record in db_records:
+        attendance_records.append({
+            'date': record['date'],
+            'time': record['time'],
+            'status': 'Present'
+        })
 
     conn.close()
     return render_template('student_dashboard.html', student=student, attendance_records=attendance_records)
-
 @app.route('/student_login', methods=['GET', 'POST'])
 def student_login():
     if request.method == 'POST':
@@ -230,9 +238,9 @@ def register():
                     (name, student_id, class_year,department,password, filepath))
             conn.commit()
             conn.close()
-            session['student_id'] = student_id   # ✅ Add this line
+            # session['student_id'] = student_id   # ✅ Add this line
 
-            return redirect(url_for('profile'))
+            return redirect(url_for('home'))
 
     # GET or fallback render
     return render_template('register.html')
