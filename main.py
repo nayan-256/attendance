@@ -449,9 +449,15 @@ def teacher_dashboard():
     values = []
     legend_labels = []
     attendance_dates = []
+    start_date = None
+    end_date = None
+
     if request.method == 'POST':
         student_id = request.form.get('student_id')
         student_name = request.form.get('student_name')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+
         # Prefer ID if provided, else use name
         if student_id:
             cur.execute('SELECT id, name FROM users WHERE id=?', (student_id,))
@@ -465,7 +471,15 @@ def teacher_dashboard():
         if student:
             selected_student = student[0]
             # Pie chart data
-            cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
+            if start_date and end_date:
+                cur.execute('''
+                    SELECT status, COUNT(*) FROM attendance
+                    WHERE user_id = ? AND DATE(timestamp) BETWEEN ? AND ?
+                    GROUP BY status
+                ''', (selected_student, start_date, end_date))
+            else:
+                cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
+
             records = cur.fetchall()
             if records:
                 labels = [r[0] for r in records]
@@ -483,19 +497,30 @@ def teacher_dashboard():
                 buf.close()
                 plt.close()
             # Theory attendance dates (status = 'Present' or 'Check-In')
-            cur.execute('''
-                SELECT DATE(timestamp) FROM attendance
-                WHERE user_id=? AND (status='Present' OR status='Check-In')
-                ORDER BY timestamp DESC
-            ''', (selected_student,))
-            attendance_dates = [row[0] for row in cur.fetchall()]
+            if start_date and end_date:
+                cur.execute('''
+                    SELECT DATE(timestamp) FROM attendance
+                    WHERE user_id=? AND (status='Present' OR status='Check-In')
+                    AND DATE(timestamp) BETWEEN ? AND ?
+                    ORDER BY timestamp DESC
+                ''', (selected_student, start_date, end_date))
+            else:
+                cur.execute('''
+                    SELECT DATE(timestamp) FROM attendance
+                    WHERE user_id=? AND (status='Present' OR status='Check-In')
+                    ORDER BY timestamp DESC
+                ''', (selected_student,))
+    attendance_dates = [row[0] for row in cur.fetchall()]
     conn.close()
     return render_template(
         'teacher_dashboard.html',
         students=students,
         graph=graph,
         selected_student=selected_student,
-        attendance_dates=attendance_dates
+        attendance_dates=attendance_dates,
+        start_date=start_date,
+        end_date=end_date
+
     )
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
