@@ -48,17 +48,595 @@
                 opacity: 1;
             }
         }
+
+        .chart-container {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #66a6ff, #89f7fe);
+            border-radius: 2px;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            min-width: 120px;
+            margin: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .calendar-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .calendar-month {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .month-header {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .day {
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 0.25rem;
+        }
+
+        .day:hover {
+            background: rgba(0, 123, 255, 0.1);
+            cursor: pointer;
+        }
+
+        .holiday {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Enhanced Calendar Styles */
+        .calendar-grid {
+            font-size: 0.75rem;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 2px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 4px 2px;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-size: 0.7rem;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e9ecef;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            min-height: 30px;
+        }
+
+        .calendar-day:hover {
+            background-color: #e3f2fd;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+        }
+
+        .calendar-day.empty:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        .calendar-day.holiday {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            font-weight: bold;
+        }
+
+        .calendar-day.holiday.national {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .calendar-day.holiday.religious {
+            background-color: #cce5f7;
+            border-color: #007bff;
+            color: #004085;
+        }
+
+        .calendar-day.holiday.festival {
+            background-color: #ffe4b3;
+            border-color: #fd7e14;
+            color: #8a4100;
+        }
+
+        .calendar-day.holiday:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .holiday-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .holiday-item {
+            transition: all 0.2s ease;
+        }
+
+        .holiday-item:hover {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px;
+            margin: -4px;
+        }
+
+        .holiday-group {
+            margin-left: 0.5rem;
+        }
+
+        .holiday-summary {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .summary-stat {
+            text-align: center;
+        }
+
+        .summary-stat .h4,
+        .summary-stat .h5 {
+            margin-bottom: 0;
+        }
+
+        /* Calendar navigation buttons */
+        .btn-outline-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Holiday type badges */
+        .badge {
+            font-size: 0.7rem;
+        }
+
+        /* Custom scrollbar for holiday list */
+        .holiday-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .holiday-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .holiday-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .holiday-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Responsive calendar */
+        @media (max-width: 768px) {
+            .calendar-day {
+                font-size: 0.6rem;
+                min-height: 25px;
+            }
+
+            .day-header {
+                font-size: 0.6rem;
+                padding: 2px 1px;
+            }
+        }
+
+        /* Calendar Widget in Corner */
+        .calendar-widget {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            transform: translateX(110%);
+        }
+
+        .calendar-widget.show {
+            transform: translateX(0);
+        }
+
+        .calendar-widget-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .calendar-widget-content {
+            padding: 20px;
+        }
+
+        .widget-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+        }
+
+        .widget-day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px 4px;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .widget-calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1px;
+        }
+
+        .widget-calendar-day:hover {
+            background-color: #e3f2fd;
+            transform: scale(1.1);
+        }
+
+        .widget-calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .widget-calendar-day.holiday {
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .widget-calendar-day.other-month {
+            color: #ccc;
+        }
+
+        .calendar-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .calendar-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .widget-nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .widget-nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .close-widget {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .close-widget:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Holiday indicator in widget */
+        .holiday-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            background-color: #ff4444;
+            border-radius: 50%;
+        }
+
+        /* Month navigation */
+        .widget-month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* Upcoming holidays in widget */
+        .upcoming-holidays {
+            margin-top: 15px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .upcoming-holiday-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        .upcoming-holiday-date {
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* Today indicator in large calendar */
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .calendar-day.today:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Gradient background for calendar headers */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        /* Shadow for calendar cards */
+        .shadow-sm {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease;
+        }
+
+        /* Main Calendar Grid (Large Calendar) */
+        .main-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+        }
+
+        .main-day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px 4px;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e9ecef;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            min-height: 35px;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .calendar-day:hover {
+            background-color: #e3f2fd;
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+            background-color: transparent;
+        }
+
+        .calendar-day.empty:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        /* Card hover effects */
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
 <body>
+    <!-- Calendar Widget -->
+    <div class="calendar-widget" id="calendarWidget">
+        <div class="calendar-widget-header">
+            <button class="close-widget" onclick="toggleCalendarWidget()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="widget-month-nav">
+                <button class="widget-nav-btn" onclick="changeWidgetMonth(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span id="widgetCurrentMonth">June 2025</span>
+                <button class="widget-nav-btn" onclick="changeWidgetMonth(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="calendar-widget-content">
+            <div class="widget-calendar-grid">
+                <div class="widget-day-header">Su</div>
+                <div class="widget-day-header">Mo</div>
+                <div class="widget-day-header">Tu</div>
+                <div class="widget-day-header">We</div>
+                <div class="widget-day-header">Th</div>
+                <div class="widget-day-header">Fr</div>
+                <div class="widget-day-header">Sa</div>
+                <!-- Calendar days will be populated by JavaScript -->
+                <div id="widgetCalendarDays"></div>
+            </div>
+            <div class="upcoming-holidays">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #666;">
+                    <i class="fas fa-star"></i> Upcoming Holidays
+                </div>
+                <div id="widgetUpcomingHolidays">
+                    <!-- Upcoming holidays will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="dashboard-box col-md-10 mx-auto">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Teacher Dashboard</h2>
-                <a href="{{ url_for('teacher_logout') }}" class="btn btn-outline-danger">Logout</a>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-info calendar-toggle-btn" onclick="toggleCalendarWidget()" title="Toggle Calendar">
+                        <i class="fas fa-calendar-alt"></i>
+                    </button>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
             </div>
             <form method="post" class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -108,17 +686,28 @@
                     </ul>
                 </div>
             </div>
-            <!-- Weekly Attendance Summary -->
-            <div class="mt-5">
-                <h4 class="text-center">Weekly Attendance Summary</h4>
-                <canvas id="weeklyChart" class="graph-img"></canvas>
+                  <!-- Weekly Attendance Summary -->
+        <div class="mt-5">
+            <div class="chart-container">
+                <h4 class="chart-title">📊 Weekly Attendance Summary</h4>
+                <div class="summary-stats" id="weeklyStats"></div>
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
             </div>
+        </div>
+        
+        <!-- Monthly Attendance Summary -->
+        <div class="mt-5">
+            <div class="chart-container">
+                <h4 class="chart-title">📈 Monthly Attendance Trend</h4>
+                <div class="summary-stats" id="monthlyStats"></div>
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
 
-            <!-- Monthly Attendance Summary -->
-            <div class="mt-5">
-                <h4 class="text-center">Monthly Attendance Summary</h4>
-                <canvas id="monthlyChart" class="graph-img"></canvas>
-            </div>
 
             {% if attendance_dates %}
             <div class="mt-4">
@@ -146,38 +735,713 @@
             {% endif %}
         </div>
     </div>
+    
+    <!-- Yearly Calendar with Holidays - Always Visible -->
+    <div class="container mt-5">
+        <div class="dashboard-box col-md-10 mx-auto">
+            <div class="chart-container">
+                <h4 class="chart-title">📅 Yearly Calendar with Holidays</h4>
+                
+                <!-- Year Navigation -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button class="btn btn-outline-primary" onclick="changeYear(-1)">
+                        <i class="fas fa-chevron-left"></i> Previous Year
+                    </button>
+                    <h5 id="currentYear" class="mb-0">2025</h5>
+                    <button class="btn btn-outline-primary" onclick="changeYear(1)">
+                        Next Year <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="row" id="calendarGrid">
+                    <!-- Calendar months will be generated by JavaScript -->
+                </div>
+
+                <!-- Holidays List -->
+                <div class="mt-4">
+                    <h5>📋 Holidays for <span id="holidayYear">2025</span></h5>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="holidaysList" class="holiday-list">
+                                <!-- Holidays will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="holiday-summary">
+                                <h6>Holiday Summary</h6>
+                                <div id="holidaySummary">
+                                    <!-- Summary stats will be shown here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <script>
-        const weeklyData = {{ weekly_summary | default ({}) | tojson }};
-        const monthlyData = {{ monthly_summary | default ({}) | tojson }};
+        // Calendar Widget Variables
+        let widgetCurrentDate = new Date();
+        let widgetIsVisible = false;
 
-        const weekLabels = Object.keys(weeklyData);
-        const weekValues = Object.values(weeklyData);
+        // Calendar Widget Functions
+        function toggleCalendarWidget() {
+            const widget = document.getElementById('calendarWidget');
+            widgetIsVisible = !widgetIsVisible;
+            
+            if (widgetIsVisible) {
+                widget.classList.add('show');
+                renderWidgetCalendar();
+            } else {
+                widget.classList.remove('show');
+            }
+        }
 
-        const monthLabels = Object.keys(monthlyData);
-        const monthValues = Object.values(monthlyData);
+        function changeWidgetMonth(direction) {
+            widgetCurrentDate.setMonth(widgetCurrentDate.getMonth() + direction);
+            renderWidgetCalendar();
+        }
 
-        new Chart(document.getElementById('weeklyChart'), {
-            type: 'bar',
-            data: {
-                labels: weekLabels,
-                datasets: [{
-                    label: 'Weekly Attendance',
-                    data: weekValues,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                }]
+        function renderWidgetCalendar() {
+            const monthSpan = document.getElementById('widgetCurrentMonth');
+            const daysContainer = document.getElementById('widgetCalendarDays');
+            const upcomingHolidaysContainer = document.getElementById('widgetUpcomingHolidays');
+
+            if (!monthSpan || !daysContainer) return;
+
+            const year = widgetCurrentDate.getFullYear();
+            const month = widgetCurrentDate.getMonth();
+            
+            // Update month display
+            monthSpan.textContent = widgetCurrentDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            // Clear previous days
+            daysContainer.innerHTML = '';
+
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'widget-calendar-day other-month';
+                const prevMonthDay = new Date(year, month, -firstDayOfWeek + i + 1);
+                dayEl.textContent = prevMonthDay.getDate();
+                daysContainer.appendChild(dayEl);
+            }
+
+            // Add days of current month
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'widget-calendar-day';
+                dayEl.textContent = day;
+
+                const currentDate = new Date(year, month, day);
+                const dateString = currentDate.toISOString().split('T')[0];
+
+                // Check if it's today
+                if (
+                    currentDate.getDate() === today.getDate() &&
+                    currentDate.getMonth() === today.getMonth() &&
+                    currentDate.getFullYear() === today.getFullYear()
+                ) {
+                    dayEl.classList.add('today');
+                }
+
+                // Check if it's a holiday
+                const holiday = getHolidayByDate(year, dateString);
+                if (holiday) {
+                    dayEl.classList.add('holiday', holiday.type);
+                    dayEl.title = `${holiday.name} - ${holiday.reason}`;
+                }
+
+                daysContainer.appendChild(dayEl);
+            }
+
+            // Add remaining days from next month to fill the grid
+            const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+            const remainingCells = totalCells - (firstDayOfWeek + daysInMonth);
+            
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'widget-calendar-day other-month';
+                dayEl.textContent = day;
+                daysContainer.appendChild(dayEl);
+            }
+
+            // Render upcoming holidays
+            renderWidgetUpcomingHolidays(year);
+        }
+
+        function renderWidgetUpcomingHolidays(year) {
+            const container = document.getElementById('widgetUpcomingHolidays');
+            if (!container) return;
+
+            const yearHolidays = holidays[year] || [];
+            const today = new Date().toISOString().split('T')[0];
+            
+            const upcomingHolidays = yearHolidays
+                .filter(holiday => holiday.date >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 3); // Show only next 3 holidays
+
+            if (upcomingHolidays.length === 0) {
+                container.innerHTML = '<div class="text-muted small">No upcoming holidays</div>';
+                return;
+            }
+
+            container.innerHTML = upcomingHolidays.map(holiday => {
+                const holidayDate = new Date(holiday.date);
+                const formattedDate = holidayDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                return `
+                    <div class="upcoming-holiday-item">
+                        <div class="upcoming-holiday-name">${holiday.name}</div>
+                        <div class="upcoming-holiday-date">${formattedDate}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Close widget when clicking outside
+        document.addEventListener('click', function(event) {
+            const widget = document.getElementById('calendarWidget');
+            const toggleBtn = document.querySelector('.calendar-toggle-btn');
+            
+            if (widgetIsVisible && 
+                !widget.contains(event.target) && 
+                !toggleBtn.contains(event.target)) {
+                toggleCalendarWidget();
             }
         });
 
-        new Chart(document.getElementById('monthlyChart'), {
-            type: 'bar',
-            data: {
-                labels: monthLabels,
-                datasets: [{
-                    label: 'Monthly Attendance',
-                    data: monthValues,
-                    backgroundColor: 'rgba(255, 159, 64, 0.7)'
-                }]
+        // Chart data from Flask
+        let weeklyData = {};
+        let monthlyData = {};
+        let currentYear = new Date().getFullYear();
+        
+        try {
+            weeklyData = {{ weekly_summary | default('{}') | tojson | safe }};
+            monthlyData = {{ monthly_summary | default('{}') | tojson | safe }};
+        } catch (e) {
+            console.error('Error parsing code block data:', e);
+        }
+    
+        console.log('Weekly Data:', weeklyData);
+        console.log('Monthly Data:', monthlyData);
+
+        // Function to create summary statistics
+        function createSummaryStats(data, containerId, type) {
+            const container = document.getElementById(containerId);
+            if (!container || !data || Object.keys(data).length === 0) return;
+
+            const values = Object.values(data);
+            const total = values.reduce((sum, val) => sum + val, 0);
+            const average = (total / values.length).toFixed(1);
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${average}</div>
+                    <div class="stat-label">Average</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${max}</div>
+                    <div class="stat-label">Highest</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${min}</div>
+                    <div class="stat-label">Lowest</div>
+                </div>
+            `;
+        }
+    
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Weekly Chart
+            const weeklyCanvas = document.getElementById('weeklyChart');
+            if (weeklyCanvas && weeklyData && Object.keys(weeklyData).length > 0) {
+                // Create summary stats
+                createSummaryStats(weeklyData, 'weeklyStats', 'weekly');
+
+                // Create gradient
+                const ctx = weeklyCanvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+                gradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
+
+                new Chart(weeklyCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(weeklyData).map(week => week.replace('-W', ' Week ')),
+                        datasets: [{
+                            label: 'Weekly Attendance Count',
+                            data: Object.values(weeklyData),
+                            backgroundColor: gradient,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: false
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Attendances',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Week',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            } else {
+                console.log('No weekly data available');
+                document.getElementById('weeklyStats').innerHTML = '<div class="text-center text-muted">No weekly data available for the selected period</div>';
+            }
+    
+            // Monthly Chart
+            const monthlyCanvas = document.getElementById('monthlyChart');
+            if (monthlyCanvas && monthlyData && Object.keys(monthlyData).length > 0) {
+                // Create summary stats
+                createSummaryStats(monthlyData, 'monthlyStats', 'monthly');
+
+                // Create gradient
+                const ctx2 = monthlyCanvas.getContext('2d');
+                const gradient2 = ctx2.createLinearGradient(0, 0, 0, 400);
+                gradient2.addColorStop(0, 'rgba(255, 159, 64, 0.4)');
+                gradient2.addColorStop(1, 'rgba(255, 159, 64, 0.1)');
+
+                new Chart(monthlyCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(monthlyData).map(month => {
+                            const [year, monthNum] = month.split('-');
+                            const date = new Date(year, monthNum - 1);
+                            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                        }),
+                        datasets: [{
+                            label: 'Monthly Attendance Count',
+                            data: Object.values(monthlyData),
+                            backgroundColor: gradient2,
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 4,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 3,
+                            pointRadius: 8,
+                            pointHoverRadius: 12,
+                            pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: false
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(255, 159, 64, 1)',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Attendances',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Month',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            } else {
+                console.log('No monthly data available');
+                document.getElementById('monthlyStats').innerHTML = '<div class="text-center text-muted">No monthly data available for the selected period</div>';
+            }
+
+            // Holiday data for different years
+            const holidays = {
+                2025: [
+                    { date: '2025-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2025-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2025-03-14', name: 'Holi', reason: 'Festival of Colors', type: 'festival' },
+                    { date: '2025-04-14', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+                    { date: '2025-04-18', name: 'Ram Navami', reason: 'Hindu Festival', type: 'religious' },
+                    { date: '2025-05-01', name: 'Labour Day', reason: 'International Workers\' Day', type: 'national' },
+                    { date: '2025-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2025-08-29', name: 'Janmashtami', reason: 'Hindu Festival', type: 'religious' },
+                    { date: '2025-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+                    { date: '2025-10-31', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+                    { date: '2025-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+                ],
+                2024: [
+                    { date: '2024-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2024-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2024-03-25', name: 'Holi', reason: 'Festival of Colors', type: 'festival' },
+                    { date: '2024-03-29', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+                    { date: '2024-04-17', name: 'Ram Navami', reason: 'Hindu Festival', type: 'religious' },
+                    { date: '2024-05-01', name: 'Labour Day', reason: 'International Workers\' Day', type: 'national' },
+                    { date: '2024-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+                    { date: '2024-08-26', name: 'Janmashtami', reason: 'Hindu Festival', type: 'religious' },
+                    { date: '2024-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+                    { date: '2024-11-01', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+                    { date: '2024-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+                ]
+            };
+
+            // Calendar functionality
+            function renderCalendar(year) {
+                const calendarGrid = document.getElementById('calendarGrid');
+                const currentYearEl = document.getElementById('currentYear');
+                const holidayYearEl = document.getElementById('holidayYear');
+                
+                if (!calendarGrid) {
+                    console.error('Calendar grid element not found!');
+                    return;
+                }
+                
+                // Clear existing content
+                calendarGrid.innerHTML = '';
+                if (currentYearEl) currentYearEl.textContent = year;
+                if (holidayYearEl) holidayYearEl.textContent = year;
+
+                // Generate calendar for each month
+                for (let month = 0; month < 12; month++) {
+                    const monthDiv = document.createElement('div');
+                    monthDiv.className = 'col-lg-3 col-md-4 col-sm-6 mb-4';
+                    
+                    const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const firstDay = new Date(year, month, 1).getDay();
+                    
+                    let calendarHTML = `
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-gradient-primary text-white text-center py-2">
+                                <h6 class="mb-0 fw-bold">${monthName} ${year}</h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="main-calendar-grid">
+                                    <div class="main-day-header">Su</div>
+                                    <div class="main-day-header">Mo</div>
+                                    <div class="main-day-header">Tu</div>
+                                    <div class="main-day-header">We</div>
+                                    <div class="main-day-header">Th</div>
+                                    <div class="main-day-header">Fr</div>
+                                    <div class="main-day-header">Sa</div>
+                    `;
+                    
+                    // Add empty cells for days before month starts
+                    for (let i = 0; i < firstDay; i++) {
+                        calendarHTML += '<div class="calendar-day empty"></div>';
+                    }
+                    
+                    // Add days of the month
+                    const today = new Date();
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const holiday = getHolidayByDate(year, date);
+                        const currentDate = new Date(year, month, day);
+                        
+                        let dayClasses = 'calendar-day';
+                        let dayTitle = '';
+                        
+                        // Check if it's today
+                        if (
+                            currentDate.getDate() === today.getDate() &&
+                            currentDate.getMonth() === today.getMonth() &&
+                            currentDate.getFullYear() === today.getFullYear()
+                        ) {
+                            dayClasses += ' today';
+                        }
+                        
+                        // Check if it's a holiday
+                        if (holiday) {
+                            dayClasses += ` holiday ${holiday.type}`;
+                            dayTitle = `title="${holiday.name} - ${holiday.reason}"`;
+                        }
+                        
+                        calendarHTML += `
+                            <div class="${dayClasses}" ${dayTitle}>
+                                ${day}
+                                ${holiday ? '<div class="holiday-indicator"></div>' : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    // Fill remaining cells to complete the grid
+                    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+                    const remainingCells = totalCells - (firstDay + daysInMonth);
+                    
+                    for (let i = 1; i <= remainingCells; i++) {
+                        calendarHTML += '<div class="calendar-day empty"></div>';
+                    }
+                    
+                    calendarHTML += `
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    monthDiv.innerHTML = calendarHTML;
+                    calendarGrid.appendChild(monthDiv);
+                }
+                
+                // Render holidays list
+                renderHolidaysList(year);
+            }
+
+            function getHolidayByDate(year, date) {
+                const yearHolidays = holidays[year] || [];
+                return yearHolidays.find(holiday => holiday.date === date);
+            }
+
+            function renderHolidaysList(year) {
+                const holidaysList = document.getElementById('holidaysList');
+                const holidaySummary = document.getElementById('holidaySummary');
+                
+                if (!holidaysList) return;
+                
+                const yearHolidays = holidays[year] || [];
+                
+                if (yearHolidays.length === 0) {
+                    holidaysList.innerHTML = '<div class="alert alert-info">No holidays data available for this year.</div>';
+                    holidaySummary.innerHTML = '<div class="text-muted">No data</div>';
+                    return;
+                }
+                
+                // Group holidays by type
+                const holidaysByType = yearHolidays.reduce((acc, holiday) => {
+                    if (!acc[holiday.type]) acc[holiday.type] = [];
+                    acc[holiday.type].push(holiday);
+                    return acc;
+                }, {});
+                
+                let holidaysHTML = '';
+                Object.keys(holidaysByType).forEach(type => {
+                    const typeClass = type === 'national' ? 'primary' : 
+                                     type === 'religious' ? 'success' : 
+                                     type === 'festival' ? 'warning' : 'info';
+                    
+                    holidaysHTML += `
+                        <div class="mb-3">
+                            <h6 class="text-${typeClass}">
+                                <i class="fas fa-tag"></i> ${type.charAt(0).toUpperCase() + type.slice(1)} Holidays
+                            </h6>
+                            <div class="holiday-group">
+                    `;
+                    
+                    holidaysByType[type].forEach(holiday => {
+                        const date = new Date(holiday.date);
+                        const formattedDate = date.toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                        
+                        holidaysHTML += `
+                            <div class="holiday-item border-start border-${typeClass} border-3 ps-3 mb-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>${holiday.name}</strong>
+                                        <div class="text-muted small">${holiday.reason}</div>
+                                    </div>
+                                    <span class="badge bg-${typeClass}">${formattedDate}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    holidaysHTML += '</div></div>';
+                });
+                
+                holidaysList.innerHTML = holidaysHTML;
+                
+                // Update summary
+                const totalHolidays = yearHolidays.length;
+                const typeCount = Object.keys(holidaysByType).length;
+                const nextHoliday = getNextHoliday(year);
+                
+                holidaySummary.innerHTML = `
+                    <div class="summary-stat">
+                        <div class="h4 text-primary mb-1">${totalHolidays}</div>
+                        <div class="small text-muted">Total Holidays</div>
+                    </div>
+                    <div class="summary-stat mt-3">
+                        <div class="h5 text-success mb-1">${typeCount}</div>
+                        <div class="small text-muted">Holiday Types</div>
+                    </div>
+                    ${nextHoliday ? `
+                        <div class="summary-stat mt-3">
+                            <div class="small text-warning"><strong>Next Holiday:</strong></div>
+                            <div class="small">${nextHoliday.name}</div>
+                            <div class="small text-muted">${new Date(nextHoliday.date).toLocaleDateString()}</div>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            function getNextHoliday(year) {
+                const yearHolidays = holidays[year] || [];
+                const today = new Date();
+                const currentDate = today.toISOString().split('T')[0];
+                
+                return yearHolidays
+                    .filter(holiday => holiday.date >= currentDate)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+            }
+
+            // Year navigation
+            window.changeYear = function(direction) {
+                const currentYearEl = document.getElementById('currentYear');
+                const newYear = parseInt(currentYearEl.textContent) + direction;
+                renderCalendar(newYear);
+            };
+
+            // Initialize calendar
+            renderCalendar(currentYear || new Date().getFullYear());
+            
+            // Also try to initialize calendar widget if visible
+            if (widgetIsVisible) {
+                renderWidgetCalendar();
             }
         });
     </script>

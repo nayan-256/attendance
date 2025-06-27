@@ -189,7 +189,7 @@ def teacher_login():
         if teacher:
             session['teacher_logged_in'] = True
             session['teacher_username'] = username
-            return redirect(url_for('teacher_dashboard'))
+            return redirect(url_for('home'))
         else:
             flash('Invalid teacher credentials', 'error')
     return render_template('teacher_login.html')
@@ -576,9 +576,9 @@ def teacher_dashboard():
             monthly_summary = dict(monthly)
 
     conn.close()
-    weekly_summary = [{"week": k, "count": v} for k, v in weekly_summary.items()]
-    monthly_summary = [{"month": k, "count": v} for k, v in monthly_summary.items()]
-
+    # Keep as dictionaries for JavaScript consumption
+    # Don't convert to lists of objects
+    
     return render_template(
         'teacher_dashboard.html',
         students=students,
