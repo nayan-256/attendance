@@ -10,6 +10,7 @@ import base64
 import csv
 import pandas as pd
 from datetime import datetime
+from collections import defaultdict
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session
 
 
@@ -377,7 +378,31 @@ def view_attendance():
     records = cur.fetchall()
     conn.close()
 
-    return render_template("attendance.html", records=records)
+    # Convert to DataFrame for plotting
+    df = pd.DataFrame(records, columns=['name', 'student_id', 'class_year', 'department', 'timestamp'])
+
+    if df.empty:
+        weekly_summary = []
+        monthly_summary = []
+    else:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+        # Add week and month columns
+        df['week'] = df['timestamp'].dt.to_period('W').apply(lambda r: r.start_time.strftime('%Y-%m-%d'))
+        df['month'] = df['timestamp'].dt.to_period('M').apply(lambda r: r.start_time.strftime('%Y-%m'))
+
+        # Group by week and month
+        weekly_summary = df.groupby('week').size().reset_index(name='count').to_dict(orient='records')
+        monthly_summary = df.groupby('month').size().reset_index(name='count').to_dict(orient='records')
+        weekly_summary = weekly_summary if weekly_summary is not None else []
+        monthly_summary = monthly_summary if monthly_summary is not None else []
+
+    return render_template(
+    "teacher_dashboard.html",
+    ...,
+    weekly_summary=weekly_summary or [],
+    monthly_summary=monthly_summary or []
+)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -443,6 +468,9 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', records=records, names=names, dates=dates, not_found=not_found)
 
+from collections import defaultdict
+from datetime import datetime
+
 @app.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
     if not session.get('teacher_logged_in'):
@@ -457,6 +485,8 @@ def teacher_dashboard():
     values = []
     legend_labels = []
     attendance_dates = []
+    weekly_summary = {}
+    monthly_summary = {}
     start_date = None
     end_date = None
 
@@ -466,7 +496,6 @@ def teacher_dashboard():
         start_date = request.form.get('start_date')
         end_date = request.form.get('end_date')
 
-        # Prefer ID if provided, else use name
         if student_id:
             cur.execute('SELECT id, name FROM users WHERE id=?', (student_id,))
             student = cur.fetchone()
@@ -478,7 +507,7 @@ def teacher_dashboard():
 
         if student:
             selected_student = student[0]
-            # Pie chart data
+            # Pie chart
             if start_date and end_date:
                 cur.execute('''
                     SELECT status, COUNT(*) FROM attendance
@@ -487,7 +516,6 @@ def teacher_dashboard():
                 ''', (selected_student, start_date, end_date))
             else:
                 cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
-
             records = cur.fetchall()
             if records:
                 labels = [r[0] for r in records]
@@ -504,7 +532,8 @@ def teacher_dashboard():
                 graph = base64.b64encode(buf.getvalue()).decode()
                 buf.close()
                 plt.close()
-            # Theory attendance dates (status = 'Present' or 'Check-In')
+
+            # Attendance Dates
             if start_date and end_date:
                 cur.execute('''
                     SELECT DATE(timestamp) FROM attendance
@@ -518,8 +547,38 @@ def teacher_dashboard():
                     WHERE user_id=? AND (status='Present' OR status='Check-In')
                     ORDER BY timestamp DESC
                 ''', (selected_student,))
-    attendance_dates = [row[0] for row in cur.fetchall()]
+            attendance_dates = [row[0] for row in cur.fetchall()]
+
+            # Weekly and Monthly Summary
+            if start_date and end_date:
+                cur.execute('''
+                    SELECT DATE(timestamp) FROM attendance
+                    WHERE user_id=? AND (status='Present' OR status='Check-In')
+                    AND DATE(timestamp) BETWEEN ? AND ?
+                ''', (selected_student, start_date, end_date))
+            else:
+                cur.execute('''
+                    SELECT DATE(timestamp) FROM attendance
+                    WHERE user_id=? AND (status='Present' OR status='Check-In')
+                ''', (selected_student,))
+
+            all_dates = [row[0] for row in cur.fetchall()]
+            weekly = defaultdict(int)
+            monthly = defaultdict(int)
+            for date_str in all_dates:
+                date = datetime.strptime(date_str, '%Y-%m-%d')
+                week_label = f"{date.strftime('%Y')}-W{date.strftime('%U')}"
+                month_label = date.strftime('%Y-%m')
+                weekly[week_label] += 1
+                monthly[month_label] += 1
+
+            weekly_summary = dict(weekly)
+            monthly_summary = dict(monthly)
+
     conn.close()
+    weekly_summary = [{"week": k, "count": v} for k, v in weekly_summary.items()]
+    monthly_summary = [{"month": k, "count": v} for k, v in monthly_summary.items()]
+
     return render_template(
         'teacher_dashboard.html',
         students=students,
@@ -527,8 +586,9 @@ def teacher_dashboard():
         selected_student=selected_student,
         attendance_dates=attendance_dates,
         start_date=start_date,
-        end_date=end_date
-
+        end_date=end_date,
+        weekly_summary=weekly_summary,
+        monthly_summary=monthly_summary
     )
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
