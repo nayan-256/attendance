@@ -9,9 +9,11 @@ import io
 import base64
 import csv
 import pandas as pd
+import uuid
 from datetime import datetime
 from collections import defaultdict
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -85,7 +87,7 @@ def init_db():
 init_db()
 
 
-@app.route('/')
+@app.route('/', endpoint='home')
 def home():
     return render_template('index.html')
     
@@ -254,31 +256,161 @@ def profile():
         return redirect(url_for('student_login'))
 
     conn = sqlite3.connect('database.db')
-    conn.row_factory =sqlite3.Row
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
     row = cur.fetchone()
     conn.close()
 
     if row:
+        # Get image path - first try database, then smart matching
+        image_path = None
+        
+        if row['image_path']:
+            # Clean up existing database path
+            db_image_path = row['image_path'].replace('\\', '/').replace('static/', '')
+            if os.path.exists(os.path.join('static', db_image_path)):
+                image_path = db_image_path
+        
+        # If no valid image in database, try smart matching
+        if not image_path:
+            student_name = row['name']
+            image_path = find_student_image(student_name)
+        
+        # Final fallback to default
+        if not image_path or not os.path.exists(os.path.join('static', image_path)):
+            image_path = 'default_profile.svg'
+        
         user = {
             'name': row['name'],
             'student_id': row['student_id'],
             'class_year': row['class_year'],
             'department': row['department'],
-            'image_path': row['image_path'].replace('\\','/') if row['image_path'] else 'default_profile.png'
+            'image_path': image_path
         }
         return render_template('profile.html', user=user)
     else:
         flash("Student profile not found", "danger")
-        return redirect(url_for('profile'))
+        return redirect(url_for('student_login'))
+
+def find_student_image(student_name):
+    """
+    Smart function to find student image from uploads folder
+    Matches student name with uploaded image filenames
+    """
+    import os
+    import glob
+    
+    uploads_dir = os.path.join('static', 'uploads')
+    
+    if not os.path.exists(uploads_dir):
+        return 'default_profile.svg'
+    
+    # Get all image files from uploads folder
+    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+    image_files = []
+    
+    for extension in image_extensions:
+        image_files.extend(glob.glob(os.path.join(uploads_dir, extension)))
+    
+    if not image_files:
+        return 'default_profile.svg'
+    
+    # Clean student name for matching
+    clean_name = student_name.lower().replace(' ', '_').replace('.', '').strip()
+    name_parts = [part.strip() for part in student_name.lower().split() if len(part.strip()) > 1]
+    
+    # Try different matching strategies
+    best_match = None
+    max_score = 0
+    
+    for image_path in image_files:
+        image_filename = os.path.basename(image_path).lower()
+        score = 0
+        
+        # Strategy 1: Exact name match
+        if clean_name in image_filename:
+            score += 15
+        
+        # Strategy 2: Individual name parts match
+        for part in name_parts:
+            if len(part) > 2 and part in image_filename:
+                score += 5
+        
+        # Strategy 3: First name + last name combination
+        if len(name_parts) >= 2:
+            first_last = f"{name_parts[0]}_{name_parts[-1]}"
+            if first_last in image_filename:
+                score += 12
+            
+            # Also try without underscore
+            first_last_nospace = f"{name_parts[0]}{name_parts[-1]}"
+            if first_last_nospace in image_filename:
+                score += 10
+        
+        # Strategy 4: Any name part at the beginning of filename
+        for part in name_parts:
+            if len(part) > 2 and image_filename.startswith(part):
+                score += 8
+        
+        # Strategy 5: Loose matching for common variations
+        if len(name_parts) > 0:
+            first_name = name_parts[0]
+            if len(first_name) > 3 and first_name in image_filename:
+                score += 6
+        
+        if score > max_score:
+            max_score = score
+            best_match = image_path
+    
+    if best_match and max_score > 0:
+        # Convert to relative path for web serving
+        relative_path = best_match.replace('\\', '/').replace('static/', '')
+        return relative_path
+    else:
+        # Return default profile image if no good match found
+        return 'default_profile.svg'
+
+# Helper function to get all available student images for admin
+def get_all_student_images():
+    """
+    Get all student images from uploads folder with metadata
+    """
+    import os
+    import glob
+    from datetime import datetime
+    
+    uploads_dir = os.path.join('static', 'uploads')
+    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+    images = []
+    
+    for extension in image_extensions:
+        for image_path in glob.glob(os.path.join(uploads_dir, extension)):
+            filename = os.path.basename(image_path)
+            
+            # Extract student name from filename (assuming format: name_timestamp.ext)
+            name_part = filename.split('_')[0] if '_' in filename else filename.split('.')[0]
+            
+            # Get file modification time
+            mod_time = os.path.getmtime(image_path)
+            upload_date = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M')
+            
+            images.append({
+                'filename': filename,
+                'path': image_path.replace('\\', '/').replace('static/', ''),
+                'student_name': name_part.replace('_', ' ').title(),
+                'upload_date': upload_date
+            })
+    
+    return sorted(images, key=lambda x: x['upload_date'], reverse=True)
 
   
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
     student_id = session.get('student_id')
     if not student_id:
-        return redirect(url_for('login'))
+        flash("Please log in to edit your profile", "warning")
+        return redirect(url_for('student_login'))
 
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
@@ -288,23 +420,96 @@ def edit_profile():
         name = request.form['name']
         class_year = request.form['class_year']
         department = request.form['department']
+        password = request.form.get('password', '').strip()
+        
+        # Handle profile image upload
+        new_image_path = None
+        if 'profile_image' in request.files:
+            file = request.files['profile_image']
+            if file and file.filename and file.filename != '':
+                # Validate file type
+                allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+                if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                    # Generate unique filename
+                    file_extension = file.filename.rsplit('.', 1)[1].lower()
+                    unique_filename = f"{name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{str(uuid.uuid4())[:8]}.{file_extension}"
+                    
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Save file
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(filepath)
+                    
+                    # Store relative path for database
+                    new_image_path = f"uploads/{unique_filename}"
+                    
+                    flash("Profile photo updated successfully!", "success")
+                else:
+                    flash("Invalid file type. Please upload PNG, JPG, JPEG, or GIF files only.", "error")
 
-        # ✅ Update the database
-        cur.execute("""
-            UPDATE users SET name = ?, class_year = ?, department = ? WHERE student_id = ?
-        """, (name, class_year, department, student_id))
-
+        # Prepare update query and parameters
+        update_fields = ["name = ?", "class_year = ?", "department = ?"]
+        update_params = [name, class_year, department]
+        
+        # Add image path if new image was uploaded
+        if new_image_path:
+            update_fields.append("image_path = ?")
+            update_params.append(new_image_path)
+        
+        # Add password if provided
+        if password:
+            update_fields.append("password = ?")
+            update_params.append(password)
+        
+        # Add student_id for WHERE clause
+        update_params.append(student_id)
+        
+        # Execute update
+        query = f"UPDATE users SET {', '.join(update_fields)} WHERE student_id = ?"
+        cur.execute(query, update_params)
+        
         conn.commit()
         conn.close()
-
+        
+        if not new_image_path:  # Only show general success if no image success was shown
+            flash("Profile updated successfully!", "success")
+        
         return redirect(url_for('profile'))
 
-    # GET: load existing user data
+    # GET: load existing user data with image path
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
-    user = cur.fetchone()
+    user_row = cur.fetchone()
     conn.close()
-
-    return render_template('edit_profile.html', user=user)
+    
+    if user_row:
+        # Get current image path
+        current_image_path = None
+        if user_row['image_path']:
+            # Clean up database path
+            db_image_path = user_row['image_path'].replace('\\', '/').replace('static/', '')
+            if os.path.exists(os.path.join('static', db_image_path)):
+                current_image_path = db_image_path
+        
+        # If no valid image in database, try smart matching
+        if not current_image_path:
+            current_image_path = find_student_image(user_row['name'])
+        
+        # Final fallback
+        if not current_image_path or not os.path.exists(os.path.join('static', current_image_path)):
+            current_image_path = 'default_profile.svg'
+        
+        user = {
+            'name': user_row['name'],
+            'student_id': user_row['student_id'],
+            'class_year': user_row['class_year'],
+            'department': user_row['department'],
+            'image_path': current_image_path
+        }
+        return render_template('edit_profile.html', user=user)
+    else:
+        flash("User not found", "error")
+        return redirect(url_for('student_login'))
 
 
 @app.route('/attendance')
@@ -398,38 +603,46 @@ def view_attendance():
         monthly_summary = monthly_summary if monthly_summary is not None else []
 
     return render_template(
-    "teacher_dashboard.html",
-    ...,
-    weekly_summary=weekly_summary or [],
-    monthly_summary=monthly_summary or []
-)
+        "dashboard.html",
+        records=records,
+        weekly_summary=weekly_summary or [],
+        monthly_summary=monthly_summary or []
+    )
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     # Ensure the user is logged in before proceeding
     if not session.get('logged_in'):
+        flash("Please log in as admin to view attendance records", "warning")
         return redirect(url_for('login'))  # Redirect to login page if not logged in
     
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
     
     # Fetch all unique names and dates for the dropdowns
-    cur.execute('SELECT DISTINCT name FROM users')
+    cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
     names = cur.fetchall()
     
     cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
     dates = cur.fetchall()
     
-    # If a search is submitted, filter the records based on name and date
+    # Initialize variables
     records = []
+    not_found = False
+    show_results = False
+    
     if request.method == 'POST':
+        show_results = True
         selected_name = request.form.get('name')
         selected_date = request.form.get('date')
+        show_all = request.form.get('show_all')
         
-        # Query for attendance records filtered by name and/or date
+        # Query for all attendance records (including historical data)
+        # Show all statuses to provide complete attendance history
         query = '''
             SELECT 
                 users.name,
+                users.student_id,
                 users.class_year, 
                 users.department, 
                 DATE(attendance.timestamp) AS date, 
@@ -441,13 +654,15 @@ def dashboard():
         conditions = []
         params = []
         
-        if selected_name:
-            conditions.append("users.name = ?")
-            params.append(selected_name)
-        
-        if selected_date:
-            conditions.append("DATE(attendance.timestamp) = ?")
-            params.append(selected_date)
+        # If show_all button is clicked, don't add additional filters
+        if not show_all:
+            if selected_name and selected_name != '':
+                conditions.append("users.name = ?")
+                params.append(selected_name)
+            
+            if selected_date and selected_date != '':
+                conditions.append("DATE(attendance.timestamp) = ?")
+                params.append(selected_date)
         
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
@@ -458,15 +673,59 @@ def dashboard():
         records = cur.fetchall()
         
         # If no records are found, display a "not found" message
-        if not records:
-            not_found = True
-        else:
-            not_found = False
-    else:
-        not_found = False
+        not_found = len(records) == 0
+    
+    # For GET request, don't show any records by default
+    # Records will only be shown when search is performed
     
     conn.close()
-    return render_template('dashboard.html', records=records, names=names, dates=dates, not_found=not_found)
+    return render_template('dashboard.html', 
+                         records=records, 
+                         names=names, 
+                         dates=dates, 
+                         not_found=not_found,
+                         show_results=show_results)
+
+# Direct attendance viewing route (for easier access during testing)
+@app.route('/view_all_attendance')
+def view_all_attendance():
+    """Direct route to view all attendance records"""
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    # Get recent attendance records (last 50)
+    query = '''
+        SELECT 
+            users.name,
+            users.student_id,
+            users.class_year, 
+            users.department, 
+            DATE(attendance.timestamp) AS date, 
+            TIME(attendance.timestamp) AS time, 
+            attendance.status 
+        FROM attendance 
+        JOIN users ON attendance.user_id = users.id
+        ORDER BY attendance.timestamp DESC 
+        LIMIT 50
+    '''
+    cur.execute(query)
+    records = cur.fetchall()
+    
+    # Get unique names and dates for filters
+    cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
+    names = cur.fetchall()
+    
+    cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC LIMIT 30')
+    dates = cur.fetchall()
+    
+    conn.close()
+    
+    return render_template('dashboard.html', 
+                         records=records, 
+                         names=names, 
+                         dates=dates, 
+                         not_found=False,
+                         show_all=True)
 
 from collections import defaultdict
 from datetime import datetime
@@ -616,17 +875,51 @@ def checkout_attendance():
 
 
 
-@app.route('/students')
+@app.route('/students', endpoint='show_students')
 def show_students():
      if not session.get('logged_in'):
         return redirect(url_for('login'))
         
      conn = sqlite3.connect('database.db')
+     conn.row_factory = sqlite3.Row
      cur = conn.cursor()
-     cur.execute("SELECT name, student_id, image_path, id FROM users")
-     students = cur.fetchall()
+     cur.execute("SELECT * FROM users ORDER BY name")
+     users = cur.fetchall()
      conn.close()
-     return render_template('students.html', students=students)
+     
+     # Enhanced students data with profile images
+     students_data = []
+     for user in users:
+         # Get image path - first try database, then smart matching
+         image_path = None
+         
+         if user['image_path']:
+             # Clean up existing database path
+             db_image_path = user['image_path'].replace('\\', '/').replace('static/', '')
+             if os.path.exists(os.path.join('static', db_image_path)):
+                 image_path = db_image_path
+         
+         # If no valid image in database, try smart matching
+         if not image_path:
+             student_name = user['name']
+             image_path = find_student_image(student_name)
+         
+         # Final fallback to default
+         if not image_path or not os.path.exists(os.path.join('static', image_path)):
+             image_path = 'default_profile.svg'
+         
+         student_data = {
+             'id': user['id'],
+             'name': user['name'],
+             'student_id': user['student_id'],
+             'class_year': user['class_year'],
+             'department': user['department'],
+             'image_path': image_path,
+             'db_image_path': user['image_path']
+         }
+         students_data.append(student_data)
+     
+     return render_template('students.html', students=students_data)
 
 @app.route('/delete_student_by_id', methods=['POST'])
 def delete_student_by_id():
@@ -756,3 +1049,95 @@ print(app.url_map)
 
 if __name__ == '__main__':
     app.run(debug=True)
+@app.route('/api/holidays/<int:year>')
+def get_holidays(year):
+    """API endpoint to get holidays for a specific year"""
+    # Static holiday data - can be moved to database later
+    holidays_data = {
+        2025: [
+            {'date': '2025-01-01', 'name': 'New Year\'s Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2025-01-26', 'name': 'Republic Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2025-03-14', 'name': 'Holi', 'reason': 'Festival of Colors', 'type': 'festival'},
+            {'date': '2025-04-14', 'name': 'Good Friday', 'reason': 'Christian Holiday', 'type': 'religious'},
+            {'date': '2025-04-18', 'name': 'Ram Navami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2025-05-01', 'name': 'Labour Day', 'reason': 'International Workers\' Day', 'type': 'national'},
+            {'date': '2025-08-15', 'name': 'Independence Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2025-08-29', 'name': 'Janmashtami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2025-10-02', 'name': 'Gandhi Jayanti', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2025-10-31', 'name': 'Diwali', 'reason': 'Festival of Lights', 'type': 'festival'},
+            {'date': '2025-12-25', 'name': 'Christmas Day', 'reason': 'Christian Holiday', 'type': 'religious'}
+        ],
+        2024: [
+            {'date': '2024-01-01', 'name': 'New Year\'s Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2024-01-26', 'name': 'Republic Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2024-03-25', 'name': 'Holi', 'reason': 'Festival of Colors', 'type': 'festival'},
+            {'date': '2024-03-29', 'name': 'Good Friday', 'reason': 'Christian Holiday', 'type': 'religious'},
+            {'date': '2024-04-17', 'name': 'Ram Navami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2024-05-01', 'name': 'Labour Day', 'reason': 'International Workers\' Day', 'type': 'national'},
+            {'date': '2024-08-15', 'name': 'Independence Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2024-08-26', 'name': 'Janmashtami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2024-10-02', 'name': 'Gandhi Jayanti', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2024-11-01', 'name': 'Diwali', 'reason': 'Festival of Lights', 'type': 'festival'},
+            {'date': '2024-12-25', 'name': 'Christmas Day', 'reason': 'Christian Holiday', 'type': 'religious'}
+        ],
+        2026: [
+            {'date': '2026-01-01', 'name': 'New Year\'s Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2026-01-26', 'name': 'Republic Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2026-03-05', 'name': 'Holi', 'reason': 'Festival of Colors', 'type': 'festival'},
+            {'date': '2026-04-03', 'name': 'Good Friday', 'reason': 'Christian Holiday', 'type': 'religious'},
+            {'date': '2026-04-06', 'name': 'Ram Navami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2026-05-01', 'name': 'Labour Day', 'reason': 'International Workers\' Day', 'type': 'national'},
+            {'date': '2026-08-15', 'name': 'Independence Day', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2026-08-17', 'name': 'Janmashtami', 'reason': 'Hindu Festival', 'type': 'religious'},
+            {'date': '2026-10-02', 'name': 'Gandhi Jayanti', 'reason': 'National Holiday', 'type': 'national'},
+            {'date': '2026-10-19', 'name': 'Diwali', 'reason': 'Festival of Lights', 'type': 'festival'},
+            {'date': '2026-12-25', 'name': 'Christmas Day', 'reason': 'Christian Holiday', 'type': 'religious'}
+        ]
+    }
+    
+    from flask import jsonify
+    return jsonify(holidays_data.get(year, []))
+
+# Admin route to view all students with their images - DISABLED to avoid endpoint conflicts
+# @app.route('/admin/students', endpoint='admin_students_view')
+# def admin_students():
+#     """Admin route to view all registered students with their profile images"""
+#     conn = sqlite3.connect('database.db')
+#     conn.row_factory = sqlite3.Row
+#     cur = conn.cursor()
+#     cur.execute("SELECT * FROM users ORDER BY name")
+#     users = cur.fetchall()
+#     conn.close()
+#     
+#     students_data = []
+#     for user in users:
+#         # Get image path - first try database, then smart matching
+#         image_path = None
+#         
+#         if user['image_path']:
+#             # Clean up existing database path
+#             db_image_path = user['image_path'].replace('\\', '/').replace('static/', '')
+#             if os.path.exists(os.path.join('static', db_image_path)):
+#                 image_path = db_image_path
+#         
+#         # If no valid image in database, try smart matching
+#         if not image_path:
+#             student_name = user['name']
+#             image_path = find_student_image(student_name)
+#         
+#         # Final fallback to default
+#         if not image_path or not os.path.exists(os.path.join('static', image_path)):
+#             image_path = 'default_profile.svg'
+#         
+#         student_data = {
+#             'name': user['name'],
+#             'student_id': user['student_id'],
+#             'class_year': user['class_year'],
+#             'department': user['department'],
+#             'image_path': image_path,
+#             'db_image_path': user['image_path'],
+#             'image_exists': os.path.exists(os.path.join('static', image_path))
+#         }
+#         students_data.append(student_data)
+#     
+#     return render_template('admin_students.html', students=students_data)

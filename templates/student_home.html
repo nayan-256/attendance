@@ -46,9 +46,390 @@
       .student-actions { flex-direction: column !important; }
       .student-actions .btn { width: 100%; margin-bottom: 10px; }
     }
+
+    /* Calendar Widget Styles */
+    .calendar-floating-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      font-size: 1.5rem;
+      color: #667eea;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .calendar-floating-btn:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .calendar-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow-y: auto;
+    }
+
+    .calendar-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .calendar-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .calendar-popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .calendar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 20px 20px 0 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .close-calendar {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .close-calendar:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .calendar-content {
+      padding: 20px;
+    }
+
+    .year-navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .year-nav-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .year-nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .month-card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .month-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .month-header {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .day-header {
+      text-align: center;
+      font-weight: bold;
+      padding: 5px;
+      background-color: #e9ecef;
+      color: #495057;
+      font-size: 0.8rem;
+      border-radius: 3px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      background-color: #e3f2fd;
+      transform: scale(1.1);
+    }
+
+    .calendar-day.today {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: bold;
+    }
+
+    .calendar-day.holiday {
+      background-color: #ffebee;
+      color: #c62828;
+      font-weight: bold;
+    }
+
+    .calendar-day.holiday.national {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .calendar-day.holiday.religious {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .calendar-day.holiday.festival {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .holiday-indicator {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 4px;
+      height: 4px;
+      background-color: #ff4444;
+      border-radius: 50%;
+    }
+
+    .holidays-section {
+      margin-top: 20px;
+      border-top: 2px solid #f0f0f0;
+      padding-top: 20px;
+    }
+
+    .holidays-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .holiday-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .holiday-group {
+      margin-bottom: 20px;
+    }
+
+    .holiday-type-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .holiday-type-header.national {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .holiday-type-header.religious {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .holiday-type-header.festival {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .holiday-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+      transition: all 0.2s;
+    }
+
+    .holiday-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .holiday-item.national {
+      border-left-color: #4caf50;
+    }
+
+    .holiday-item.religious {
+      border-left-color: #2196f3;
+    }
+
+    .holiday-item.festival {
+      border-left-color: #ff9800;
+    }
+
+    .holiday-summary {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .summary-stat {
+      margin-bottom: 15px;
+    }
+
+    .summary-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .summary-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .calendar-popup {
+        width: 95%;
+        max-height: 90vh;
+      }
+      
+      .holidays-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .calendar-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Calendar Floating Button -->
+  <div class="calendar-floating-btn" onclick="toggleCalendar()">
+    📅
+  </div>
+
+  <!-- Calendar Popup Overlay -->
+  <div class="calendar-popup-overlay" id="calendarOverlay" onclick="closeCalendar()"></div>
+
+  <!-- Calendar Popup -->
+  <div class="calendar-popup" id="calendarPopup">
+    <div class="calendar-header">
+      <button class="close-calendar" onclick="closeCalendar()">×</button>
+      <h3>📅 Yearly Calendar with Holidays</h3>
+      <div class="year-navigation">
+        <button class="year-nav-btn" onclick="changeYear(-1)">
+          ← Previous Year
+        </button>
+        <h4 id="currentYear">2025</h4>
+        <button class="year-nav-btn" onclick="changeYear(1)">
+          Next Year →
+        </button>
+      </div>
+    </div>
+    
+    <div class="calendar-content">
+      <!-- Calendar Grid -->
+      <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar months will be generated by JavaScript -->
+      </div>
+      
+      <!-- Holidays Section -->
+      <div class="holidays-section">
+        <h5>🎉 Holidays for <span id="holidayYear">2025</span></h5>
+        <div class="holidays-grid">
+          <div class="holiday-list" id="holidaysList">
+            <!-- Holidays will be populated by JavaScript -->
+          </div>
+          <div class="holiday-summary">
+            <h6>📊 Holiday Summary</h6>
+            <div id="holidaySummary">
+              <!-- Summary stats will be shown here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="center-container">
     <div class="student-home-card animate__animated animate__fadeInUp text-center">
       <h2 class="fw-bold text-primary mb-4 animate__animated animate__fadeInDown">
@@ -62,5 +443,264 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Calendar functionality
+    let currentYear = new Date().getFullYear();
+    
+    // Holiday data
+    const holidays = {
+      2025: [
+        { date: '2025-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-03-14', name: 'Holi', reason: 'Festival of Colors', type: 'festival' },
+        { date: '2025-04-14', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+        { date: '2025-04-18', name: 'Ram Navami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2025-05-01', name: 'Labour Day', reason: 'International Workers\' Day', type: 'national' },
+        { date: '2025-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-08-29', name: 'Janmashtami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2025-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+        { date: '2025-10-31', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+        { date: '2025-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+      ],
+      2024: [
+        { date: '2024-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+        { date: '2024-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+        { date: '2024-03-25', name: 'Holi', reason: 'Festival of Colors', type: 'festival' },
+        { date: '2024-03-29', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+        { date: '2024-04-17', name: 'Ram Navami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2024-05-01', name: 'Labour Day', reason: 'International Workers\' Day', type: 'national' },
+        { date: '2024-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+        { date: '2024-08-26', name: 'Janmashtami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2024-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+        { date: '2024-11-01', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+        { date: '2024-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+      ],
+      2026: [
+        { date: '2026-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+        { date: '2026-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+        { date: '2026-03-05', name: 'Holi', reason: 'Festival of Colors', type: 'festival' },
+        { date: '2026-04-03', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+        { date: '2026-04-06', name: 'Ram Navami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2026-05-01', name: 'Labour Day', reason: 'International Workers\' Day', type: 'national' },
+        { date: '2026-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+        { date: '2026-08-17', name: 'Janmashtami', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2026-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+        { date: '2026-10-19', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+        { date: '2026-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+      ]
+    };
+
+    // Toggle calendar popup
+    function toggleCalendar() {
+      const popup = document.getElementById('calendarPopup');
+      const overlay = document.getElementById('calendarOverlay');
+      
+      popup.classList.add('show');
+      overlay.classList.add('show');
+      
+      // Render calendar when opened
+      renderCalendar(currentYear);
+    }
+
+    // Close calendar popup
+    function closeCalendar() {
+      const popup = document.getElementById('calendarPopup');
+      const overlay = document.getElementById('calendarOverlay');
+      
+      popup.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    // Change year
+    function changeYear(direction) {
+      currentYear += direction;
+      renderCalendar(currentYear);
+    }
+
+    // Get holiday by date
+    function getHolidayByDate(year, date) {
+      const yearHolidays = holidays[year] || [];
+      return yearHolidays.find(holiday => holiday.date === date);
+    }
+
+    // Render calendar
+    function renderCalendar(year) {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const currentYearEl = document.getElementById('currentYear');
+      const holidayYearEl = document.getElementById('holidayYear');
+      
+      if (!calendarGrid) return;
+      
+      // Clear and update year display
+      calendarGrid.innerHTML = '';
+      currentYearEl.textContent = year;
+      holidayYearEl.textContent = year;
+
+      // Generate calendar for each month
+      for (let month = 0; month < 12; month++) {
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'month-card';
+        
+        const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay();
+        
+        let calendarHTML = `
+          <div class="month-header">${monthName}</div>
+          <div class="days-grid">
+            <div class="day-header">Su</div>
+            <div class="day-header">Mo</div>
+            <div class="day-header">Tu</div>
+            <div class="day-header">We</div>
+            <div class="day-header">Th</div>
+            <div class="day-header">Fr</div>
+            <div class="day-header">Sa</div>
+        `;
+        
+        // Add empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+          calendarHTML += '<div class="calendar-day"></div>';
+        }
+        
+        // Add days of the month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const holiday = getHolidayByDate(year, date);
+          const currentDate = new Date(year, month, day);
+          
+          let dayClasses = 'calendar-day';
+          let dayTitle = '';
+          
+          // Check if it's today
+          if (
+            currentDate.getDate() === today.getDate() &&
+            currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()
+          ) {
+            dayClasses += ' today';
+          }
+          
+          // Check if it's a holiday
+          if (holiday) {
+            dayClasses += ` holiday ${holiday.type}`;
+            dayTitle = `title="${holiday.name} - ${holiday.reason}"`;
+          }
+          
+          calendarHTML += `
+            <div class="${dayClasses}" ${dayTitle}>
+              ${day}
+              ${holiday ? '<div class="holiday-indicator"></div>' : ''}
+            </div>
+          `;
+        }
+        
+        calendarHTML += '</div>';
+        monthDiv.innerHTML = calendarHTML;
+        calendarGrid.appendChild(monthDiv);
+      }
+      
+      // Render holidays list
+      renderHolidaysList(year);
+    }
+
+    // Render holidays list
+    function renderHolidaysList(year) {
+      const holidaysList = document.getElementById('holidaysList');
+      const holidaySummary = document.getElementById('holidaySummary');
+      
+      if (!holidaysList) return;
+      
+      const yearHolidays = holidays[year] || [];
+      
+      if (yearHolidays.length === 0) {
+        holidaysList.innerHTML = '<div class="text-muted">No holidays data available for this year.</div>';
+        holidaySummary.innerHTML = '<div class="text-muted">No data</div>';
+        return;
+      }
+      
+      // Group holidays by type
+      const holidaysByType = yearHolidays.reduce((acc, holiday) => {
+        if (!acc[holiday.type]) acc[holiday.type] = [];
+        acc[holiday.type].push(holiday);
+        return acc;
+      }, {});
+      
+      let holidaysHTML = '';
+      Object.keys(holidaysByType).forEach(type => {
+        const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+        
+        holidaysHTML += `
+          <div class="holiday-group">
+            <div class="holiday-type-header ${type}">
+              ${typeCapitalized} Holidays
+            </div>
+        `;
+        
+        holidaysByType[type].forEach(holiday => {
+          const date = new Date(holiday.date);
+          const formattedDate = date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          holidaysHTML += `
+            <div class="holiday-item ${type}">
+              <div>
+                <strong>${holiday.name}</strong>
+                <div style="font-size: 0.8rem; color: #666;">${holiday.reason}</div>
+              </div>
+              <div style="font-weight: bold; color: #667eea;">${formattedDate}</div>
+            </div>
+          `;
+        });
+        
+        holidaysHTML += '</div>';
+      });
+      
+      holidaysList.innerHTML = holidaysHTML;
+      
+      // Update summary
+      const totalHolidays = yearHolidays.length;
+      const typeCount = Object.keys(holidaysByType).length;
+      const nextHoliday = getNextHoliday(year);
+      
+      holidaySummary.innerHTML = `
+        <div class="summary-stat">
+          <div class="summary-number">${totalHolidays}</div>
+          <div class="summary-label">Total Holidays</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-number">${typeCount}</div>
+          <div class="summary-label">Holiday Types</div>
+        </div>
+        ${nextHoliday ? `
+          <div class="summary-stat">
+            <div style="font-size: 0.9rem; font-weight: bold; color: #667eea;">Next Holiday:</div>
+            <div style="font-size: 0.8rem;">${nextHoliday.name}</div>
+            <div style="font-size: 0.8rem; color: #666;">${new Date(nextHoliday.date).toLocaleDateString()}</div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    // Get next holiday
+    function getNextHoliday(year) {
+      const yearHolidays = holidays[year] || [];
+      const today = new Date().toISOString().split('T')[0];
+      
+      return yearHolidays
+        .filter(holiday => holiday.date >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+    }
+
+    // Close popup when pressing Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeCalendar();
+      }
+    });
+  </script>
 </body>
 </html>

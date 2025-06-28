@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Records</title>
 
     <!-- Bootstrap CSS -->
@@ -9,168 +11,614 @@
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <!-- jQuery (Required for Select2) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Animate.css for animation effects -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
+    <!-- AOS (Animate On Scroll) Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(to right, #2a5656, #0b6f9d);
-            /* Stylish gradient background */
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #bbdefb;
-            cursor: pointer;
+        /* Advanced Background Animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .back-btn {
-            margin-top: 20px;
+        /* Floating Particles */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 30px;
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced Glass Container */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: containerFloat 6s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes containerFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Enhanced Title */
+        .enhanced-title {
+            background: linear-gradient(45deg, #fff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+            100% { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); }
+        }
+
+        /* Enhanced Form Elements */
+        .form-select, .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-select:focus, .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .form-select option {
+            background: rgba(102, 126, 234, 0.9);
+            color: #fff;
+        }
+
+        .form-label {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        /* Enhanced Buttons */
+        .btn-enhanced {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-enhanced:hover::before {
+            left: 100%;
+        }
+
+        .btn-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-download {
+            background: var(--success-gradient);
+            animation: pulse 2s infinite;
+        }
+
+        /* Enhanced Table */
+        .enhanced-table {
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .animate__fadeIn {
-            animation-duration: 1s;
+        .enhanced-table thead {
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .not-found {
-            color: red;
-            font-weight: bold;
-            margin-top: 20px;
+        .enhanced-table th {
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+        }
+
+        .enhanced-table td {
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            animation: badgeGlow 2s ease-in-out infinite alternate;
+        }
+
+        .status-present {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .status-absent {
+            background: linear-gradient(45deg, #ff512f, #f09819);
+            color: white;
+        }
+
+        .status-checkout {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .status-other {
+            background: linear-gradient(45deg, #ffc107, #ff8c00);
+            color: white;
+        }
+
+        @keyframes badgeGlow {
+            0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Not Found Message */
+        .not-found-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 81, 47, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            color: #fff;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .glass-container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .enhanced-title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
-<script>
-    $(document).ready(function () {
-        $('.select2').select2({
-            placeholder: "Search for a student",
-            allowClear: true
-        });
-    });
-</script>
-
 <body>
-    
-    <div class="container mt-5 animate__animated animate__fadeIn">
-        <h2 class="text-center text-primary mb-4">📅 Attendance Records</h2>
-        <div class="row mb-3">
-            <div class="col text-end">
-                <form action="{{ url_for('download_excel') }}" method="get">
-                    <button type="submit" class="btn btn-outline-primary">
-                        📥 Download Attendance Excel
-                    </button>
-                </form>
-
-            </div>
-        </div>
-
-        <!-- Search Form -->
-        <form method="POST" class="mb-4">
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="name" class="form-label">Select Name</label>
-                    <select id="name" name="name" class="form-select select2">
-                        <option value="">-- Select Name --</option>
-                        {% for name in names %}
-                        <option value="{{ name[0] }}">{{ name[0] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Class Year</label>
-                    <select name="class_year" class="form-select">
-                        <option value="">-- Select Class Year --</option>
-                        <option value="1st Year">1st Year</option>
-                        <option value="2nd Year">2nd Year</option>
-                        <option value="3rd Year">3rd Year</option>
-                        <option value="4th Year">4th Year</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Department</label>
-                    <select name="department" class="form-select">
-                        <option value="">-- Select Department --</option>
-                        <option value="Computer">Computer</option>
-                        <option value="Electrical">Electrical</option>
-                        <option value="Civil">Civil</option>
-                        <option value="ENTC">ENTC</option>
-                        <option value="Instrumentation">Instrumentation</option>
-                        <option value="Mechanical">Mechanical</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label for="date" class="form-label">Select Date</label>
-                    <input type="date" id="date" name="date" class="form-control">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label" style="visibility: hidden;">Submit</label>
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
-            </div>
-        </form>
-
-        <!-- Display "Not Found" message if no records are found -->
-        {% if not_found %}
-        <div class="not-found">No attendance records found for the selected criteria.</div>
-        {% endif %}
-
-        <!-- Attendance Records Table -->
-        {% if records %}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover shadow-sm">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Name</th>
-                        <th>Class Year</th>
-                        <th>Department</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                    <tr>
-                        <td>{{ record[0] }}</td> <!-- Name -->
-                        <td>{{ record[1] }}</td> <!-- Class Year -->
-                        <td>{{ record[2] }}</td> <!-- Department -->
-                        <td>{{ record[3] }}</td> <!-- Date -->
-                        <td>{{ record[4] }}</td> <!-- Time -->
-                        <td>{{ record[5] }}</td> <!-- Status -->
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="text-danger text-center mt-3">No records found.</p>
-        {% endif %}
-
-
-        <a href="/" class="btn btn-outline-primary back-btn">⬅ Back to Home</a>
+    <!-- Floating Particles Background -->
+    <div class="floating-particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 10s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 14s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 16s;"></div>
     </div>
 
+    <div class="glass-container mt-5" data-aos="fade-up" data-aos-duration="1000">
+        <h2 class="enhanced-title">
+            <i class="fas fa-chart-line me-3"></i>Attendance Records Dashboard
+        </h2>
+        
+        <div class="row mb-4">
+            <div class="col text-end">
+                <form action="{{ url_for('download_excel') }}" method="get">
+                    <button type="submit" class="btn btn-enhanced btn-download" data-bs-toggle="tooltip" title="Download attendance data as Excel file">
+                        <i class="fas fa-download me-2"></i>Download Excel Report
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Enhanced Search Form -->
+        <div class="card glass-container mb-4" data-aos="fade-right" data-aos-delay="200">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="text-white mb-0">
+                    <i class="fas fa-search me-2"></i>Search Filters
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="searchForm">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-3">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-user me-1"></i>Select Student
+                            </label>
+                            <select id="name" name="name" class="form-select select2">
+                                <option value="">-- Choose Student --</option>
+                                {% for name in names %}
+                                <option value="{{ name[0] }}">{{ name[0] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label">
+                                <i class="fas fa-graduation-cap me-1"></i>Class Year
+                            </label>
+                            <select name="class_year" class="form-select">
+                                <option value="">-- Select Year --</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <label class="form-label">
+                                <i class="fas fa-building me-1"></i>Department
+                            </label>
+                            <select name="department" class="form-select">
+                                <option value="">-- Select Department --</option>
+                                <option value="Computer">Computer</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="ENTC">ENTC</option>
+                                <option value="Instrumentation">Instrumentation</option>
+                                <option value="Mechanical">Mechanical</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <label for="date" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Select Date
+                            </label>
+                            <input type="date" id="date" name="date" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-enhanced me-3">
+                                <i class="fas fa-search me-2"></i>Search Records
+                            </button>
+                            <button type="submit" name="show_all" value="true" class="btn btn-success me-3">
+                                <i class="fas fa-list me-2"></i>Show All Records
+                            </button>
+                            <button type="button" class="btn btn-outline-light" onclick="clearForm()">
+                                <i class="fas fa-times me-2"></i>Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Display "Not Found" message if no records are found -->
+        {% if not_found and show_results %}
+        <div class="not-found-card" data-aos="fade-in" data-aos-delay="300">
+            <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+            <h4>No Records Found</h4>
+            <p>No attendance records match your search criteria. Try different filters or check if attendance data exists for the selected date/student.</p>
+        </div>
+        {% endif %}
+
+        <!-- Enhanced Attendance Records Table -->
+        {% if show_results %}
+            {% if records %}
+            <div class="card glass-container" data-aos="fade-up" data-aos-delay="400">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="text-white mb-0">
+                        <i class="fas fa-history me-2"></i>Complete Attendance Records
+                        <span class="badge bg-info ms-2">{{ records|length }} Records</span>
+                    </h5>
+                    <p class="text-white-50 mb-0 mt-2">
+                        <i class="fas fa-info-circle me-1"></i>Showing all historical attendance records with status
+                    </p>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table enhanced-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user me-1"></i>Student Name</th>
+                                    <th><i class="fas fa-id-card me-1"></i>Student ID</th>
+                                    <th><i class="fas fa-graduation-cap me-1"></i>Class Year</th>
+                                    <th><i class="fas fa-building me-1"></i>Department</th>
+                                    <th><i class="fas fa-calendar me-1"></i>Date</th>
+                                    <th><i class="fas fa-clock me-1"></i>Time</th>
+                                    <th><i class="fas fa-check-circle me-1"></i>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in records %}
+                                <tr data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <strong>{{ record[0] }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ record[1] }}</span>
+                                    </td>
+                                    <td>{{ record[2] }}</td>
+                                    <td>{{ record[3] }}</td>
+                                    <td>
+                                        <i class="fas fa-calendar-day me-1"></i>{{ record[4] }}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-clock me-1"></i>{{ record[5] }}
+                                    </td>
+                                    <td>
+                                        {% if record[6] == 'Present' or record[6] == 'Check-In' %}
+                                            <span class="status-badge status-present">
+                                                <i class="fas fa-check me-1"></i>{{ record[6] }}
+                                            </span>
+                                        {% elif record[6] == 'Check-Out' %}
+                                            <span class="status-badge status-checkout">
+                                                <i class="fas fa-sign-out-alt me-1"></i>{{ record[6] }}
+                                            </span>
+                                        {% elif record[6] == 'Absent' %}
+                                            <span class="status-badge status-absent">
+                                                <i class="fas fa-times me-1"></i>{{ record[6] }}
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge status-other">
+                                                <i class="fas fa-question me-1"></i>{{ record[6] }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="card glass-container text-center" data-aos="fade-up" data-aos-delay="400">
+            <div class="card-body">
+                <i class="fas fa-search fa-3x text-white mb-3"></i>
+                <h4 class="text-white">Search for Attendance Records</h4>
+                <p class="text-white-50">Use the search form above to filter attendance records by name or date, or click "Show All Records" to view complete attendance history including all statuses.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-enhanced">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- jQuery (Required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS (Animate On Scroll) JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Initialize Select2
+        $(document).ready(function () {
+            $('.select2').select2({
+                placeholder: "Search for a student",
+                allowClear: true,
+                theme: 'bootstrap-5'
+            });
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Add loading animation to form submit
+            $('#searchForm').on('submit', function() {
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalHTML = submitBtn.html();
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Searching...');
+                submitBtn.prop('disabled', true);
+                
+                // Re-enable after form submission (this won't execute if form submits successfully)
+                setTimeout(() => {
+                    submitBtn.html(originalHTML);
+                    submitBtn.prop('disabled', false);
+                }, 3000);
+            });
+        });
+
+        // Clear form function
+        function clearForm() {
+            document.getElementById('searchForm').reset();
+            $('.select2').val(null).trigger('change');
+        }
+
+        // Add random delay to particles
+        document.querySelectorAll('.particle').forEach((particle, index) => {
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.left = Math.random() * 100 + '%';
+        });
+    </script>
+
+    <style>
+        /* Additional styles for enhanced elements */
+        .avatar-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #fff;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection__rendered {
+            color: #fff;
+        }
+
+        .select2-dropdown {
+            background: rgba(102, 126, 234, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+        }
+
+        .select2-results__option {
+            color: #fff;
+        }
+
+        .select2-results__option--highlighted {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </body>
 
 </html>

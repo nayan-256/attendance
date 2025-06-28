@@ -6,72 +6,293 @@
   <title>Check-Out | Attendance System</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     body {
-      background: linear-gradient(135deg, #e54cbf, #bde032);
-      /* Gradient background */
-      background-size: cover;
-      background-position: center;
-      height: 100vh;
+      background: linear-gradient(-45deg, #ff6b6b, #feca57, #ff9ff3, #54a0ff);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: "Segoe UI", sans-serif;
+      position: relative;
+      overflow: hidden;
     }
 
-    .box {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 40px;
-      border-radius: 15px;
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating elements */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-20px) rotate(120deg); }
+      66% { transform: translateY(10px) rotate(240deg); }
+    }
+
+    .checkout-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 3rem;
       text-align: center;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      z-index: 10;
     }
 
-    #result {
+    .checkout-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    .checkout-icon i {
+      font-size: 3rem;
+      color: white;
+    }
+
+    .checkout-title {
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .checkout-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn-checkout {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+      border: none;
+      border-radius: 20px;
+      padding: 1.2rem 3rem;
+      font-weight: 600;
       font-size: 1.2rem;
-      margin-top: 20px;
+      color: white;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-checkout:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+      color: white;
+    }
+
+    .status-message {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      color: #333;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-box {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2rem;
+      color: #333;
+      font-size: 1.2rem;
+      font-weight: 600;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+    }
+
+    .spinner-border {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    /* Progress steps */
+    .progress-steps {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .step {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+
+    .step.active {
+      color: white;
+      font-weight: 600;
     }
   </style>
 </head>
 
 <body>
-  <div class="box animate__animated animate__zoomIn">
-    <h2 class="mb-4">👋 Face Recognition Check-Out</h2>
+  <div class="checkout-box animate__animated animate__zoomIn">
+    <div class="checkout-icon animate__animated animate__bounceIn">
+      <i class="fas fa-sign-out-alt"></i>
+    </div>
+    <h2 class="checkout-title animate__animated animate__fadeInDown">Face Recognition</h2>
+    <p class="checkout-subtitle animate__animated animate__fadeInUp">Check-Out System</p>
 
     {% if result %}
-    <div id="result" class="alert alert-success animate__animated animate__fadeIn">
-      {{ result }}
+    <div class="result-box animate__animated animate__fadeIn">
+      {% if 'successfully' in result %}
+      <i class="fas fa-check-circle text-success me-2"></i>{{ result }}
+      {% else %}
+      <i class="fas fa-times-circle text-danger me-2"></i>{{ result }}
+      {% endif %}
     </div>
     <script>
       const resultText = "{{ result }}";
       let speakText;
-
-      if (resultText.toLowerCase().includes("success") || resultText.toLowerCase().includes("checked out")) {
-        speakText = resultText;
-      } else if (resultText.toLowerCase().includes("not recognized")) {
-        speakText = "Sorry, face not recognized. Please try again.";
-      } else {
-        speakText = "Result: " + resultText;
+      
+      // Extract student name from result if successful
+      let studentName = "";
+      if (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked out")) {
+        const nameMatch = resultText.match(/^(.+?)\s+checked out successfully/);
+        if (nameMatch) {
+          studentName = nameMatch[1].trim();
+        }
       }
 
-      const utterance = new SpeechSynthesisUtterance(speakText);
-      speechSynthesis.speak(utterance);
+      // Check if check-out was successful or failed
+      if (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked out")) {
+        if (studentName) {
+          speakText = `Check-out successful! Thank you ${studentName} for using the attendance system. Have a wonderful day!`;
+        } else {
+          speakText = "Check-out successful! Thank you for using the attendance system. Have a great day!";
+        }
+      } else if (resultText.toLowerCase().includes("not recognized")) {
+        speakText = "Sorry, your face was not recognized. Please try again or contact the administrator.";
+      } else {
+        speakText = "Check-out failed. Please try again.";
+      }
 
-      // Optional: Redirect after speaking
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 6000);
+      // Function to speak with female voice
+      function speakWithFemaleVoice(text) {
+        return new Promise((resolve) => {
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Set completion callback
+          utterance.onend = () => {
+            resolve();
+          };
+          
+          utterance.onerror = () => {
+            resolve(); // Resolve even on error to ensure redirect
+          };
+          
+          // Wait for voices to load
+          const setVoice = () => {
+            const voices = speechSynthesis.getVoices();
+            
+            // Try to find a female voice (look for common female voice names)
+            const femaleVoice = voices.find(voice => 
+              voice.name.toLowerCase().includes('female') ||
+              voice.name.toLowerCase().includes('zira') ||
+              voice.name.toLowerCase().includes('siri') ||
+              voice.name.toLowerCase().includes('samantha') ||
+              voice.name.toLowerCase().includes('susan') ||
+              voice.name.toLowerCase().includes('hazel') ||
+              voice.gender === 'female' ||
+              (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
+            );
+            
+            if (femaleVoice) {
+              utterance.voice = femaleVoice;
+            }
+            
+            // Set speech parameters for a pleasant female voice
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            utterance.volume = 0.8;
+            
+            speechSynthesis.speak(utterance);
+          };
+
+          // If voices are already loaded
+          if (speechSynthesis.getVoices().length > 0) {
+            setVoice();
+          } else {
+            // Wait for voices to load
+            speechSynthesis.addEventListener('voiceschanged', setVoice);
+          }
+        });
+      }
+
+      // Play voice alert and redirect after completion
+      async function handleVoiceAndRedirect() {
+        try {
+          await speakWithFemaleVoice(speakText);
+          // Wait a brief moment after speech ends, then redirect
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 500);
+        } catch (error) {
+          // Fallback: redirect after 4 seconds if voice fails
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 4000);
+        }
+      }
+
+      // Start the voice alert and redirect process
+      handleVoiceAndRedirect();
     </script>
     {% else %}
 
     <form method="POST">
-      <button id="checkoutBtn" type="submit" class="btn btn-warning btn-lg text-white">
-        <span id="btnText">Start Check-Out</span>
-        <div id="spinner" class="spinner-border spinner-border-sm text-light ms-2 d-none" role="status"></div>
+      <button id="checkoutBtn" type="submit" class="btn btn-checkout animate__animated animate__pulse">
+        <i class="fas fa-camera me-2"></i>
+        <span id="btnText">Start Face Scan</span>
+        <div id="spinner" class="spinner-border text-light ms-2 d-none" role="status"></div>
       </button>
     </form>
-    <div id="statusMsg" class="mt-4 text-muted animate__animated"></div>
+    
+    <div class="progress-steps animate__animated animate__fadeInUp">
+      <div id="step1" class="step">Step 1: Position your face in front of camera</div>
+      <div id="step2" class="step">Step 2: Verifying your identity</div>
+      <div id="step3" class="step">Step 3: Completing check-out process</div>
+    </div>
+    
+    <div id="statusMsg" class="status-message d-none animate__animated"></div>
     {% endif %}
   </div>
 
@@ -82,17 +303,27 @@
 
     if (btn) {
       btn.addEventListener("click", () => {
-        document.getElementById("btnText").innerText = "Scanning Face...";
+        document.getElementById("btnText").innerText = "Scanning...";
         spinner.classList.remove("d-none");
-        statusMsg.innerHTML = "Step 1: Please face the camera.";
-        statusMsg.classList.add("animate__fadeIn");
+        statusMsg.classList.remove("d-none");
+
+        // Activate steps progressively
+        setTimeout(() => {
+          document.getElementById("step1").classList.add("active");
+          statusMsg.innerHTML = "<i class='fas fa-camera me-2'></i>Please face the camera directly";
+          statusMsg.classList.add("animate__fadeIn");
+        }, 500);
 
         setTimeout(() => {
-          statusMsg.innerHTML = "Step 2: Verifying identity...";
+          document.getElementById("step1").classList.remove("active");
+          document.getElementById("step2").classList.add("active");
+          statusMsg.innerHTML = "<i class='fas fa-search me-2'></i>Analyzing facial features...";
         }, 2000);
 
         setTimeout(() => {
-          statusMsg.innerHTML = "Step 3: Finalizing check-out...";
+          document.getElementById("step2").classList.remove("active");
+          document.getElementById("step3").classList.add("active");
+          statusMsg.innerHTML = "<i class='fas fa-check me-2'></i>Finalizing check-out...";
         }, 4000);
       });
     }
