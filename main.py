@@ -1,9 +1,11 @@
 import os
-import cv2
-import pickle
-import face_recognition
+# import cv2
+# import pickle
+# import face_recognition
 import numpy as np
 import sqlite3
+import matplotlib
+matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 import io
 import base64
@@ -14,6 +16,21 @@ from datetime import datetime,timedelta
 from collections import defaultdict
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify
 from werkzeug.utils import secure_filename
+
+# Optional imports that might cause issues
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    print("Warning: OpenCV (cv2) not available")
+    CV2_AVAILABLE = False
+
+try:
+    import face_recognition
+    FACE_RECOGNITION_AVAILABLE = True
+except ImportError:
+    print("Warning: face_recognition not available")
+    FACE_RECOGNITION_AVAILABLE = False
 
 
 app = Flask(__name__)
@@ -80,6 +97,39 @@ def init_db():
     cur.execute("SELECT * FROM teachers WHERE username='teacher1'")
     if not cur.fetchone():
         cur.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", ('teacher1', 'teacher123'))
+
+    # Create subjects table
+    cur.execute('''CREATE TABLE IF NOT EXISTS subjects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject_name TEXT UNIQUE,
+        subject_code TEXT UNIQUE,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+
+    # Insert default subjects
+    default_subjects = [
+        ('Mathematics', 'MATH101', 'Basic Mathematics'),
+        ('Physics', 'PHY101', 'Basic Physics'),
+        ('Chemistry', 'CHEM101', 'Basic Chemistry'),
+        ('Computer Science', 'CS101', 'Introduction to Computer Science')
+    ]
+    
+    for subject_name, subject_code, description in default_subjects:
+        cur.execute("SELECT * FROM subjects WHERE subject_code=?", (subject_code,))
+        if not cur.fetchone():
+            cur.execute("INSERT INTO subjects (subject_name, subject_code, description) VALUES (?, ?, ?)", 
+                       (subject_name, subject_code, description))
+
+    # Create teacher_subjects mapping table
+    cur.execute('''CREATE TABLE IF NOT EXISTS teacher_subjects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        teacher_id INTEGER,
+        subject_id INTEGER,
+        FOREIGN KEY(teacher_id) REFERENCES teachers(id),
+        FOREIGN KEY(subject_id) REFERENCES subjects(id),
+        UNIQUE(teacher_id, subject_id)
+    )''')
 
     conn.commit()
     conn.close()
@@ -514,6 +564,10 @@ def edit_profile():
 
 @app.route('/attendance')
 def attendance():
+    if not FACE_RECOGNITION_AVAILABLE or not CV2_AVAILABLE:
+        flash("Face recognition or camera functionality is not available on this system.", "warning")
+        return render_template('attendance.html', error="Face recognition not available")
+    
     known_encodings = []
     known_ids = []
 
@@ -522,28 +576,40 @@ def attendance():
     cur.execute("SELECT id, image_path FROM users")
     users = cur.fetchall()
 
-    for user in users:
-        img = face_recognition.load_image_file(user[1])
-        encodings = face_recognition.face_encodings(img)
-        if encodings:
-            known_encodings.append(encodings[0])
-            known_ids.append(user[0])
+    try:
+        for user in users:
+            if user[1] and os.path.exists(user[1]):
+                img = face_recognition.load_image_file(user[1])
+                encodings = face_recognition.face_encodings(img)
+                if encodings:
+                    known_encodings.append(encodings[0])
+                    known_ids.append(user[0])
 
-    cap = cv2.VideoCapture(0)
-    success, frame = cap.read()
-    cap.release()
+        cap = cv2.VideoCapture(0)
+        success, frame = cap.read()
+        cap.release()
 
-    face_locations = face_recognition.face_locations(frame)
-    face_encodings = face_recognition.face_encodings(frame, face_locations)
+        if success:
+            face_locations = face_recognition.face_locations(frame)
+            face_encodings = face_recognition.face_encodings(frame, face_locations)
 
-    for face_encoding in face_encodings:
-        matches = face_recognition.compare_faces(known_encodings, face_encoding)
-        if True in matches:
-            matched_id = known_ids[matches.index(True)]
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cur.execute("INSERT INTO attendance (user_id, timestamp, status) VALUES (?, ?, ?)", (matched_id, timestamp, "Present"))
-            conn.commit()
-
+            for face_encoding in face_encodings:
+                matches = face_recognition.compare_faces(known_encodings, face_encoding)
+                if True in matches:
+                    matched_id = known_ids[matches.index(True)]
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    cur.execute("INSERT INTO attendance (user_id, timestamp, status) VALUES (?, ?, ?)", (matched_id, timestamp, "Present"))
+                    conn.commit()
+                    flash("Attendance marked successfully!", "success")
+                    break
+            else:
+                flash("No recognized face found", "warning")
+        else:
+            flash("Camera not accessible", "error")
+            
+    except Exception as e:
+        flash(f"Error during face recognition: {str(e)}", "error")
+        
     conn.close()
     return render_template('attendance.html')
 
@@ -727,13 +793,11 @@ def view_all_attendance():
                          not_found=False,
                          show_all=True)
 
-from collections import defaultdict
-from datetime import datetime
-
 @app.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
     if not session.get('teacher_logged_in'):
         return redirect(url_for('teacher_login'))
+    
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
     cur.execute('SELECT id, name, student_id FROM users')
@@ -766,77 +830,99 @@ def teacher_dashboard():
 
         if student:
             selected_student = student[0]
-            # Pie chart
-            if start_date and end_date:
-                cur.execute('''
-                    SELECT status, COUNT(*) FROM attendance
-                    WHERE user_id = ? AND DATE(timestamp) BETWEEN ? AND ?
-                    GROUP BY status
-                ''', (selected_student, start_date, end_date))
-            else:
-                cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
-            records = cur.fetchall()
-            if records:
-                labels = [r[0] for r in records]
-                values = [r[1] for r in records]
-                legend_labels = [f"{label} ({value})" for label, value in zip(labels, values)]
-                plt.figure(figsize=(5,5))
-                patches, texts, autotexts = plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
-                plt.legend(patches, legend_labels, loc="best")
-                plt.title('Attendance Distribution')
-                plt.axis('equal')
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png', bbox_inches="tight")
-                buf.seek(0)
-                graph = base64.b64encode(buf.getvalue()).decode()
-                buf.close()
-                plt.close()
+            
+            # Pie chart generation with error handling
+            try:
+                if start_date and end_date:
+                    cur.execute('''
+                        SELECT status, COUNT(*) FROM attendance
+                        WHERE user_id = ? AND DATE(timestamp) BETWEEN ? AND ?
+                        GROUP BY status
+                    ''', (selected_student, start_date, end_date))
+                else:
+                    cur.execute('SELECT status, COUNT(*) FROM attendance WHERE user_id=? GROUP BY status', (selected_student,))
+                
+                records = cur.fetchall()
+                if records:
+                    labels = [r[0] for r in records]
+                    values = [r[1] for r in records]
+                    legend_labels = [f"{label} ({value})" for label, value in zip(labels, values)]
+                    
+                    plt.figure(figsize=(5,5))
+                    patches, texts, autotexts = plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
+                    plt.legend(patches, legend_labels, loc="best")
+                    plt.title('Attendance Distribution')
+                    plt.axis('equal')
+                    
+                    buf = io.BytesIO()
+                    plt.savefig(buf, format='png', bbox_inches="tight")
+                    buf.seek(0)
+                    graph = base64.b64encode(buf.getvalue()).decode()
+                    buf.close()
+                    plt.close()
+                    
+            except Exception as e:
+                print(f"Error generating chart: {e}")
+                graph = None
 
             # Attendance Dates
-            if start_date and end_date:
-                cur.execute('''
-                    SELECT DATE(timestamp) FROM attendance
-                    WHERE user_id=? AND (status='Present' OR status='Check-In')
-                    AND DATE(timestamp) BETWEEN ? AND ?
-                    ORDER BY timestamp DESC
-                ''', (selected_student, start_date, end_date))
-            else:
-                cur.execute('''
-                    SELECT DATE(timestamp) FROM attendance
-                    WHERE user_id=? AND (status='Present' OR status='Check-In')
-                    ORDER BY timestamp DESC
-                ''', (selected_student,))
-            attendance_dates = [row[0] for row in cur.fetchall()]
+            try:
+                if start_date and end_date:
+                    cur.execute('''
+                        SELECT DATE(timestamp) FROM attendance
+                        WHERE user_id=? AND (status='Present' OR status='Check-In')
+                        AND DATE(timestamp) BETWEEN ? AND ?
+                        ORDER BY timestamp DESC
+                    ''', (selected_student, start_date, end_date))
+                else:
+                    cur.execute('''
+                        SELECT DATE(timestamp) FROM attendance
+                        WHERE user_id=? AND (status='Present' OR status='Check-In')
+                        ORDER BY timestamp DESC
+                    ''', (selected_student,))
+                attendance_dates = [row[0] for row in cur.fetchall()]
+            except Exception as e:
+                print(f"Error fetching attendance dates: {e}")
+                attendance_dates = []
 
             # Weekly and Monthly Summary
-            if start_date and end_date:
-                cur.execute('''
-                    SELECT DATE(timestamp) FROM attendance
-                    WHERE user_id=? AND (status='Present' OR status='Check-In')
-                    AND DATE(timestamp) BETWEEN ? AND ?
-                ''', (selected_student, start_date, end_date))
-            else:
-                cur.execute('''
-                    SELECT DATE(timestamp) FROM attendance
-                    WHERE user_id=? AND (status='Present' OR status='Check-In')
-                ''', (selected_student,))
+            try:
+                if start_date and end_date:
+                    cur.execute('''
+                        SELECT DATE(timestamp) FROM attendance
+                        WHERE user_id=? AND (status='Present' OR status='Check-In')
+                        AND DATE(timestamp) BETWEEN ? AND ?
+                    ''', (selected_student, start_date, end_date))
+                else:
+                    cur.execute('''
+                        SELECT DATE(timestamp) FROM attendance
+                        WHERE user_id=? AND (status='Present' OR status='Check-In')
+                    ''', (selected_student,))
 
-            all_dates = [row[0] for row in cur.fetchall()]
-            weekly = defaultdict(int)
-            monthly = defaultdict(int)
-            for date_str in all_dates:
-                date = datetime.strptime(date_str, '%Y-%m-%d')
-                week_label = f"{date.strftime('%Y')}-W{date.strftime('%U')}"
-                month_label = date.strftime('%Y-%m')
-                weekly[week_label] += 1
-                monthly[month_label] += 1
+                all_dates = [row[0] for row in cur.fetchall()]
+                weekly = defaultdict(int)
+                monthly = defaultdict(int)
+                
+                for date_str in all_dates:
+                    try:
+                        date = datetime.strptime(date_str, '%Y-%m-%d')
+                        week_label = f"{date.strftime('%Y')}-W{date.strftime('%U')}"
+                        month_label = date.strftime('%Y-%m')
+                        weekly[week_label] += 1
+                        monthly[month_label] += 1
+                    except ValueError as ve:
+                        print(f"Error parsing date {date_str}: {ve}")
+                        continue
 
-            weekly_summary = dict(weekly)
-            monthly_summary = dict(monthly)
+                weekly_summary = dict(weekly)
+                monthly_summary = dict(monthly)
+                
+            except Exception as e:
+                print(f"Error generating summaries: {e}")
+                weekly_summary = {}
+                monthly_summary = {}
 
     conn.close()
-    # Keep as dictionaries for JavaScript consumption
-    # Don't convert to lists of objects
     
     return render_template(
         'teacher_dashboard.html',
@@ -852,12 +938,18 @@ def teacher_dashboard():
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
     if request.method == 'POST':
-        known_face_encodings, known_face_names = load_encoded_faces()
-        name = recognize_face(known_face_encodings, known_face_names)
-        if name:
-            mark_attendance(name, status="Check-In")
-            return render_template('checkin.html', result=f"{name} checked in successfully!")
-        return render_template('checkin.html', result="Face not recognized.")
+        if not FACE_RECOGNITION_AVAILABLE or not CV2_AVAILABLE:
+            return render_template('checkin.html', result="Face recognition not available on this system.")
+        
+        try:
+            known_face_encodings, known_face_names = load_encoded_faces()
+            name = recognize_face(known_face_encodings, known_face_names)
+            if name:
+                mark_attendance(name, status="Check-In")
+                return render_template('checkin.html', result=f"{name} checked in successfully!")
+            return render_template('checkin.html', result="Face not recognized.")
+        except Exception as e:
+            return render_template('checkin.html', result=f"Error: {str(e)}")
     return render_template('checkin.html', result=None)
 
 
@@ -865,12 +957,18 @@ def checkin_attendance():
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout_attendance():
     if request.method == 'POST':
-        known_face_encodings, known_face_names = load_encoded_faces()
-        name = recognize_face(known_face_encodings, known_face_names)
-        if name:
-            mark_attendance(name, status="Check-Out")
-            return render_template('checkout.html', result=f"{name} checked out successfully!")
-        return render_template('checkout.html', result="Face not recognized.")
+        if not FACE_RECOGNITION_AVAILABLE or not CV2_AVAILABLE:
+            return render_template('checkout.html', result="Face recognition not available on this system.")
+        
+        try:
+            known_face_encodings, known_face_names = load_encoded_faces()
+            name = recognize_face(known_face_encodings, known_face_names)
+            if name:
+                mark_attendance(name, status="Check-Out")
+                return render_template('checkout.html', result=f"{name} checked out successfully!")
+            return render_template('checkout.html', result="Face not recognized.")
+        except Exception as e:
+            return render_template('checkout.html', result=f"Error: {str(e)}")
     return render_template('checkout.html', result=None)
 
 
@@ -967,6 +1065,9 @@ def mark_attendance(name, status):
     conn.close()
 
 def load_encoded_faces():
+    if not FACE_RECOGNITION_AVAILABLE:
+        return [], []
+        
     known_encodings = []
     known_names = []
 
@@ -977,42 +1078,54 @@ def load_encoded_faces():
     conn.close()
 
     for name, path in users:
-        img = face_recognition.load_image_file(path)
-        encodings = face_recognition.face_encodings(img)
-        if encodings:
-            known_encodings.append(encodings[0])
-            known_names.append(name)
+        try:
+            if path and os.path.exists(path):
+                img = face_recognition.load_image_file(path)
+                encodings = face_recognition.face_encodings(img)
+                if encodings:
+                    known_encodings.append(encodings[0])
+                    known_names.append(name)
+        except Exception as e:
+            print(f"Error loading face for {name}: {e}")
+            continue
 
     return known_encodings, known_names
 
 
 def recognize_face(known_encodings, known_names, tolerance=0.5):
-    cap = cv2.VideoCapture(0)
-    success, frame = cap.read()
-    cap.release()
-
-    if not success:
+    if not CV2_AVAILABLE or not FACE_RECOGNITION_AVAILABLE:
         return None
+        
+    try:
+        cap = cv2.VideoCapture(0)
+        success, frame = cap.read()
+        cap.release()
 
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    face_locations = face_recognition.face_locations(rgb_frame)
-
-    if not face_locations:
-        return None
-
-    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-
-    for encoding in face_encodings:
-        distances = face_recognition.face_distance(known_encodings, encoding)
-        min_distance = min(distances)
-        if min_distance < tolerance:
-            best_match_index = distances.tolist().index(min_distance)
-            return known_names[best_match_index]
-        else:
-            print("Face found but not matching any registered user")
+        if not success:
             return None
 
-    return None
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        face_locations = face_recognition.face_locations(rgb_frame)
+
+        if not face_locations:
+            return None
+
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+        for encoding in face_encodings:
+            distances = face_recognition.face_distance(known_encodings, encoding)
+            min_distance = min(distances)
+            if min_distance < tolerance:
+                best_match_index = distances.tolist().index(min_distance)
+                return known_names[best_match_index]
+            else:
+                print("Face found but not matching any registered user")
+                return None
+
+        return None
+    except Exception as e:
+        print(f"Error in face recognition: {e}")
+        return None
 
 @app.route('/download_excel')
 def download_excel():
@@ -1048,23 +1161,205 @@ def download_excel():
 def chatbot_page():
     return render_template("chatbot.html")
 
-# Chatbot response API (handles user messages)
+# Enhanced Role-Based Chatbot response API (handles user messages)
 @app.route('/chatbot', methods=['POST'])
 def chatbot_response():
     user_input = request.json.get('message', '').lower()
+    
+    # Determine user role and get user info
+    user_role = "guest"
+    user_info = None
+    student_id = session.get('student_id')
+    admin_logged_in = session.get('logged_in')
+    teacher_logged_in = session.get('teacher_logged_in')
+    teacher_username = session.get('teacher_username')
+    
+    try:
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        
+        # Identify user role and get user info
+        if student_id:
+            user_role = "student"
+            cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+            user_info = cur.fetchone()
+        elif admin_logged_in:
+            user_role = "admin"
+            user_info = {"username": "admin"}
+        elif teacher_logged_in:
+            user_role = "teacher"
+            user_info = {"username": teacher_username}
+        
+        # Personalized greetings based on role
+        if any(word in user_input for word in ['hello', 'hi', 'hey', 'good morning', 'good afternoon']):
+            if user_role == "student" and user_info:
+                return jsonify({'response': f"Hello {user_info['name']}! 👋 I'm your attendance assistant. How can I help you today? I can check your attendance, help with leave requests, or answer any questions!"})
+            elif user_role == "teacher":
+                return jsonify({'response': f"Welcome {teacher_username}! 👋 I'm here to assist you with student attendance management, class statistics, and administrative tasks. How can I help?"})
+            elif user_role == "admin":
+                return jsonify({'response': "Hello Admin! 👋 I'm your administrative assistant. I can help with system management, student records, attendance reports, and analytics. What would you like to do?"})
+            else:
+                return jsonify({'response': "Hello! 👋 I'm the attendance assistant. Please log in as a student, teacher, or admin to get personalized help, or ask general questions about the system!"})
+        
+        elif any(word in user_input for word in ['thanks', 'thank you', 'bye', 'goodbye']):
+            return jsonify({'response': "You're welcome! 😊 Feel free to reach out anytime for assistance. Have a great day!"})
+        
+        # STUDENT-SPECIFIC QUERIES
+        if user_role == "student":
+            # Student attendance queries
+            if "attendance" in user_input and ("my" in user_input or "percentage" in user_input):
+                cur.execute("""
+                    SELECT COUNT(*) as total_days,
+                           SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days
+                    FROM attendance WHERE user_id = ?
+                """, (user_info['id'],))
+                result = cur.fetchone()
+                if result and result['total_days'] > 0:
+                    percentage = (result['present_days'] / result['total_days']) * 100
+                    status_emoji = "🎉" if percentage >= 75 else "📈" if percentage >= 60 else "⚠️"
+                    return jsonify({'response': f"📊 Your attendance: {result['present_days']}/{result['total_days']} days ({percentage:.1f}%) {status_emoji}\n\n{'Excellent attendance!' if percentage >= 75 else 'Good, but try to improve!' if percentage >= 60 else 'You need to attend more classes!'}"})
+                else:
+                    return jsonify({'response': "📊 No attendance records found yet. Start attending classes to build your record!"})
+            
+            elif "classes" in user_input and ("missed" in user_input or "absent" in user_input):
+                cur.execute("""
+                    SELECT COUNT(*) as missed_classes
+                    FROM attendance 
+                    WHERE user_id = ? AND status = 'Absent'
+                """, (user_info['id'],))
+                result = cur.fetchone()
+                missed = result['missed_classes'] if result else 0
+                return jsonify({'response': f"📉 You've missed {missed} classes. {'Try to attend regularly to maintain good attendance!' if missed > 3 else 'Great job maintaining regular attendance! 👍'}"})
+            
+            elif "today" in user_input and "attendance" in user_input:
+                from datetime import date
+                today = date.today().isoformat()
+                cur.execute("""
+                    SELECT status FROM attendance 
+                    WHERE user_id = ? AND date(timestamp) = ?
+                """, (user_info['id'], today))
+                result = cur.fetchone()
+                if result:
+                    status = result['status']
+                    return jsonify({'response': f"📅 Today's attendance: {status} {'✅' if status == 'Present' else '❌'}"})
+                else:
+                    return jsonify({'response': "📅 No attendance marked for today yet. Don't forget to check in!"})
+            
+            elif "profile" in user_input or "my info" in user_input:
+                return jsonify({'response': f"👤 Your Profile:\n• Name: {user_info['name']}\n• Student ID: {user_info['student_id']}\n• Class: {user_info['class_year']}\n• Department: {user_info['department']}\n\nYou can edit your profile from the student dashboard!"})
+            
+            elif "leave" in user_input or "absence" in user_input:
+                return jsonify({'response': "📝 Leave Application Process:\n1. Go to Student Dashboard\n2. Click 'Apply for Leave'\n3. Fill in dates and reason\n4. Submit for teacher approval\n5. Check status in your dashboard\n\nNeed help with a specific step?"})
+        
+        # TEACHER-SPECIFIC QUERIES
+        elif user_role == "teacher":
+            if "class" in user_input and ("average" in user_input or "overall" in user_input or "statistics" in user_input):
+                cur.execute("""
+                    SELECT 
+                        COUNT(DISTINCT user_id) as total_students,
+                        AVG(CASE WHEN status = 'Present' THEN 1.0 ELSE 0.0 END) * 100 as avg_attendance,
+                        COUNT(*) as total_records
+                    FROM attendance
+                """)
+                result = cur.fetchone()
+                if result and result['total_students'] > 0:
+                    avg_att = result['avg_attendance']
+                    return jsonify({'response': f"📈 Class Statistics:\n• Total Students: {result['total_students']}\n• Average Attendance: {avg_att:.1f}%\n• Total Records: {result['total_records']}\n\nUse Teacher Dashboard for detailed student-wise analysis!"})
+                else:
+                    return jsonify({'response': "📊 No attendance data available yet."})
+            
+            elif "student" in user_input and ("list" in user_input or "all" in user_input):
+                cur.execute("SELECT name, student_id, class_year FROM users ORDER BY name LIMIT 10")
+                students = cur.fetchall()
+                if students:
+                    student_list = "\n".join([f"• {s['name']} ({s['student_id']}) - {s['class_year']}" for s in students])
+                    return jsonify({'response': f"👥 Recent Students:\n{student_list}\n\n{'...(showing first 10)' if len(students) == 10 else ''}\nUse Teacher Dashboard for complete management!"})
+                else:
+                    return jsonify({'response': "👥 No students registered yet."})
+            
+            elif "attendance" in user_input and ("mark" in user_input or "record" in user_input):
+                return jsonify({'response': "📝 Attendance Management:\n• Use Teacher Dashboard for detailed student analytics\n• View attendance patterns and generate reports\n• Monitor individual student performance\n• Export attendance data to Excel\n\nAccess these features from your teacher dashboard!"})
+            
+            elif "dashboard" in user_input or "analytics" in user_input:
+                return jsonify({'response': "📊 Teacher Dashboard Features:\n• Student-wise attendance analysis\n• Graphical attendance reports\n• Date range filtering\n• Weekly/Monthly summaries\n• Export functionality\n\nNavigate to Teacher Dashboard to access all tools!"})
+        
+        # ADMIN-SPECIFIC QUERIES
+        elif user_role == "admin":
+            if "system" in user_input and ("status" in user_input or "overview" in user_input):
+                cur.execute("SELECT COUNT(*) as total_students FROM users")
+                students_count = cur.fetchone()['total_students']
+                cur.execute("SELECT COUNT(*) as total_records FROM attendance")
+                records_count = cur.fetchone()['total_records']
+                cur.execute("SELECT COUNT(*) as teachers_count FROM teachers")
+                teachers_count = cur.fetchone()['teachers_count']
+                
+                return jsonify({'response': f"🖥️ System Overview:\n• Total Students: {students_count}\n• Total Teachers: {teachers_count}\n• Attendance Records: {records_count}\n• System Status: ✅ Active\n\nUse Admin Dashboard for detailed management!"})
+            
+            elif "students" in user_input and ("manage" in user_input or "add" in user_input or "delete" in user_input):
+                return jsonify({'response': "👥 Student Management:\n• View all registered students\n• Add new student records\n• Delete student accounts\n• Manage student profiles\n• Export student data\n\nAccess these features from the Admin Dashboard!"})
+            
+            elif "reports" in user_input or "analytics" in user_input:
+                return jsonify({'response': "📊 Admin Reports & Analytics:\n• Comprehensive attendance reports\n• Student performance analytics\n• Class-wise statistics\n• Export to Excel/CSV\n• Custom date range reports\n\nGenerate detailed reports from Admin Dashboard!"})
+            
+            elif "backup" in user_input or "export" in user_input:
+                return jsonify({'response': "💾 Data Management:\n• Export attendance data to Excel\n• Backup student records\n• Download comprehensive reports\n• Schedule automated backups\n\nUse the export features in Admin Dashboard!"})
+        
+        # GENERAL QUERIES (for all users)
+        elif "how to" in user_input and ("mark" in user_input or "attendance" in user_input):
+            if user_role == "student":
+                return jsonify({'response': "📸 Marking Your Attendance:\n1. Go to Check-in page\n2. Position your face clearly in camera\n3. Wait for face recognition\n4. Attendance marked automatically!\n\nTips: Good lighting, face the camera, remove glasses if needed."})
+            else:
+                return jsonify({'response': "📸 Attendance Marking Process:\n• Students use face recognition system\n• Automatic attendance recording\n• Real-time database updates\n• Manual override available for admins\n\nEnsure proper lighting and camera access!"})
+        
+        elif "features" in user_input or "what can you do" in user_input:
+            if user_role == "student":
+                return jsonify({'response': "🤖 I can help you with:\n• Check your attendance percentage\n• View missed classes\n• Profile information\n• Leave application guidance\n• Attendance marking help\n• General queries\n\nJust ask naturally!"})
+            elif user_role == "teacher":
+                return jsonify({'response': "🤖 Teacher Assistant Features:\n• Class attendance statistics\n• Student performance analytics\n• Attendance reports\n• Dashboard navigation help\n• Data export guidance\n• System management tips"})
+            elif user_role == "admin":
+                return jsonify({'response': "🤖 Admin Assistant Features:\n• System overview and status\n• Student management guidance\n• Comprehensive reports\n• Data backup and export\n• User account management\n• System analytics"})
+            else:
+                return jsonify({'response': "🤖 General Features:\n• Role-based assistance\n• Attendance system help\n• Navigation guidance\n• Technical support\n\nPlease log in for personalized assistance!"})
+        
+        elif "help" in user_input:
+            role_specific_help = {
+                "student": "• 'What's my attendance?'\n• 'How many classes missed?'\n• 'How to apply for leave?'\n• 'My profile info'",
+                "teacher": "• 'Class attendance statistics'\n• 'Show all students'\n• 'How to use dashboard?'\n• 'Generate reports'",
+                "admin": "• 'System overview'\n• 'Manage students'\n• 'Generate reports'\n• 'Export data'",
+                "guest": "• 'How to mark attendance?'\n• 'System features'\n• Please log in for personalized help"
+            }
+            return jsonify({'response': f"💡 {user_role.title()} Help:\n{role_specific_help[user_role]}\n\nFeel free to ask in your own words!"})
+        
+        # Technical issues
+        elif "problem" in user_input or "issue" in user_input or "error" in user_input:
+            return jsonify({'response': "🔧 Technical Support:\n1. Refresh the page\n2. Clear browser cache\n3. Check internet connection\n4. For face recognition: ensure good lighting\n5. Try different browser\n6. Contact system administrator\n\nDescribe your specific issue for better help!"})
+        
+        elif "camera" in user_input or "face recognition" in user_input:
+            return jsonify({'response': "📸 Face Recognition Help:\n• Ensure good lighting\n• Face camera directly\n• Remove glasses/masks temporarily\n• Stay still during scan\n• Make sure face is registered\n• Check camera permissions\n\nStill having issues? Contact admin for support."})
+        
+        # Login guidance for guests
+        elif user_role == "guest" and any(word in user_input for word in ['login', 'access', 'account']):
+            return jsonify({'response': "🔐 Login Options:\n• Student Login: Use your Student ID and password\n• Teacher Login: Use teacher credentials\n• Admin Login: Administrative access\n\nChoose your role from the home page to get started!"})
+        
+        # Fallback with role-specific suggestions
+        else:
+            suggestions = {
+                "student": ["'What's my attendance percentage?'", "'How to apply for leave?'", "'Show my profile'"],
+                "teacher": ["'Class attendance statistics'", "'Show student list'", "'How to use dashboard?'"],
+                "admin": ["'System overview'", "'Manage students'", "'Generate reports'"],
+                "guest": ["'How to mark attendance?'", "'Login help'", "'System features'"]
+            }
+            import random
+            suggestion = random.choice(suggestions[user_role])
+            return jsonify({'response': f"🤔 I'm not sure about that. Try asking: {suggestion}\n\nOr type 'help' to see what I can do for {user_role}s!"})
+            
+    except Exception as e:
+        return jsonify({'response': "⚠️ Sorry, I encountered an error. Please try again or contact support if the issue persists."})
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
-    if "how many classes" in user_input:
-        return jsonify({'response': "You missed 3 classes this week."})
-    elif "how do i request leave" in user_input:
-        return jsonify({'response': "Go to your dashboard > Leave Request."})
-    else:
-        return jsonify({'response': "I'm not sure. Please try asking about attendance or leave."})
-
-
-print(app.url_map)
-
-if __name__ == '__main__':
-    app.run(debug=True)
 @app.route('/api/holidays/<int:year>')
 def get_holidays(year):
     """API endpoint to get holidays for a specific year"""
@@ -1111,50 +1406,247 @@ def get_holidays(year):
         ]
     }
     
-    from flask import jsonify
     return jsonify(holidays_data.get(year, []))
 
+@app.route('/api/user-role')
+def get_user_role():
+    """API endpoint to get current user's role and information for chatbot"""
+    try:
+        # Check user role and get user info
+        student_id = session.get('student_id')
+        admin_logged_in = session.get('logged_in')
+        teacher_logged_in = session.get('teacher_logged_in')
+        teacher_username = session.get('teacher_username')
+        
+        if student_id:
+            # Student user
+            conn = sqlite3.connect('database.db')
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT name, student_id, class_year, department FROM users WHERE student_id = ?", (student_id,))
+            user_info = cur.fetchone()
+            conn.close()
+            
+            if user_info:
+                return jsonify({
+                    'role': 'student',
+                    'userInfo': {
+                        'name': user_info['name'],
+                        'student_id': user_info['student_id'],
+                        'class_year': user_info['class_year'],
+                        'department': user_info['department']
+                    }
+                })
+        elif admin_logged_in:
+            # Admin user
+            return jsonify({
+                'role': 'admin',
+                'userInfo': {
+                    'username': 'admin'
+                }
+            })
+        elif teacher_logged_in:
+            # Teacher user
+            return jsonify({
+                'role': 'teacher',
+                'userInfo': {
+                    'username': teacher_username
+                }
+            })
+        
+        # Guest user (not logged in)
+        return jsonify({
+            'role': 'guest',
+            'userInfo': None
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'role': 'guest',
+            'userInfo': None,
+            'error': str(e)
+        })
 
-# Admin route to view all students with their images - DISABLED to avoid endpoint conflicts
-# @app.route('/admin/students', endpoint='admin_students_view')
-# def admin_students():
-#     """Admin route to view all registered students with their profile images"""
-#     conn = sqlite3.connect('database.db')
-#     conn.row_factory = sqlite3.Row
-#     cur = conn.cursor()
-#     cur.execute("SELECT * FROM users ORDER BY name")
-#     users = cur.fetchall()
-#     conn.close()
-#     
-#     students_data = []
-#     for user in users:
-#         # Get image path - first try database, then smart matching
-#         image_path = None
-#         
-#         if user['image_path']:
-#             # Clean up existing database path
-#             db_image_path = user['image_path'].replace('\\', '/').replace('static/', '')
-#             if os.path.exists(os.path.join('static', db_image_path)):
-#                 image_path = db_image_path
-#         
-#         # If no valid image in database, try smart matching
-#         if not image_path:
-#             student_name = user['name']
-#             image_path = find_student_image(student_name)
-#         
-#         # Final fallback to default
-#         if not image_path or not os.path.exists(os.path.join('static', image_path)):
-#             image_path = 'default_profile.svg'
-#         
-#         student_data = {
-#             'name': user['name'],
-#             'student_id': user['student_id'],
-#             'class_year': user['class_year'],
-#             'department': user['department'],
-#             'image_path': image_path,
-#             'db_image_path': user['image_path'],
-#             'image_exists': os.path.exists(os.path.join('static', image_path))
-#         }
-#         students_data.append(student_data)
-#     
-#     return render_template('admin_students.html', students=students_data)
+@app.route('/manage_teachers')
+def manage_teachers():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    
+    # Get all teachers with their subjects
+    cur.execute('''
+        SELECT t.id, t.username, 
+               GROUP_CONCAT(s.subject_name) as subjects
+        FROM teachers t
+        LEFT JOIN teacher_subjects ts ON t.id = ts.teacher_id
+        LEFT JOIN subjects s ON ts.subject_id = s.id
+        GROUP BY t.id, t.username
+    ''')
+    teachers = cur.fetchall()
+    
+    # Get all subjects for assignment
+    cur.execute('SELECT * FROM subjects ORDER BY subject_name')
+    subjects = cur.fetchall()
+    
+    conn.close()
+    return render_template('manage_teachers.html', teachers=teachers, subjects=subjects)
+
+@app.route('/add_teacher', methods=['POST'])
+def add_teacher():
+    username = request.form['username']
+    password = request.form['password']
+    subject_ids = request.form.getlist('subjects')
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        # Add teacher
+        cur.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", (username, password))
+        teacher_id = cur.lastrowid
+        
+        # Assign subjects to teacher
+        for subject_id in subject_ids:
+            cur.execute("INSERT OR IGNORE INTO teacher_subjects (teacher_id, subject_id) VALUES (?, ?)", 
+                       (teacher_id, subject_id))
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Teacher added successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Username already exists'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+@app.route('/edit_teacher/<int:teacher_id>', methods=['POST'])
+def edit_teacher(teacher_id):
+    username = request.form['username']
+    password = request.form.get('password', '')
+    subject_ids = request.form.getlist('subjects')
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        # Update teacher
+        if password:
+            cur.execute("UPDATE teachers SET username = ?, password = ? WHERE id = ?", 
+                       (username, password, teacher_id))
+        else:
+            cur.execute("UPDATE teachers SET username = ? WHERE id = ?", (username, teacher_id))
+        
+        # Update teacher subjects
+        cur.execute("DELETE FROM teacher_subjects WHERE teacher_id = ?", (teacher_id,))
+        for subject_id in subject_ids:
+            cur.execute("INSERT INTO teacher_subjects (teacher_id, subject_id) VALUES (?, ?)", 
+                       (teacher_id, subject_id))
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Teacher updated successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+@app.route('/delete_teacher/<int:teacher_id>', methods=['POST'])
+def delete_teacher(teacher_id):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        # Delete teacher subjects first
+        cur.execute("DELETE FROM teacher_subjects WHERE teacher_id = ?", (teacher_id,))
+        # Delete teacher
+        cur.execute("DELETE FROM teachers WHERE id = ?", (teacher_id,))
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Teacher deleted successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+# ===== SUBJECT MANAGEMENT ROUTES =====
+@app.route('/manage_subjects')
+def manage_subjects():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    
+    # Get all subjects with teacher count
+    cur.execute('''
+        SELECT s.id, s.subject_name, s.subject_code, s.description,
+               COUNT(ts.teacher_id) as teacher_count
+        FROM subjects s
+        LEFT JOIN teacher_subjects ts ON s.id = ts.subject_id
+        GROUP BY s.id, s.subject_name, s.subject_code, s.description
+        ORDER BY s.subject_name
+    ''')
+    subjects = cur.fetchall()
+    
+    conn.close()
+    return render_template('manage_subjects.html', subjects=subjects)
+
+@app.route('/add_subject', methods=['POST'])
+def add_subject():
+    subject_name = request.form['subject_name']
+    subject_code = request.form['subject_code']
+    description = request.form.get('description', '')
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("INSERT INTO subjects (subject_name, subject_code, description) VALUES (?, ?, ?)", 
+                   (subject_name, subject_code, description))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Subject added successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Subject name or code already exists'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+@app.route('/edit_subject/<int:subject_id>', methods=['POST'])
+def edit_subject(subject_id):
+    subject_name = request.form['subject_name']
+    subject_code = request.form['subject_code']
+    description = request.form.get('description', '')
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("UPDATE subjects SET subject_name = ?, subject_code = ?, description = ? WHERE id = ?", 
+                   (subject_name, subject_code, description, subject_id))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Subject updated successfully'})
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'message': 'Subject name or code already exists'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+@app.route('/delete_subject/<int:subject_id>', methods=['POST'])
+def delete_subject(subject_id):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    try:
+        # Delete teacher-subject mappings first
+        cur.execute("DELETE FROM teacher_subjects WHERE subject_id = ?", (subject_id,))
+        # Delete subject
+        cur.execute("DELETE FROM subjects WHERE id = ?", (subject_id,))
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Subject deleted successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    finally:
+        conn.close()
+
+if __name__ == '__main__':
+    app.run(debug=True)

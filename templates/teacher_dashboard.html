@@ -483,20 +483,7 @@
             }
         }
     </style>
-</head>
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-
-    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
@@ -524,17 +511,17 @@
 
             <!-- Enhanced Action Buttons -->
             <div class="action-buttons mb-5" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ url_for('manage_teachers') }}" class="btn-enhanced" style="background: var(--success-gradient);">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Manage Teachers
+                </a>
+                <a href="{{ url_for('manage_subjects') }}" class="btn-enhanced" style="background: var(--info-gradient);">
+                    <i class="fas fa-book"></i>
+                    Manage Subjects
+                </a>
                 <a href="{{ url_for('home') }}" class="btn-enhanced">
                     <i class="fas fa-home"></i>
                     Back to Home
-                </a>
-                <a href="/dashboard" class="btn-enhanced btn-success-enhanced">
-                    <i class="fas fa-chart-bar"></i>
-                    View All Records
-                </a>
-                <a href="/students" class="btn-enhanced btn-info-enhanced">
-                    <i class="fas fa-users"></i>
-                    Manage Students
                 </a>
             </div>
 
@@ -578,8 +565,6 @@
                             Analyze
                         </button>
                     </div>
-                </form>
-            </div>
                 </form>
             </div>
 

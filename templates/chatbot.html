@@ -2,61 +2,642 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        #chatbox {
-            width: 400px;
-            margin: 50px auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #ccc;
         }
-        #chatlog {
-            height: 200px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            padding: 10px;
+
+        .chat-container {
+            width: 100%;
+            max-width: 450px;
+            height: 600px;
             background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
         }
-        input[type="text"] {
-            width: 75%;
-            padding: 8px;
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        button {
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 0;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typingPulse 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingPulse {
+            0%, 60%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            min-height: 45px;
+            max-height: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-chip {
             padding: 8px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .suggestion-chip:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .chat-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .chat-header {
+                padding: 15px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
 </head>
 <body>
-    <div id="chatbox">
-        <h3>Chatbot Assistant</h3>
-        <div id="chatlog"></div>
-        <input type="text" id="userInput" placeholder="Type your question here..." />
-        <button onclick="sendMessage()">Send</button>
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="close-btn" onclick="window.close()" title="Close Chat">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2><i class="fas fa-robot"></i> Attendance Assistant</h2>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online & Ready to Help</span>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <i class="fas fa-hand-wave" style="color: #fbbf24; margin-bottom: 10px; font-size: 1.5rem;"></i>
+                <div id="welcomeText">Welcome! I'm your attendance assistant.</div>
+                <div id="roleInfo" style="margin-top: 8px; padding: 8px; background: #f1f5f9; border-radius: 8px; font-size: 0.85rem;">
+                    <span id="roleStatus">Loading user role...</span>
+                </div>
+                <div style="margin-top: 10px; font-weight: 600; color: #374151;" id="capabilitiesText">
+                    I can help you with attendance queries, system navigation, and more!
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar" style="background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <div class="quick-suggestions" id="quickSuggestions">
+                <!-- Dynamic suggestions will be loaded based on user role -->
+                <div class="suggestion-chip" onclick="sendQuickMessage('Hello')">
+                    � Say Hello
+                </div>
+                <div class="suggestion-chip" onclick="sendQuickMessage('Help')">
+                    ❓ Help
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <textarea 
+                    class="input-field" 
+                    id="userInput" 
+                    placeholder="Type your question here..." 
+                    rows="1"
+                    maxlength="500"
+                ></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
+        let isTyping = false;
+        let userRole = 'guest';
+
+        // Detect user role and update UI
+        function detectUserRole() {
+            // Make a request to get user session info
+            fetch('/api/user-role', {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                userRole = data.role || 'guest';
+                updateUIForRole(userRole, data.userInfo);
+            })
+            .catch(error => {
+                console.log('Could not detect user role, using guest mode');
+                updateUIForRole('guest', null);
+            });
+        }
+
+        function updateUIForRole(role, userInfo) {
+            const roleStatus = document.getElementById('roleStatus');
+            const welcomeText = document.getElementById('welcomeText');
+            const capabilitiesText = document.getElementById('capabilitiesText');
+            const quickSuggestions = document.getElementById('quickSuggestions');
+
+            // Update welcome message and role info
+            if (role === 'student' && userInfo) {
+                roleStatus.innerHTML = `👤 Logged in as: <strong>${userInfo.name}</strong> (Student)`;
+                welcomeText.textContent = `Hello ${userInfo.name}! I'm your personal attendance assistant.`;
+                capabilitiesText.innerHTML = '• Check your attendance & grades<br>• Apply for leave<br>• View your profile<br>• Get help with system features';
+            } else if (role === 'teacher' && userInfo) {
+                roleStatus.innerHTML = `👨‍🏫 Logged in as: <strong>${userInfo.username}</strong> (Teacher)`;
+                welcomeText.textContent = `Welcome ${userInfo.username}! I'm here to assist with class management.`;
+                capabilitiesText.innerHTML = '• View class statistics<br>• Manage student attendance<br>• Generate reports<br>• Dashboard guidance';
+            } else if (role === 'admin') {
+                roleStatus.innerHTML = `👨‍💼 Logged in as: <strong>Administrator</strong>`;
+                welcomeText.textContent = 'Hello Admin! I\'m your system management assistant.';
+                capabilitiesText.innerHTML = '• System overview & analytics<br>• Student management<br>• Data export & reports<br>• Administrative tools';
+            } else {
+                roleStatus.innerHTML = '🌐 <strong>Guest Mode</strong> - Please log in for personalized assistance';
+                welcomeText.textContent = 'Welcome! I\'m the attendance system assistant.';
+                capabilitiesText.innerHTML = '• System information<br>• Login guidance<br>• General help<br>• Technical support';
+            }
+
+            // Update quick suggestions based on role
+            updateQuickSuggestions(role);
+        }
+
+        function updateQuickSuggestions(role) {
+            const quickSuggestions = document.getElementById('quickSuggestions');
+            let suggestions = [];
+
+            if (role === 'student') {
+                suggestions = [
+                    { text: '📊 My Attendance', message: 'What is my attendance percentage?' },
+                    { text: '📝 Apply Leave', message: 'How do I apply for leave?' },
+                    { text: '👤 My Profile', message: 'Show my profile information' },
+                    { text: '📅 Today\'s Status', message: 'What is my attendance today?' }
+                ];
+            } else if (role === 'teacher') {
+                suggestions = [
+                    { text: '📈 Class Stats', message: 'Show class attendance statistics' },
+                    { text: '👥 Student List', message: 'Show all students' },
+                    { text: '📊 Dashboard Help', message: 'How to use teacher dashboard?' },
+                    { text: '📄 Generate Report', message: 'How to generate attendance reports?' }
+                ];
+            } else if (role === 'admin') {
+                suggestions = [
+                    { text: '🖥️ System Status', message: 'Show system overview' },
+                    { text: '👥 Manage Students', message: 'How to manage students?' },
+                    { text: '📊 Analytics', message: 'Show system analytics' },
+                    { text: '💾 Export Data', message: 'How to export data?' }
+                ];
+            } else {
+                suggestions = [
+                    { text: '👋 Say Hello', message: 'Hello' },
+                    { text: '🔐 Login Help', message: 'How do I login?' },
+                    { text: '📸 Mark Attendance', message: 'How to mark attendance?' },
+                    { text: '❓ Help', message: 'Help' }
+                ];
+            }
+
+            // Clear existing suggestions
+            quickSuggestions.innerHTML = '';
+
+            // Add new suggestions
+            suggestions.forEach(suggestion => {
+                const chip = document.createElement('div');
+                chip.className = 'suggestion-chip';
+                chip.textContent = suggestion.text;
+                chip.onclick = () => sendQuickMessage(suggestion.message);
+                quickSuggestions.appendChild(chip);
+            });
+        }
+
+        // Auto-resize textarea
+        const userInput = document.getElementById('userInput');
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Enter to send message (Shift+Enter for new line)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function sendQuickMessage(message) {
+            userInput.value = message;
+            sendMessage();
+        }
+
         function sendMessage() {
-            const input = document.getElementById("userInput").value;
-            if (!input) return;
+            const input = userInput.value.trim();
+            if (!input || isTyping) return;
 
-            const chatlog = document.getElementById("chatlog");
-            chatlog.innerHTML += `<div><strong>You:</strong> ${input}</div>`;
+            const chatMessages = document.getElementById('chatMessages');
+            const sendBtn = document.getElementById('sendBtn');
+            const suggestions = document.getElementById('quickSuggestions');
 
-            fetch("/chatbot", {
-                method: "POST",
+            // Hide quick suggestions after first message
+            if (suggestions.style.display !== 'none') {
+                suggestions.style.display = 'none';
+            }
+
+            // Add user message
+            addMessage(input, 'user');
+            
+            // Clear input and reset height
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            // Disable send button and show typing indicator
+            sendBtn.disabled = true;
+            isTyping = true;
+            showTypingIndicator();
+
+            // Send to backend
+            fetch('/chatbot', {
+                method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ message: input })
             })
             .then(res => res.json())
             .then(data => {
-                chatlog.innerHTML += `<div><strong>Bot:</strong> ${data.response}</div>`;
-                document.getElementById("userInput").value = "";
-                chatlog.scrollTop = chatlog.scrollHeight;
+                hideTypingIndicator();
+                addMessage(data.response, 'bot');
+                sendBtn.disabled = false;
+                isTyping = false;
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                sendBtn.disabled = false;
+                isTyping = false;
+                console.error('Error:', error);
             });
         }
+
+        function addMessage(text, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Handle multi-line text (preserve line breaks)
+            const formattedText = text.replace(/\n/g, '<br>');
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>
+                </div>
+                <div>
+                    <div class="message-bubble">${formattedText}</div>
+                    <div class="message-time">${currentTime}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+            
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'none';
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', function() {
+            detectUserRole();
+            userInput.focus();
+            
+            // Check for pre-filled message from student home page
+            const preMessage = localStorage.getItem('chatbotPreMessage');
+            if (preMessage) {
+                // Small delay to ensure UI is ready
+                setTimeout(() => {
+                    userInput.value = preMessage;
+                    sendMessage();
+                    // Clear the stored message
+                    localStorage.removeItem('chatbotPreMessage');
+                }, 1000);
+            }
+        });
+
+        // Smooth scroll behavior
+        document.getElementById('chatMessages').style.scrollBehavior = 'smooth';
     </script>
 </body>
 </html>

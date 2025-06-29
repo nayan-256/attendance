@@ -105,14 +105,6 @@
       color: white;
     }
 
-    .nav-btn[style*="background: #28a745"]:hover {
-      background: #218838 !important;
-    }
-
-    .nav-btn[style*="background: #17a2b8"]:hover {
-      background: #138496 !important;
-    }
-
     .chatbot-btn {
       position: fixed;
       bottom: 20px;
@@ -180,16 +172,6 @@
       <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit">
         <i class="fas fa-edit me-2"></i>
         Edit Profile
-      </a>
-      
-      <a href="{{ url_for('manage_teachers') }}" class="nav-btn" style="background: #28a745; color: white;">
-        <i class="fas fa-chalkboard-teacher me-2"></i>
-        Manage Teachers
-      </a>
-      
-      <a href="{{ url_for('manage_subjects') }}" class="nav-btn" style="background: #17a2b8; color: white;">
-        <i class="fas fa-book me-2"></i>
-        Manage Subjects
       </a>
       
       <a href="{{ url_for('logout') }}" class="nav-btn btn-logout">

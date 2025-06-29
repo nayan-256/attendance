@@ -19,10 +19,6 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <a href="/chatbot" class="chatbot-button">
-    💬 Chatbot Assistant
-  </a>
-
   <style>
     /* Enhanced Background with New Animations */
     .bg-image {
@@ -868,24 +864,36 @@
     }
 
     .chatbot-button {
-      display: inline-block;
-      padding: 12px 24px;
-      margin-top: 15px;
-      font-size: 18px;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
       font-weight: bold;
       color: white;
-      background: linear-gradient(to right, #667eea, #764ba2);
-      /* Purple gradient */
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
       border-radius: 25px;
       text-decoration: none;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .chatbot-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      color: white;
+      text-decoration: none;
+    }
+
+    .chatbot-button:active {
+      transform: translateY(0) scale(0.98);
     }
   </style>
 </head>
@@ -1459,6 +1467,12 @@
       }
     });
   </script>
+
+  <!-- Floating Chatbot Button -->
+  <a href="/chatbot" class="chatbot-button" target="_blank" rel="noopener noreferrer" title="Open Attendance Assistant">
+    <i class="fas fa-comments"></i>
+    💬 Chatbot Assistant
+  </a>
 </body>
 
 </html>
