@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <style>
+        #chatbox {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+        #chatlog {
+            height: 200px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: white;
+        }
+        input[type="text"] {
+            width: 75%;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <h3>Chatbot Assistant</h3>
+        <div id="chatlog"></div>
+        <input type="text" id="userInput" placeholder="Type your question here..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById("userInput").value;
+            if (!input) return;
+
+            const chatlog = document.getElementById("chatlog");
+            chatlog.innerHTML += `<div><strong>You:</strong> ${input}</div>`;
+
+            fetch("/chatbot", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: input })
+            })
+            .then(res => res.json())
+            .then(data => {
+                chatlog.innerHTML += `<div><strong>Bot:</strong> ${data.response}</div>`;
+                document.getElementById("userInput").value = "";
+                chatlog.scrollTop = chatlog.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>

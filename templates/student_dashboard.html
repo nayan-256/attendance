@@ -5,19 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Dashboard</title>
-  
+
   <!-- Bootstrap 5.3.3 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- Animate.css -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  
+
   <!-- AOS (Animate On Scroll) Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
+
   <style>
     :root {
       --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -38,9 +38,17 @@
     }
 
     @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     /* Floating Particles */
@@ -94,9 +102,11 @@
       0% {
         transform: translateY(0px) rotate(0deg);
       }
+
       50% {
         transform: translateY(-100px) rotate(180deg);
       }
+
       100% {
         transform: translateY(0px) rotate(360deg);
       }
@@ -109,7 +119,7 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 25px;
-      box-shadow: 
+      box-shadow:
         0 8px 32px 0 rgba(31, 38, 135, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
       padding: 40px;
@@ -121,8 +131,15 @@
     }
 
     @keyframes containerFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
     }
 
     @keyframes fadeInUp {
@@ -130,6 +147,7 @@
         opacity: 0;
         transform: translateY(40px);
       }
+
       100% {
         opacity: 1;
         transform: translateY(0);
@@ -151,8 +169,13 @@
     }
 
     @keyframes titleGlow {
-      0% { filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.3)); }
-      100% { filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.5)); }
+      0% {
+        filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.3));
+      }
+
+      100% {
+        filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.5));
+      }
     }
 
     /* Enhanced Welcome Message */
@@ -179,8 +202,13 @@
     }
 
     @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
     }
 
     .user-avatar {
@@ -198,8 +226,15 @@
     }
 
     @keyframes avatarPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
     }
 
     /* Enhanced Table */
@@ -266,14 +301,29 @@
     }
 
     @keyframes statusGlow {
-      0% { box-shadow: 0 0 5px rgba(86, 171, 47, 0.5); }
-      100% { box-shadow: 0 0 15px rgba(168, 230, 207, 0.8); }
+      0% {
+        box-shadow: 0 0 5px rgba(86, 171, 47, 0.5);
+      }
+
+      100% {
+        box-shadow: 0 0 15px rgba(168, 230, 207, 0.8);
+      }
     }
 
     @keyframes statusShake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-3px); }
-      75% { transform: translateX(3px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-3px);
+      }
+
+      75% {
+        transform: translateX(3px);
+      }
     }
 
     /* Calendar Enhancement */
@@ -300,8 +350,15 @@
     }
 
     @keyframes floatButton {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     .calendar-floating-btn:hover {
@@ -342,8 +399,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* Responsive Design */
@@ -352,11 +414,11 @@
         margin: 20px;
         padding: 20px;
       }
-      
+
       .dashboard-title {
         font-size: 2rem;
       }
-      
+
       .calendar-floating-btn {
         width: 60px;
         height: 60px;
@@ -674,6 +736,7 @@
         opacity: 0;
         transform: translateX(-20px);
       }
+
       to {
         opacity: 1;
         transform: translateX(0);
@@ -743,7 +806,8 @@
   </div>
 
   <!-- Enhanced Calendar Floating Button -->
-  <div class="calendar-floating-btn" onclick="toggleCalendar()" data-bs-toggle="tooltip" title="View Calendar & Holidays">
+  <div class="calendar-floating-btn" onclick="toggleCalendar()" data-bs-toggle="tooltip"
+    title="View Calendar & Holidays">
     <i class="fas fa-calendar-alt"></i>
   </div>
 
@@ -765,13 +829,13 @@
         </button>
       </div>
     </div>
-    
+
     <div class="calendar-content">
       <!-- Calendar Grid -->
       <div class="calendar-grid" id="calendarGrid">
         <!-- Calendar months will be generated by JavaScript -->
       </div>
-      
+
       <!-- Holidays Section -->
       <div class="holidays-section">
         <h5>🎉 Holidays for <span id="holidayYear">2025</span></h5>
@@ -843,9 +907,9 @@
             {% set total = attendance_records|length %}
             {% set present = attendance_records|selectattr('status', 'equalto', 'Present')|list|length %}
             {% if total > 0 %}
-              <h2 class="fw-bold">{{ "%.1f"|format((present/total)*100) }}%</h2>
+            <h2 class="fw-bold">{{ "%.1f"|format((present/total)*100) }}%</h2>
             {% else %}
-              <h2 class="fw-bold">0%</h2>
+            <h2 class="fw-bold">0%</h2>
             {% endif %}
           </div>
         </div>
@@ -853,7 +917,8 @@
     </div>
 
     <!-- Recent Attendance Table -->
-    <div class="card border-0" style="background: var(--glass-bg); backdrop-filter: blur(10px);" data-aos="fade-up" data-aos-delay="600">
+    <div class="card border-0" style="background: var(--glass-bg); backdrop-filter: blur(10px);" data-aos="fade-up"
+      data-aos-delay="600">
       <div class="card-header bg-transparent border-0">
         <h4 class="mb-0 text-dark">
           <i class="fas fa-history me-2"></i>Recent Attendance Records
@@ -893,7 +958,8 @@
                   {% endif %}
                 </td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="View attendance details">
+                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip"
+                    title="View attendance details">
                     <i class="fas fa-eye"></i>
                   </button>
                 </td>
@@ -920,17 +986,17 @@
       </div>
     </div>
   </div>
-    </div>
-    <div class="d-grid gap-2 mt-4">
-         <a class="btn btn-secondary btn-lg animate__animated animate__fadeInLeft"
-       href="javascript:history.back()">Back</a>
-    </div>
   </div>
+  <div class="d-grid gap-2 mt-4">
+    <a class="btn btn-secondary btn-lg animate__animated animate__fadeInLeft" href="javascript:history.back()">Back</a>
+  </div>
+  </div>
+  
 
   <script>
     // Calendar functionality
     let currentYear = new Date().getFullYear();
-    
+
     // Comprehensive Holiday data (2022-2028)
     const holidays = {
       2022: [
@@ -1126,10 +1192,10 @@
     function toggleCalendar() {
       const popup = document.getElementById('calendarPopup');
       const overlay = document.getElementById('calendarOverlay');
-      
+
       popup.classList.add('show');
       overlay.classList.add('show');
-      
+
       // Render calendar when opened
       renderCalendar(currentYear);
     }
@@ -1138,7 +1204,7 @@
     function closeCalendar() {
       const popup = document.getElementById('calendarPopup');
       const overlay = document.getElementById('calendarOverlay');
-      
+
       popup.classList.remove('show');
       overlay.classList.remove('show');
     }
@@ -1148,27 +1214,16 @@
       const minYear = 2022;
       const maxYear = 2028;
       const newYear = currentYear + direction;
-      
-      if (newYear >= minYear && newYear <= maxYear) {
-        currentYear = newYear;
-        renderCalendar(currentYear);
-        
-        // Update button states
-        updateYearButtons();
-      }
-    }
 
-    // Update year navigation button states
-    function updateYearButtons() {
-      const prevBtn = document.querySelector('.year-nav-btn[onclick="changeYear(-1)"]');
-      const nextBtn = document.querySelector('.year-nav-btn[onclick="changeYear(1)"]');
-      
-      if (prevBtn) {
-        prevBtn.disabled = currentYear <= 2022;
-        prevBtn.style.opacity = currentYear <= 2022 ? '0.5' : '1';
+      if (newYear >= minYear && newYear <= maxYear) {
+        currentYear = newYear; renderCalendar(currentYear); // Update button
+    states updateYearButtons();
       }
-      
-      if (nextBtn) {
+    } // Update year navigation button states function updateYearButtons() { const
+    prevBtn = document.querySelector('.year-nav-btn[onclick="changeYear(-1)" ]'); const
+      nextBtn = document.querySelector('.year-nav-btn[onclick="changeYear(1)" ]'); if (prevBtn) {
+        prevBtn.disabled = currentYear <= 2022; prevBtn.style.opacity = currentYear <= 2022 ? '0.5' : '1';
+      } if (nextBtn) {
         nextBtn.disabled = currentYear >= 2028;
         nextBtn.style.opacity = currentYear >= 2028 ? '0.5' : '1';
       }
@@ -1185,9 +1240,9 @@
       const calendarGrid = document.getElementById('calendarGrid');
       const currentYearEl = document.getElementById('currentYear');
       const holidayYearEl = document.getElementById('holidayYear');
-      
+
       if (!calendarGrid) return;
-      
+
       // Clear and update year display
       calendarGrid.innerHTML = '';
       currentYearEl.textContent = year;
@@ -1199,67 +1254,42 @@
       // Generate calendar for each month
       for (let month = 0; month < 12; month++) {
         const monthDiv = document.createElement('div');
-        monthDiv.className = 'month-card';
-        
-        const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDay = new Date(year, month, 1).getDay();
-        
-        let calendarHTML = `
-          <div class="month-header">${monthName}</div>
-          <div class="days-grid">
-            <div class="day-header">Su</div>
-            <div class="day-header">Mo</div>
-            <div class="day-header">Tu</div>
-            <div class="day-header">We</div>
-            <div class="day-header">Th</div>
-            <div class="day-header">Fr</div>
-            <div class="day-header">Sa</div>
+        monthDiv.className = 'month-card'; const monthName = new Date(year, month).toLocaleDateString('en-US', {
+          month: 'long'
+        }); const daysInMonth = new Date(year, month + 1, 0).getDate(); const firstDay = new Date(year, month,
+          1).getDay(); let calendarHTML = ` <div class="month-header">${monthName}</div>
+      <div class="days-grid">
+        <div class="day-header">Su</div>
+        <div class="day-header">Mo</div>
+        <div class="day-header">Tu</div>
+        <div class="day-header">We</div>
+        <div class="day-header">Th</div>
+        <div class="day-header">Fr</div>
+        <div class="day-header">Sa</div>
         `;
-        
+
         // Add empty cells for days before month starts
-        for (let i = 0; i < firstDay; i++) {
-          calendarHTML += '<div class="calendar-day"></div>';
+        for (let i = 0; i < firstDay; i++) { calendarHTML += '<div class="calendar-day"></div>'; } // Add days of the
+          month const today = new Date(); for (let day = 1; day <= daysInMonth; day++) {
+          const date = `${year}-${String(month +
+            1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const holiday = getHolidayByDate(year, date); const
+              currentDate = new Date(year, month, day); let dayClasses = 'calendar-day'; let dayTitle = ''; // Check if it's
+          today if (currentDate.getDate() === today.getDate() && currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()) { dayClasses += ' today'; } // Check if it's a holiday if
+          (holiday) {
+            dayClasses += ` holiday ${holiday.type}`; dayTitle = `title="${holiday.name} - ${holiday.reason}" `;
+          } calendarHTML += ` <div class="${dayClasses}" ${dayTitle}>
+          ${day}
+          ${holiday ? '<div class="holiday-indicator"></div>' : ''}
+      </div>
+      `;
         }
-        
-        // Add days of the month
-        const today = new Date();
-        for (let day = 1; day <= daysInMonth; day++) {
-          const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const holiday = getHolidayByDate(year, date);
-          const currentDate = new Date(year, month, day);
-          
-          let dayClasses = 'calendar-day';
-          let dayTitle = '';
-          
-          // Check if it's today
-          if (
-            currentDate.getDate() === today.getDate() &&
-            currentDate.getMonth() === today.getMonth() &&
-            currentDate.getFullYear() === today.getFullYear()
-          ) {
-            dayClasses += ' today';
-          }
-          
-          // Check if it's a holiday
-          if (holiday) {
-            dayClasses += ` holiday ${holiday.type}`;
-            dayTitle = `title="${holiday.name} - ${holiday.reason}"`;
-          }
-          
-          calendarHTML += `
-            <div class="${dayClasses}" ${dayTitle}>
-              ${day}
-              ${holiday ? '<div class="holiday-indicator"></div>' : ''}
-            </div>
-          `;
-        }
-        
+
         calendarHTML += '</div>';
         monthDiv.innerHTML = calendarHTML;
         calendarGrid.appendChild(monthDiv);
       }
-      
+
       // Render holidays list
       renderHolidaysList(year);
     }
@@ -1268,49 +1298,49 @@
     function renderHolidaysList(year) {
       const holidaysList = document.getElementById('holidaysList');
       const holidaySummary = document.getElementById('holidaySummary');
-      
+
       if (!holidaysList) return;
-      
+
       const yearHolidays = holidays[year] || [];
-      
+
       if (yearHolidays.length === 0) {
         holidaysList.innerHTML = '<div class="text-muted">No holidays data available for this year.</div>';
         holidaySummary.innerHTML = '<div class="text-muted">No data</div>';
         return;
       }
-      
+
       // Group holidays by type
       const holidaysByType = yearHolidays.reduce((acc, holiday) => {
         if (!acc[holiday.type]) acc[holiday.type] = [];
         acc[holiday.type].push(holiday);
         return acc;
       }, {});
-      
+
       let holidaysHTML = '';
       Object.keys(holidaysByType).forEach(type => {
         const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-        
+
         holidaysHTML += `
-          <div class="holiday-group">
-            <div class="holiday-type-header ${type}">
-              ${typeCapitalized} Holidays
-            </div>
+      <div class="holiday-group">
+        <div class="holiday-type-header ${type}">
+          ${typeCapitalized} Holidays
+        </div>
         `;
-        
+
         holidaysByType[type].forEach((holiday, index) => {
           const date = new Date(holiday.date);
-          const formattedDate = date.toLocaleDateString('en-US', { 
-            month: 'short', 
+          const formattedDate = date.toLocaleDateString('en-US', {
+            month: 'short',
             day: 'numeric',
             weekday: 'short'
           });
-          
+
           // Calculate days until/since holiday
           const today = new Date();
           const holidayDate = new Date(holiday.date);
           const diffTime = holidayDate - today;
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
+
           let dayStatus = '';
           if (diffDays > 0) {
             dayStatus = `<small style="color: #28a745;">In ${diffDays} days</small>`;
@@ -1319,111 +1349,116 @@
           } else {
             dayStatus = `<small style="color: #6c757d;">${Math.abs(diffDays)} days ago</small>`;
           }
-          
+
           holidaysHTML += `
-            <div class="holiday-item ${type}" style="animation-delay: ${index * 0.1}s;">
-              <div>
-                <strong style="color: #333; font-size: 1.1rem;">${holiday.name}</strong>
-                <div style="font-size: 0.85rem; color: #666; margin-top: 2px;">${holiday.reason}</div>
-                ${dayStatus}
-              </div>
-              <div style="text-align: right;">
-                <div style="font-weight: bold; color: #667eea; font-size: 1rem;">${formattedDate}</div>
-                <div style="font-size: 0.8rem; color: #999; text-transform: capitalize;">${type}</div>
-              </div>
-            </div>
-          `;
+        <div class="holiday-item ${type}" style="animation-delay: ${index * 0.1}s;">
+          <div>
+            <strong style="color: #333; font-size: 1.1rem;">${holiday.name}</strong>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 2px;">${holiday.reason}</div>
+            ${dayStatus}
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: bold; color: #667eea; font-size: 1rem;">${formattedDate}</div>
+            <div style="font-size: 0.8rem; color: #999; text-transform: capitalize;">${type}</div>
+          </div>
+        </div>
+        `;
         });
-        
-        holidaysHTML += '</div>';
+
+        holidaysHTML += '
+      </div > ';
       });
-      
+
       holidaysList.innerHTML = holidaysHTML;
-      
+
       // Update summary with enhanced statistics
       const totalHolidays = yearHolidays.length;
       const typeCount = Object.keys(holidaysByType).length;
       const nextHoliday = getNextHoliday(year);
-      
+
       // Calculate holidays by month
       const monthlyStats = yearHolidays.reduce((acc, holiday) => {
         const month = new Date(holiday.date).getMonth();
         acc[month] = (acc[month] || 0) + 1;
         return acc;
       }, {});
-      
-      const monthWithMostHolidays = Object.keys(monthlyStats).reduce((a, b) => 
+
+      const monthWithMostHolidays = Object.keys(monthlyStats).reduce((a, b) =>
         monthlyStats[a] > monthlyStats[b] ? a : b
       );
-      
+
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
       // Count holidays by type
       const nationalCount = (holidaysByType.national || []).length;
       const festivalCount = (holidaysByType.festival || []).length;
       const religiousCount = (holidaysByType.religious || []).length;
-      
+
       holidaySummary.innerHTML = `
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="summary-stat">
-              <div class="summary-number">${totalHolidays}</div>
-              <div class="summary-label">Total Holidays</div>
-            </div>
+      <div class="row g-2">
+        <div class="col-6">
+          <div class="summary-stat">
+            <div class="summary-number">${totalHolidays}</div>
+            <div class="summary-label">Total Holidays</div>
           </div>
-          <div class="col-6">
-            <div class="summary-stat">
-              <div class="summary-number">${typeCount}</div>
-              <div class="summary-label">Holiday Types</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="summary-stat" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-              <div class="summary-number">${nationalCount}</div>
-              <div class="summary-label">National</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="summary-stat" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
-              <div class="summary-number">${festivalCount}</div>
-              <div class="summary-label">Festivals</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="summary-stat" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
-              <div class="summary-number">${religiousCount}</div>
-              <div class="summary-label">Religious</div>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="summary-stat" style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107;">
-              <div style="font-size: 0.9rem; font-weight: bold; color: #856404;">Peak Month:</div>
-              <div style="font-size: 1.1rem; color: #856404;">${monthNames[monthWithMostHolidays]} (${monthlyStats[monthWithMostHolidays]} holidays)</div>
-            </div>
-          </div>
-          ${nextHoliday ? `
-            <div class="col-12">
-              <div class="summary-stat" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
-                <div style="font-size: 0.9rem; font-weight: bold;">🎯 Next Holiday:</div>
-                <div style="font-size: 1rem; font-weight: bold;">${nextHoliday.name}</div>
-                <div style="font-size: 0.85rem; opacity: 0.9;">${new Date(nextHoliday.date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</div>
-                <div style="font-size: 0.8rem; opacity: 0.8;">${nextHoliday.reason}</div>
-              </div>
-            </div>
-          ` : `
-            <div class="col-12">
-              <div class="summary-stat" style="background: rgba(108, 117, 125, 0.1); color: #6c757d;">
-                <div style="font-size: 0.9rem;">No upcoming holidays this year</div>
-              </div>
-            </div>
-          `}
         </div>
+        <div class="col-6">
+          <div class="summary-stat">
+            <div class="summary-number">${typeCount}</div>
+            <div class="summary-label">Holiday Types</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="summary-stat"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="summary-number">${nationalCount}</div>
+            <div class="summary-label">National</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="summary-stat"
+            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div class="summary-number">${festivalCount}</div>
+            <div class="summary-label">Festivals</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="summary-stat"
+            style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+            <div class="summary-number">${religiousCount}</div>
+            <div class="summary-label">Religious</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="summary-stat" style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107;">
+            <div style="font-size: 0.9rem; font-weight: bold; color: #856404;">Peak Month:</div>
+            <div style="font-size: 1.1rem; color: #856404;">${monthNames[monthWithMostHolidays]}
+              (${monthlyStats[monthWithMostHolidays]} holidays)</div>
+          </div>
+        </div>
+        ${nextHoliday ? `
+        <div class="col-12">
+          <div class="summary-stat" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+            <div style="font-size: 0.9rem; font-weight: bold;">🎯 Next Holiday:</div>
+            <div style="font-size: 1rem; font-weight: bold;">${nextHoliday.name}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">${new Date(nextHoliday.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}</div>
+            <div style="font-size: 0.8rem; opacity: 0.8;">${nextHoliday.reason}</div>
+          </div>
+        </div>
+        ` : `
+        <div class="col-12">
+          <div class="summary-stat" style="background: rgba(108, 117, 125, 0.1); color: #6c757d;">
+            <div style="font-size: 0.9rem;">No upcoming holidays this year</div>
+          </div>
+        </div>
+        `}
+      </div>
       `;
     }
 
@@ -1431,14 +1466,14 @@
     function getNextHoliday(year) {
       const yearHolidays = holidays[year] || [];
       const today = new Date().toISOString().split('T')[0];
-      
+
       return yearHolidays
         .filter(holiday => holiday.date >= today)
         .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
     }
 
     // Close popup when pressing Escape key
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') {
         closeCalendar();
       }
@@ -1454,7 +1489,7 @@
     }
 
     // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Hide loading after page loads
       setTimeout(hideLoading, 500);
 
@@ -1466,7 +1501,7 @@
 
       // Add click event to action buttons
       document.querySelectorAll('a[href]').forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
           if (this.getAttribute('href').startsWith('/')) {
             showLoading();
           }
@@ -1475,11 +1510,11 @@
 
       // Add hover effects to table rows
       document.querySelectorAll('.enhanced-table tbody tr').forEach(row => {
-        row.addEventListener('mouseenter', function() {
+        row.addEventListener('mouseenter', function () {
           this.style.transform = 'scale(1.02)';
         });
-        
-        row.addEventListener('mouseleave', function() {
+
+        row.addEventListener('mouseleave', function () {
           this.style.transform = 'scale(1)';
         });
       });
@@ -1488,7 +1523,7 @@
 
   <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   <!-- AOS (Animate On Scroll) JS -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 

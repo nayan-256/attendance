@@ -5,19 +5,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Face Recognition Attendance System</title>
-  
+
   <!-- Bootstrap 5.3.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+
   <!-- Animate.css for animations -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- AOS (Animate On Scroll) Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <a href="/chatbot" class="chatbot-button">
+    💬 Chatbot Assistant
+  </a>
+
   <style>
     /* Enhanced Background with New Animations */
     .bg-image {
@@ -34,23 +39,27 @@
 
     /* New Advanced Gradient Animation */
     @keyframes gradientShift {
-      0% { 
+      0% {
         background-position: 0% 50%;
         filter: hue-rotate(0deg);
       }
+
       25% {
         background-position: 100% 50%;
         filter: hue-rotate(90deg);
       }
-      50% { 
+
+      50% {
         background-position: 100% 100%;
         filter: hue-rotate(180deg);
       }
+
       75% {
         background-position: 0% 100%;
         filter: hue-rotate(270deg);
       }
-      100% { 
+
+      100% {
         background-position: 0% 50%;
         filter: hue-rotate(360deg);
       }
@@ -58,11 +67,14 @@
 
     /* New Pulse Animation */
     @keyframes backgroundPulse {
-      0%, 100% { 
+
+      0%,
+      100% {
         transform: scale(1);
         opacity: 1;
       }
-      50% { 
+
+      50% {
         transform: scale(1.02);
         opacity: 0.95;
       }
@@ -76,7 +88,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
+      background-image:
         radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
@@ -87,19 +99,24 @@
     }
 
     @keyframes floatingShapes {
-      0%, 100% { 
+
+      0%,
+      100% {
         transform: translate(0, 0) rotate(0deg);
         opacity: 0.8;
       }
-      25% { 
+
+      25% {
         transform: translate(20px, -30px) rotate(90deg);
         opacity: 1;
       }
-      50% { 
+
+      50% {
         transform: translate(-10px, -20px) rotate(180deg);
         opacity: 0.6;
       }
-      75% { 
+
+      75% {
         transform: translate(-30px, 10px) rotate(270deg);
         opacity: 0.9;
       }
@@ -120,7 +137,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: 
+      background-image:
         radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(120, 119, 255, 0.3) 0%, transparent 50%);
@@ -142,20 +159,43 @@
     }
 
     @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33% { transform: translateY(-30px) rotate(120deg); }
-      66% { transform: translateY(30px) rotate(240deg); }
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      33% {
+        transform: translateY(-30px) rotate(120deg);
+      }
+
+      66% {
+        transform: translateY(30px) rotate(240deg);
+      }
     }
 
     @keyframes drift {
-      0% { transform: translateX(-100px) translateY(-100px); }
-      100% { transform: translateX(100px) translateY(100px); }
+      0% {
+        transform: translateX(-100px) translateY(-100px);
+      }
+
+      100% {
+        transform: translateX(100px) translateY(100px);
+      }
     }
 
     /* Animated particles for teacher background */
@@ -193,12 +233,15 @@
         transform: translateY(100vh) translateX(0px) rotate(0deg);
         opacity: 0;
       }
+
       10% {
         opacity: 1;
       }
+
       90% {
         opacity: 1;
       }
+
       100% {
         transform: translateY(-100vh) translateX(100px) rotate(360deg);
         opacity: 0;
@@ -217,10 +260,13 @@
     }
 
     @keyframes overlayPulse {
-      0%, 100% { 
+
+      0%,
+      100% {
         background: rgba(0, 0, 0, 0.2);
       }
-      50% { 
+
+      50% {
         background: rgba(0, 0, 0, 0.1);
       }
     }
@@ -241,7 +287,7 @@
       border-radius: 25px;
       text-align: center;
       max-width: 650px;
-      box-shadow: 
+      box-shadow:
         0 25px 50px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -252,23 +298,27 @@
 
     /* New Floating Animation */
     @keyframes containerFloat {
-      0%, 100% { 
+
+      0%,
+      100% {
         transform: translateY(0px) rotateX(0deg) rotateY(0deg);
-        box-shadow: 
+        box-shadow:
           0 25px 50px rgba(0, 0, 0, 0.3),
           0 0 0 1px rgba(255, 255, 255, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.3);
       }
-      33% { 
+
+      33% {
         transform: translateY(-15px) rotateX(2deg) rotateY(-1deg);
-        box-shadow: 
+        box-shadow:
           0 35px 70px rgba(0, 0, 0, 0.4),
           0 0 0 1px rgba(255, 255, 255, 0.3),
           inset 0 1px 0 rgba(255, 255, 255, 0.4);
       }
-      66% { 
+
+      66% {
         transform: translateY(-10px) rotateX(-1deg) rotateY(2deg);
-        box-shadow: 
+        box-shadow:
           0 30px 60px rgba(0, 0, 0, 0.35),
           0 0 0 1px rgba(255, 255, 255, 0.25),
           inset 0 1px 0 rgba(255, 255, 255, 0.35);
@@ -277,10 +327,13 @@
 
     /* New Glow Animation */
     @keyframes containerGlow {
-      0%, 100% { 
+
+      0%,
+      100% {
         filter: brightness(1) saturate(1);
       }
-      50% { 
+
+      50% {
         filter: brightness(1.1) saturate(1.2);
       }
     }
@@ -299,19 +352,25 @@
     }
 
     @keyframes titleGradient {
-      0%, 100% { 
+
+      0%,
+      100% {
         background-position: 0% 50%;
       }
-      50% { 
+
+      50% {
         background-position: 100% 50%;
       }
     }
 
     @keyframes titleBounce {
-      0%, 100% { 
+
+      0%,
+      100% {
         transform: translateY(0px) scale(1);
       }
-      50% { 
+
+      50% {
         transform: translateY(-5px) scale(1.02);
       }
     }
@@ -375,10 +434,13 @@
     }
 
     @keyframes buttonPulse {
-      0%, 100% { 
+
+      0%,
+      100% {
         box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
       }
-      50% { 
+
+      50% {
         box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
       }
     }
@@ -393,11 +455,14 @@
     }
 
     @keyframes containerPulse {
-      0%, 100% { 
+
+      0%,
+      100% {
         transform: scale(1);
         box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
       }
-      50% { 
+
+      50% {
         transform: scale(1.02);
         box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
       }
@@ -410,10 +475,11 @@
     }
 
     @keyframes titleGlow {
-      0% { 
+      0% {
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
       }
-      100% { 
+
+      100% {
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.3);
       }
     }
@@ -791,14 +857,35 @@
         width: 95%;
         max-height: 90vh;
       }
-      
+
       .holidays-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .calendar-grid {
         grid-template-columns: 1fr;
       }
+    }
+
+    .chatbot-button {
+      display: inline-block;
+      padding: 12px 24px;
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      /* Purple gradient */
+      border: none;
+      border-radius: 25px;
+      text-decoration: none;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .chatbot-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
@@ -827,13 +914,13 @@
         </button>
       </div>
     </div>
-    
+
     <div class="calendar-content">
       <!-- Calendar Grid -->
       <div class="calendar-grid" id="calendarGrid">
         <!-- Calendar months will be generated by JavaScript -->
       </div>
-      
+
       <!-- Holidays Section -->
       <div class="holidays-section">
         <h5>🎉 Holidays for <span id="holidayYear">2025</span></h5>
@@ -853,8 +940,8 @@
   </div>
 
   <!-- Conditional Background Image -->
- <!-- Dynamic Background for Different User Types -->
- <div class="bg-image {% if session.get('teacher_logged_in') %}teacher-bg{% else %}{% endif %}" style="
+  <!-- Dynamic Background for Different User Types -->
+  <div class="bg-image {% if session.get('teacher_logged_in') %}teacher-bg{% else %}{% endif %}" style="
   {% if not session.get('teacher_logged_in') %}
   {% if session.get('logged_in') %}
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -867,11 +954,12 @@
     {% if session.get('teacher_logged_in') %}
     <div class="teacher-particles" id="teacherParticles"></div>
     {% endif %}
-    
+
     <div class="overlay {% if session.get('teacher_logged_in') %}teacher-overlay{% endif %}"></div>
-    
+
     <!-- Content -->
-    <div class="container animate__animated animate__fadeIn {% if session.get('teacher_logged_in') %}teacher-container{% endif %}">
+    <div
+      class="container animate__animated animate__fadeIn {% if session.get('teacher_logged_in') %}teacher-container{% endif %}">
       {% if session.get('teacher_logged_in') %}
       <h1 class="teacher-title">👨‍🏫 Welcome to Teacher Dashboard</h1>
       {% elif not session.get('logged_in') %}
@@ -879,79 +967,102 @@
       {% else %}
       <h1>👨‍💼 Admin Dashboard: Manage Attendance & Users</h1>
       {% endif %}
-            <nav>
+      <nav>
         {% if not session.get('logged_in') and not session.get('teacher_logged_in') and not session.get('student_id') %}
-          <!-- Show on home page (no one logged in) -->
-          <a href="/register" class="btn btn-success btn-lg me-2">
-            <i class="fas fa-user-plus me-2"></i>Register User
-          </a>
-          <a href="/checkin" class="btn btn-primary btn-lg me-2">
-            <i class="fas fa-sign-in-alt me-2"></i>Check-in
-          </a>
-          <a href="/checkout" class="btn btn-info btn-lg">
-            <i class="fas fa-sign-out-alt me-2"></i>Check-out
-          </a>
+        <!-- Show on home page (no one logged in) -->
+        <a href="/register" class="btn btn-success btn-lg me-2">
+          <i class="fas fa-user-plus me-2"></i>Register User
+        </a>
+        <a href="/checkin" class="btn btn-primary btn-lg me-2">
+          <i class="fas fa-sign-in-alt me-2"></i>Check-in
+        </a>
+        <a href="/checkout" class="btn btn-info btn-lg">
+          <i class="fas fa-sign-out-alt me-2"></i>Check-out
+        </a>
         {% endif %}
-      
+
         <!-- Admin View -->
         {% if session.get('logged_in') %}
-          <a href="/dashboard" class="btn btn-warning btn-lg me-2">
-            <i class="fas fa-chart-line me-2"></i>View Attendance Records
-          </a>
-          <a href="{{ url_for('show_students') }}" class="btn btn-info btn-lg me-2">
-            <i class="fas fa-users me-2"></i>All Students
-          </a>
-          <a href="/logout" class="btn btn-danger btn-lg">
-            <i class="fas fa-sign-out-alt me-2"></i>Logout (Admin)
-          </a>
-      
+        <a href="/dashboard" class="btn btn-warning btn-lg me-2">
+          <i class="fas fa-chart-line me-2"></i>View Attendance Records
+        </a>
+        <a href="{{ url_for('show_students') }}" class="btn btn-info btn-lg me-2">
+          <i class="fas fa-users me-2"></i>All Students
+        </a>
+        <a href="/logout" class="btn btn-danger btn-lg">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout (Admin)
+        </a>
+
         <!-- Teacher View -->
         {% elif session.get('teacher_logged_in') %}
-          <a href="/teacher_dashboard" class="btn teacher-nav-btn btn-lg me-2">
-            <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard
-          </a>
-          <a href="/teacher_logout" class="btn teacher-nav-btn btn-lg">
-            <i class="fas fa-sign-out-alt me-2"></i>Logout
-          </a>
-      
+        <a href="/teacher_dashboard" class="btn teacher-nav-btn btn-lg me-2">
+          <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard
+        </a>
+        <a href="/teacher_logout" class="btn teacher-nav-btn btn-lg">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+
         <!-- Student View -->
         {% elif session.get('student_id') %}
-          <a href="/student_dashboard" class="btn btn-info btn-lg me-2">
-            <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
-          </a>
-          <a href="/profile" class="btn btn-outline-primary btn-lg me-2">
-            <i class="fas fa-user me-2"></i>View Profile
-          </a>
-          <a href="/edit_profile" class="btn btn-outline-warning btn-lg me-2">
-            <i class="fas fa-edit me-2"></i>Edit Profile
-          </a>
-          <a href="/logout" class="btn btn-danger btn-lg">
-            <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
-          </a>
-      
+        <a href="/student_dashboard" class="btn btn-info btn-lg me-2">
+          <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
+        </a>
+        <a href="/profile" class="btn btn-outline-primary btn-lg me-2">
+          <i class="fas fa-user me-2"></i>View Profile
+        </a>
+        <a href="/edit_profile" class="btn btn-outline-warning btn-lg me-2">
+          <i class="fas fa-edit me-2"></i>Edit Profile
+        </a>
+        <a href="/logout" class="btn btn-danger btn-lg">
+          <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
+        </a>
+
         <!-- Guest View -->
         {% else %}
-          <a href="/login" class="btn btn-secondary btn-lg me-2">
-            <i class="fas fa-user-shield me-2"></i>Admin Login
-          </a>
-          <a href="/teacher_login" class="btn btn-dark btn-lg me-2">
-            <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Login
-          </a>
-          <a href="/student_login" class="btn btn-outline-success btn-lg">
-            <i class="fas fa-user-graduate me-2"></i>Student Login
-          </a>
+        <a href="/login" class="btn btn-secondary btn-lg me-2">
+          <i class="fas fa-user-shield me-2"></i>Admin Login
+        </a>
+        <a href="/teacher_login" class="btn btn-dark btn-lg me-2">
+          <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Login
+        </a>
+        <a href="/student_login" class="btn btn-outline-success btn-lg">
+          <i class="fas fa-user-graduate me-2"></i>Student Login
+        </a>
         {% endif %}
       </nav>
 
     </div>
+    
   </div>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   <script>
+    function sendMessage() {
+      const userInput = document.getElementById("userInput").value;
+      if (!userInput.trim()) return;
+
+      const chatlog = document.getElementById("chatlog");
+      chatlog.innerHTML += `<div><b>You:</b> ${userInput}</div>`;
+
+      fetch("/chatbot", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: userInput })
+      })
+        .then(res => res.json())
+        .then(data => {
+          chatlog.innerHTML += `<div><b>Bot:</b> ${data.response}</div>`;
+          document.getElementById("userInput").value = "";
+          chatlog.scrollTop = chatlog.scrollHeight;
+        });
+    }
+
     // Calendar functionality
     let currentYear = new Date().getFullYear();
-    
+
     // Holiday data
     const holidays = {
       2025: [
@@ -999,10 +1110,10 @@
     function toggleCalendar() {
       const popup = document.getElementById('calendarPopup');
       const overlay = document.getElementById('calendarOverlay');
-      
+
       popup.classList.add('show');
       overlay.classList.add('show');
-      
+
       // Render calendar when opened
       renderCalendar(currentYear);
     }
@@ -1011,7 +1122,7 @@
     function closeCalendar() {
       const popup = document.getElementById('calendarPopup');
       const overlay = document.getElementById('calendarOverlay');
-      
+
       popup.classList.remove('show');
       overlay.classList.remove('show');
     }
@@ -1033,9 +1144,9 @@
       const calendarGrid = document.getElementById('calendarGrid');
       const currentYearEl = document.getElementById('currentYear');
       const holidayYearEl = document.getElementById('holidayYear');
-      
+
       if (!calendarGrid) return;
-      
+
       // Clear and update year display
       calendarGrid.innerHTML = '';
       currentYearEl.textContent = year;
@@ -1045,11 +1156,11 @@
       for (let month = 0; month < 12; month++) {
         const monthDiv = document.createElement('div');
         monthDiv.className = 'month-card';
-        
+
         const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const firstDay = new Date(year, month, 1).getDay();
-        
+
         let calendarHTML = `
           <div class="month-header">${monthName}</div>
           <div class="days-grid">
@@ -1061,22 +1172,22 @@
             <div class="day-header">Fr</div>
             <div class="day-header">Sa</div>
         `;
-        
+
         // Add empty cells for days before month starts
         for (let i = 0; i < firstDay; i++) {
           calendarHTML += '<div class="calendar-day"></div>';
         }
-        
+
         // Add days of the month
         const today = new Date();
         for (let day = 1; day <= daysInMonth; day++) {
           const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const holiday = getHolidayByDate(year, date);
           const currentDate = new Date(year, month, day);
-          
+
           let dayClasses = 'calendar-day';
           let dayTitle = '';
-          
+
           // Check if it's today
           if (
             currentDate.getDate() === today.getDate() &&
@@ -1085,13 +1196,13 @@
           ) {
             dayClasses += ' today';
           }
-          
+
           // Check if it's a holiday
           if (holiday) {
             dayClasses += ` holiday ${holiday.type}`;
             dayTitle = `title="${holiday.name} - ${holiday.reason}"`;
           }
-          
+
           calendarHTML += `
             <div class="${dayClasses}" ${dayTitle}>
               ${day}
@@ -1099,12 +1210,12 @@
             </div>
           `;
         }
-        
+
         calendarHTML += '</div>';
         monthDiv.innerHTML = calendarHTML;
         calendarGrid.appendChild(monthDiv);
       }
-      
+
       // Render holidays list
       renderHolidaysList(year);
     }
@@ -1113,42 +1224,42 @@
     function renderHolidaysList(year) {
       const holidaysList = document.getElementById('holidaysList');
       const holidaySummary = document.getElementById('holidaySummary');
-      
+
       if (!holidaysList) return;
-      
+
       const yearHolidays = holidays[year] || [];
-      
+
       if (yearHolidays.length === 0) {
         holidaysList.innerHTML = '<div class="text-muted">No holidays data available for this year.</div>';
         holidaySummary.innerHTML = '<div class="text-muted">No data</div>';
         return;
       }
-      
+
       // Group holidays by type
       const holidaysByType = yearHolidays.reduce((acc, holiday) => {
         if (!acc[holiday.type]) acc[holiday.type] = [];
         acc[holiday.type].push(holiday);
         return acc;
       }, {});
-      
+
       let holidaysHTML = '';
       Object.keys(holidaysByType).forEach(type => {
         const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-        
+
         holidaysHTML += `
           <div class="holiday-group">
             <div class="holiday-type-header ${type}">
               ${typeCapitalized} Holidays
             </div>
         `;
-        
+
         holidaysByType[type].forEach(holiday => {
           const date = new Date(holiday.date);
-          const formattedDate = date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
+          const formattedDate = date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
           });
-          
+
           holidaysHTML += `
             <div class="holiday-item ${type}">
               <div>
@@ -1159,17 +1270,17 @@
             </div>
           `;
         });
-        
+
         holidaysHTML += '</div>';
       });
-      
+
       holidaysList.innerHTML = holidaysHTML;
-      
+
       // Update summary
       const totalHolidays = yearHolidays.length;
       const typeCount = Object.keys(holidaysByType).length;
       const nextHoliday = getNextHoliday(year);
-      
+
       holidaySummary.innerHTML = `
         <div class="summary-stat">
           <div class="summary-number">${totalHolidays}</div>
@@ -1193,14 +1304,14 @@
     function getNextHoliday(year) {
       const yearHolidays = holidays[year] || [];
       const today = new Date().toISOString().split('T')[0];
-      
+
       return yearHolidays
         .filter(holiday => holiday.date >= today)
         .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
     }
 
     // Close popup when pressing Escape key
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') {
         closeCalendar();
       }
@@ -1212,32 +1323,32 @@
       if (!particlesContainer) return;
 
       const particleCount = 50;
-      
+
       // Clear existing particles
       particlesContainer.innerHTML = '';
-      
+
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        
+
         // Random position
         particle.style.left = Math.random() * 100 + '%';
         particle.style.top = '100vh';
-        
+
         // Random size
         const size = Math.random() * 3 + 2;
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
-        
+
         // Random animation delay
         particle.style.animationDelay = Math.random() * 20 + 's';
-        
+
         // Random animation duration
         particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-        
+
         particlesContainer.appendChild(particle);
       }
-      
+
       // Create new particles periodically
       setTimeout(createTeacherParticles, 5000);
     }
@@ -1248,15 +1359,15 @@
       if (!teacherBg) return;
 
       // Add mouse movement effect
-      document.addEventListener('mousemove', function(e) {
+      document.addEventListener('mousemove', function (e) {
         const x = (e.clientX / window.innerWidth) * 100;
         const y = (e.clientY / window.innerHeight) * 100;
-        
+
         teacherBg.style.backgroundPosition = `${x}% ${y}%`;
       });
 
       // Add click ripple effect
-      teacherBg.addEventListener('click', function(e) {
+      teacherBg.addEventListener('click', function (e) {
         const ripple = document.createElement('div');
         ripple.style.position = 'absolute';
         ripple.style.borderRadius = '50%';
@@ -1269,9 +1380,9 @@
         ripple.style.height = '50px';
         ripple.style.pointerEvents = 'none';
         ripple.style.zIndex = '999';
-        
+
         this.appendChild(ripple);
-        
+
         setTimeout(() => {
           ripple.remove();
         }, 600);
@@ -1286,7 +1397,7 @@
       if (!teacherBg) return;
 
       const icons = ['📚', '✏️', '🎓', '📝', '🏫', '📊'];
-      
+
       icons.forEach((icon, index) => {
         const iconElement = document.createElement('div');
         iconElement.textContent = icon;
@@ -1298,7 +1409,7 @@
         iconElement.style.left = Math.random() * 90 + '%';
         iconElement.style.top = Math.random() * 90 + '%';
         iconElement.style.animation = `iconFloat 8s ease-in-out infinite ${index * 1.5}s`;
-        
+
         teacherBg.appendChild(iconElement);
       });
     }
@@ -1327,19 +1438,19 @@
     document.head.appendChild(rippleStyle);
 
     // Initialize everything when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Initialize teacher effects
       initTeacherEffects();
-      
+
       // Start particle animation for teacher background
       createTeacherParticles();
-      
+
       // Add smooth entrance animation for teacher container
       const teacherContainer = document.querySelector('.teacher-container');
       if (teacherContainer) {
         teacherContainer.style.opacity = '0';
         teacherContainer.style.transform = 'translateY(30px)';
-        
+
         setTimeout(() => {
           teacherContainer.style.transition = 'all 1s ease';
           teacherContainer.style.opacity = '1';

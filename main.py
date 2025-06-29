@@ -10,9 +10,9 @@ import base64
 import csv
 import pandas as pd
 import uuid
-from datetime import datetime
+from datetime import datetime,timedelta
 from collections import defaultdict
-from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session
+from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify
 from werkzeug.utils import secure_filename
 
 
@@ -1044,6 +1044,22 @@ def download_excel():
     df.to_excel(file_path, index=False)
 
     return send_file(file_path, as_attachment=True)
+@app.route("/chatbot")
+def chatbot_page():
+    return render_template("chatbot.html")
+
+# Chatbot response API (handles user messages)
+@app.route('/chatbot', methods=['POST'])
+def chatbot_response():
+    user_input = request.json.get('message', '').lower()
+
+    if "how many classes" in user_input:
+        return jsonify({'response': "You missed 3 classes this week."})
+    elif "how do i request leave" in user_input:
+        return jsonify({'response': "Go to your dashboard > Leave Request."})
+    else:
+        return jsonify({'response': "I'm not sure. Please try asking about attendance or leave."})
+
 
 print(app.url_map)
 
@@ -1097,6 +1113,7 @@ def get_holidays(year):
     
     from flask import jsonify
     return jsonify(holidays_data.get(year, []))
+
 
 # Admin route to view all students with their images - DISABLED to avoid endpoint conflicts
 # @app.route('/admin/students', endpoint='admin_students_view')
