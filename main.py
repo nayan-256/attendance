@@ -109,10 +109,16 @@ def init_db():
 
     # Insert default subjects
     default_subjects = [
-        ('Mathematics', 'MATH101', 'Basic Mathematics'),
-        ('Physics', 'PHY101', 'Basic Physics'),
-        ('Chemistry', 'CHEM101', 'Basic Chemistry'),
-        ('Computer Science', 'CS101', 'Introduction to Computer Science')
+        ('Data Structures and Algorithms (Computer)', 'DSA101', 'Data Structures and Algorithms for Computer Engineering'),
+        ('Electrical Machines (Electrical)', 'EM101', 'Electrical Machines for Electrical Engineering'),
+        ('Communication Systems (ENTC)', 'CS201', 'Communication Systems for Electronics and Telecommunication'),
+        ('Theory of Machines (Mechanical)', 'TOM101', 'Theory of Machines for Mechanical Engineering'),
+        ('Structural Analysis (Civil)', 'SA101', 'Structural Analysis for Civil Engineering'),
+        ('Process Control (Instrumentation)', 'PC101', 'Process Control for Instrumentation Engineering'),
+        ('Computer Networks (Computer)', 'CN101', 'Computer Networks for Computer Engineering'),
+        ('Power Systems (Electrical)', 'PS101', 'Power Systems for Electrical Engineering'),
+        ('Concrete Technology (Civil)', 'CT101', 'Concrete Technology for Civil Engineering'),
+        ('Microcontrollers and Applications (ENTC / Instrumentation)', 'MCA101', 'Microcontrollers and Applications for ENTC and Instrumentation')
     ]
     
     for subject_name, subject_code, description in default_subjects:
@@ -1648,5 +1654,120 @@ def delete_subject(subject_id):
     finally:
         conn.close()
 
+# === QR Code Routes for PWA ===
+@app.route('/qr_scanner')
+def qr_scanner():
+    """QR Code scanner page for mobile attendance"""
+    if not session.get('logged_in'):
+        return redirect(url_for('student_login'))
+    return render_template('qr_scanner.html')
+
+# QR Code generator route - DISABLED
+# @app.route('/generate_qr')
+# def generate_qr():
+#     """QR Code generator page for teachers"""
+#     if not session.get('teacher_logged_in'):
+#         return redirect(url_for('teacher_login'))
+#     return render_template('generate_qr.html')
+
+@app.route('/api/qr_attendance', methods=['POST'])
+def qr_attendance():
+    """API endpoint for QR code attendance marking"""
+    try:
+        data = request.get_json()
+        qr_code = data.get('qr_code')
+        student_id = session.get('student_id')
+        
+        if not student_id:
+            return jsonify({'success': False, 'message': 'Not logged in'})
+        
+        # Verify QR code format (should contain subject and timestamp info)
+        # Format: "ATTENDANCE_SUBJECT_TIMESTAMP"
+        if not qr_code or not qr_code.startswith('ATTENDANCE_'):
+            return jsonify({'success': False, 'message': 'Invalid QR code'})
+        
+        # Extract subject from QR code
+        parts = qr_code.split('_')
+        if len(parts) < 3:
+            return jsonify({'success': False, 'message': 'Invalid QR code format'})
+        
+        subject = parts[1]
+        timestamp = parts[2]
+        
+        # Check if QR code is still valid (within 30 minutes)
+        qr_time = datetime.fromtimestamp(int(timestamp))
+        current_time = datetime.now()
+        if (current_time - qr_time).total_seconds() > 1800:  # 30 minutes
+            return jsonify({'success': False, 'message': 'QR code expired'})
+        
+        # Mark attendance
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        # Get student details
+        cur.execute("SELECT name FROM users WHERE id = ?", (student_id,))
+        student = cur.fetchone()
+        if not student:
+            return jsonify({'success': False, 'message': 'Student not found'})
+        
+        # Check if already marked attendance for today
+        today = datetime.now().date()
+        cur.execute("SELECT * FROM attendance WHERE name = ? AND subject = ? AND date = ?", 
+                   (student[0], subject, today))
+        existing = cur.fetchone()
+        
+        if existing:
+            return jsonify({'success': False, 'message': 'Attendance already marked for today'})
+        
+        # Mark attendance
+        cur.execute("INSERT INTO attendance (name, subject, date, time, status) VALUES (?, ?, ?, ?, ?)",
+                   (student[0], subject, today, current_time.strftime('%H:%M:%S'), 'Present'))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': f'Attendance marked for {subject}'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+# QR Code generation API - DISABLED
+# @app.route('/api/generate_qr_code', methods=['POST'])
+# def generate_qr_code():
+#     """API endpoint to generate QR codes for attendance"""
+#     try:
+#         data = request.get_json()
+#         subject = data.get('subject')
+#         qr_type = data.get('type', 'single')  # single, bulk, custom
+#         
+#         if not session.get('teacher_logged_in'):
+#             return jsonify({'success': False, 'message': 'Not authorized'})
+#         
+#         if not subject:
+#             return jsonify({'success': False, 'message': 'Subject is required'})
+#         
+#         # Generate QR code data
+#         timestamp = str(int(datetime.now().timestamp()))
+#         qr_data = f"ATTENDANCE_{subject}_{timestamp}"
+#         
+#         # For demo purposes, we'll return the QR data
+#         # In a real implementation, you'd use a QR code library like qrcode
+#         return jsonify({
+#             'success': True, 
+#             'qr_data': qr_data,
+#             'subject': subject,
+#             'valid_until': (datetime.now() + timedelta(minutes=30)).isoformat()
+#         })
+#         
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': str(e)})
+
+# === PWA Service Worker Route ===
+@app.route('/static/sw.js')
+def service_worker():
+    """Serve service worker with correct MIME type"""
+    return send_file('static/sw.js', mimetype='application/javascript')
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Enable access from mobile devices on same network
+    app.run(debug=True, host='0.0.0.0', port=5000)

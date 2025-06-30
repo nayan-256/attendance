@@ -12,97 +12,240 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- AOS Animation Library -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --success-color: #28a745;
+      --info-color: #17a2b8;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: linear-gradient(135deg, #e0eafc, #cfdef3 80%);
+      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       min-height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .main-container {
-      max-width: 800px;
-      margin: 50px auto;
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      max-width: 900px;
+      width: 90%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 50px;
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
       text-align: center;
+      position: relative;
+      animation: containerFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes containerFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .main-container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+      border-radius: 25px;
+      z-index: -1;
+      opacity: 0.3;
+      animation: borderGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes borderGlow {
+      0% { opacity: 0.3; }
+      100% { opacity: 0.6; }
     }
 
     .welcome-title {
-      color: #667eea;
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      animation: titlePulse 2s ease-in-out infinite;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .subtitle {
+      color: #6c757d;
+      font-size: 1.2rem;
+      font-weight: 300;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.5s forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .button-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
       justify-content: center;
-      margin-top: 30px;
+      margin-top: 40px;
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 1s forwards;
     }
 
     .nav-btn {
-      min-width: 150px;
-      padding: 15px 25px;
+      position: relative;
+      min-width: 200px;
+      padding: 18px 30px;
       font-size: 1.1rem;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 15px;
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       border: none;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transform: translateY(0);
+    }
+
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-btn:hover::before {
+      left: 100%;
     }
 
     .nav-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.2),
+        0 5px 15px rgba(0, 0, 0, 0.1);
       text-decoration: none;
     }
 
+    .nav-btn:active {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .nav-btn i {
+      transition: transform 0.3s ease;
+    }
+
+    .nav-btn:hover i {
+      transform: scale(1.2) rotate(5deg);
+    }
+
     .btn-dashboard {
-      background: #17a2b8;
+      background: linear-gradient(135deg, #17a2b8, #20c997);
       color: white;
+      border: 2px solid transparent;
+      box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
     }
 
     .btn-dashboard:hover {
-      background: #138496;
+      background: linear-gradient(135deg, #138496, #1e7e34);
       color: white;
+      box-shadow: 0 12px 35px rgba(23, 162, 184, 0.4);
     }
 
     .btn-profile {
-      background: transparent;
+      background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.05));
       color: #007bff;
       border: 2px solid #007bff;
+      box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
     }
 
     .btn-profile:hover {
-      background: #007bff;
+      background: linear-gradient(135deg, #007bff, #0056b3);
       color: white;
+      border-color: #0056b3;
+      box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
     }
 
     .btn-edit {
-      background: transparent;
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
       color: #ffc107;
       border: 2px solid #ffc107;
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.2);
     }
 
     .btn-edit:hover {
-      background: #ffc107;
+      background: linear-gradient(135deg, #ffc107, #e0a800);
       color: #212529;
+      border-color: #e0a800;
+      box-shadow: 0 12px 35px rgba(255, 193, 7, 0.4);
     }
 
     .btn-logout {
-      background: #dc3545;
+      background: linear-gradient(135deg, #dc3545, #c82333);
       color: white;
+      border: 2px solid transparent;
+      box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
     }
 
     .btn-logout:hover {
-      background: #c82333;
+      background: linear-gradient(135deg, #c82333, #a71e2a);
       color: white;
+      box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4);
     }
 
     .nav-btn[style*="background: #28a745"]:hover {
@@ -115,96 +258,362 @@
 
     .chatbot-btn {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: #667eea;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       text-decoration: none;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.4),
+        0 0 0 0 rgba(102, 126, 234, 0.5);
       z-index: 1000;
+      transition: all 0.3s ease;
+      animation: chatbotPulse 3s infinite;
+    }
+
+    @keyframes chatbotPulse {
+      0% {
+        box-shadow: 
+          0 8px 25px rgba(102, 126, 234, 0.4),
+          0 0 0 0 rgba(102, 126, 234, 0.5);
+      }
+      70% {
+        box-shadow: 
+          0 8px 25px rgba(102, 126, 234, 0.4),
+          0 0 0 15px rgba(102, 126, 234, 0);
+      }
+      100% {
+        box-shadow: 
+          0 8px 25px rgba(102, 126, 234, 0.4),
+          0 0 0 0 rgba(102, 126, 234, 0);
+      }
     }
 
     .chatbot-btn:hover {
-      background: #5a6fd8;
+      background: linear-gradient(135deg, #5a6fd8, #6a5a9e);
       color: white;
-      transform: scale(1.1);
+      transform: scale(1.15) rotate(10deg);
       text-decoration: none;
+      animation: none;
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+    }
+
+    .floating-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .particle:nth-child(1) { 
+      width: 20px; height: 20px; 
+      left: 10%; animation-delay: 0s; 
+    }
+    .particle:nth-child(2) { 
+      width: 15px; height: 15px; 
+      left: 20%; animation-delay: 2s; 
+    }
+    .particle:nth-child(3) { 
+      width: 25px; height: 25px; 
+      left: 30%; animation-delay: 4s; 
+    }
+    .particle:nth-child(4) { 
+      width: 18px; height: 18px; 
+      left: 40%; animation-delay: 1s; 
+    }
+    .particle:nth-child(5) { 
+      width: 22px; height: 22px; 
+      left: 50%; animation-delay: 3s; 
+    }
+    .particle:nth-child(6) { 
+      width: 16px; height: 16px; 
+      left: 60%; animation-delay: 5s; 
+    }
+    .particle:nth-child(7) { 
+      width: 24px; height: 24px; 
+      left: 70%; animation-delay: 1.5s; 
+    }
+    .particle:nth-child(8) { 
+      width: 19px; height: 19px; 
+      left: 80%; animation-delay: 3.5s; 
+    }
+    .particle:nth-child(9) { 
+      width: 21px; height: 21px; 
+      left: 90%; animation-delay: 2.5s; 
+    }
+
+    @keyframes float {
+      0%, 100% { 
+        transform: translateY(100vh) rotate(0deg); 
+        opacity: 0; 
+      }
+      10%, 90% { 
+        opacity: 0.3; 
+      }
+      50% { 
+        transform: translateY(0vh) rotate(180deg); 
+        opacity: 0.6; 
+      }
     }
 
     @media (max-width: 768px) {
       .main-container {
-        margin: 20px auto;
-        padding: 20px;
+        width: 95%;
+        padding: 30px 20px;
+        margin: 20px 0;
       }
       
       .welcome-title {
-        font-size: 2rem;
+        font-size: 2.2rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .button-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 30px;
+      }
+      
+      .logout-container {
+        margin-top: 25px;
       }
       
       .nav-btn {
-        min-width: 130px;
-        padding: 12px 20px;
+        min-width: 100%;
+        padding: 15px 25px;
         font-size: 1rem;
       }
+
+      .logout-center {
+        min-width: 100% !important;
+        padding: 18px 30px !important;
+        font-size: 1.1rem !important;
+      }
+
+      .chatbot-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-title {
+        font-size: 1.8rem;
+      }
+      
+      .nav-btn {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Loading animation */
+    .main-container {
+      opacity: 0;
+      animation: containerFadeIn 1.2s ease-out forwards;
+    }
+
+    @keyframes containerFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Hover effects for entire container */
+    .main-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
+    }
+
+    /* Ripple effect */
+    .nav-btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-btn:active::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      animation: ripple 0.6s ease-out;
+    }
+
+    @keyframes ripple {
+      to {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+      }
+    }
+
+    .logout-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 30px;
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 1.2s forwards;
+    }
+
+    .logout-center {
+      min-width: 250px !important;
+      padding: 20px 40px !important;
+      font-size: 1.2rem !important;
+      font-weight: 700 !important;
+      position: relative;
+      z-index: 10;
+    }
+
+    .logout-center:hover {
+      transform: translateY(-10px) scale(1.08) !important;
+      box-shadow: 
+        0 20px 40px rgba(220, 53, 69, 0.5),
+        0 10px 20px rgba(220, 53, 69, 0.3) !important;
     }
   </style>
 </head>
 
 <body>
-  <div class="main-container">
+  <!-- Floating Particles Background -->
+  <div class="floating-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="main-container" data-aos="fade-up" data-aos-duration="1000">
     <h1 class="welcome-title">
       <i class="fas fa-graduation-cap me-3"></i>
       Welcome to Attendance System
     </h1>
     
-    <p class="lead text-muted">Choose an option to continue</p>
-    
     <div class="button-container">
-      <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard">
+      <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
         <i class="fas fa-tachometer-alt me-2"></i>
         Dashboard
       </a>
       
-      <a href="{{ url_for('profile') }}" class="nav-btn btn-profile">
+      <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="400">
         <i class="fas fa-user me-2"></i>
         View Profile
       </a>
       
-      <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit">
+      <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit" data-aos="zoom-in" data-aos-delay="600">
         <i class="fas fa-edit me-2"></i>
         Edit Profile
       </a>
-      
-      <a href="{{ url_for('manage_teachers') }}" class="nav-btn" style="background: #28a745; color: white;">
-        <i class="fas fa-chalkboard-teacher me-2"></i>
-        Manage Teachers
-      </a>
-      
-      <a href="{{ url_for('manage_subjects') }}" class="nav-btn" style="background: #17a2b8; color: white;">
-        <i class="fas fa-book me-2"></i>
-        Manage Subjects
-      </a>
-      
-      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout">
+    </div>
+    
+    <!-- Logout Section -->
+    <hr class="my-4" style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent); margin: 40px 0 20px 0;">
+    
+    <!-- Centered Logout Button -->
+    <div class="logout-container">
+      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout logout-center" data-aos="zoom-in" data-aos-delay="800">
         <i class="fas fa-sign-out-alt me-2"></i>
         Logout
       </a>
     </div>
   </div>
 
-  <!-- Floating Chatbot Button -->
-  <a href="/chatbot" class="chatbot-btn" target="_blank" rel="noopener noreferrer">
+  <!-- Enhanced Floating Chatbot Button -->
+  <a href="/chatbot" class="chatbot-btn" target="_blank" rel="noopener noreferrer" data-aos="bounce-in" data-aos-delay="1000">
     <i class="fas fa-comments"></i>
   </a>
 
   <!-- Bootstrap JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- AOS Animation JavaScript -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  
+  <script>
+    // Initialize AOS
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false
+    });
+
+    // Add click ripple effect
+    document.querySelectorAll('.nav-btn').forEach(button => {
+      button.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.classList.add('ripple-effect');
+        
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+    });
+
+    // Add subtle parallax effect on mouse move
+    document.addEventListener('mousemove', (e) => {
+      const mouseX = e.clientX / window.innerWidth;
+      const mouseY = e.clientY / window.innerHeight;
+      
+      const container = document.querySelector('.main-container');
+      const chatbot = document.querySelector('.chatbot-btn');
+      
+      container.style.transform = `translate(${mouseX * 10 - 5}px, ${mouseY * 10 - 5}px)`;
+      chatbot.style.transform = `translate(${mouseX * 5 - 2.5}px, ${mouseY * 5 - 2.5}px)`;
+    });
+
+    // Smooth scrolling for better UX
+    document.documentElement.style.scrollBehavior = 'smooth';
+  </script>
 </body>
 </html>

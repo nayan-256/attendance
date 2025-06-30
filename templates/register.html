@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register Student | Attendance System</title>
+  <title>Register | Attendance System</title>
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -206,18 +206,72 @@
       25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
     }
+
+    /* Tab Navigation Styles */
+    .nav-tabs {
+      border: none;
+      margin-bottom: 2rem;
+    }
+
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      margin: 0 0.5rem;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nav-tabs .nav-link.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .tab-content {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-8 col-md-10">
+      <div class="col-lg-10 col-md-12">
         <div class="register-card animate__animated animate__fadeInUp">
           <h2 class="register-title">
             <i class="fas fa-user-plus"></i>
-            Register New Student
+            Registration Portal
           </h2>
+
+          <!-- Tab Navigation -->
+          <ul class="nav nav-tabs justify-content-center" id="registrationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="student-tab" data-bs-toggle="tab" data-bs-target="#student-panel" 
+                      type="button" role="tab" aria-controls="student-panel" aria-selected="true">
+                <i class="fas fa-graduation-cap me-2"></i>Register Student
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="teacher-tab" data-bs-toggle="tab" data-bs-target="#teacher-panel" 
+                      type="button" role="tab" aria-controls="teacher-panel" aria-selected="false">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Register Teacher
+              </button>
+            </li>
+          </ul>
 
           {% if error %}
           <div class="error-message animate__animated animate__shakeX">
@@ -225,92 +279,210 @@
           </div>
           {% endif %}
 
-          <form id="registerForm" method="POST" enctype="multipart/form-data">
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label for="name" class="form-label">
-                  <i class="fas fa-user me-1"></i> Full Name
-                </label>
-                <div class="icon-input">
-                  <i class="fas fa-user"></i>
-                  <input type="text" class="form-control" id="name" name="name" required 
-                         placeholder="Enter full name">
+          <!-- Tab Content -->
+          <div class="tab-content" id="registrationTabContent">
+            <!-- Student Registration Panel -->
+            <div class="tab-pane fade show active" id="student-panel" role="tabpanel" aria-labelledby="student-tab">
+              <form id="registerStudentForm" method="POST" enctype="multipart/form-data" action="{{ url_for('register') }}">
+                <input type="hidden" name="user_type" value="student">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="student_name" class="form-label">
+                      <i class="fas fa-user me-1"></i> Full Name
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-user"></i>
+                      <input type="text" class="form-control" id="student_name" name="name" required 
+                             placeholder="Enter full name">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="student_id" class="form-label">
+                      <i class="fas fa-id-card me-1"></i> Student ID
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-id-card"></i>
+                      <input type="text" class="form-control" id="student_id" name="student_id" required 
+                             placeholder="Enter student ID">
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-6">
-                <label for="student_id" class="form-label">
-                  <i class="fas fa-id-card me-1"></i> Student ID
-                </label>
-                <div class="icon-input">
-                  <i class="fas fa-id-card"></i>
-                  <input type="text" class="form-control" id="student_id" name="student_id" required 
-                         placeholder="Enter student ID">
+
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label for="class_year" class="form-label">
+                      <i class="fas fa-calendar me-1"></i> Class Year
+                    </label>
+                    <select class="form-select" id="class_year" name="class_year" required>
+                      <option value="" disabled selected>Select Year</option>
+                      <option value="1st Year">First Year</option>
+                      <option value="2nd Year">Second Year</option>
+                      <option value="3rd Year">Third Year</option>
+                      <option value="4th Year">Final Year</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="department" class="form-label">
+                      <i class="fas fa-building me-1"></i> Department
+                    </label>
+                    <select class="form-select" id="department" name="department" required>
+                      <option value="" disabled selected>Select Department</option>
+                      <option value="Computer">Computer</option>
+                      <option value="Electrical">Electrical</option>
+                      <option value="Civil">Civil</option>
+                      <option value="ENTC">ENTC</option>
+                      <option value="Instrumentation">Instrumentation</option>
+                      <option value="Mechanical">Mechanical</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="student_password" class="form-label">
+                      <i class="fas fa-lock me-1"></i> Password
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-lock"></i>
+                      <input type="password" class="form-control" id="student_password" name="password" required 
+                             placeholder="Create password">
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                <div class="capture-section">
+                  <div class="video-container">
+                    <h5 class="mb-3">
+                      <i class="fas fa-camera me-2"></i> Capture Student Photo
+                    </h5>
+                    <video id="video_student" width="320" height="240" autoplay class="mb-3"></video>
+                    <button type="button" class="btn btn-outline-custom" onclick="captureStudentImage()">
+                      <i class="fas fa-camera me-2"></i> Capture Image
+                    </button>
+                    <canvas id="canvas_student" width="320" height="240" style="display: none"></canvas>
+                    <input type="hidden" name="captured_image" id="captured_image_student" />
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="button" class="btn btn-outline-custom me-md-2" onclick="goBack()">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                  </button>
+                  <button type="submit" class="btn btn-custom">
+                    <i class="fas fa-check me-2"></i> Register Student
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="class_year" class="form-label">
-                  <i class="fas fa-calendar me-1"></i> Class Year
-                </label>
-                <select class="form-select" id="class_year" name="class_year" required>
-                  <option value="" disabled selected>Select Year</option>
-                  <option value="1st Year">First Year</option>
-                  <option value="2nd Year">Second Year</option>
-                  <option value="3rd Year">Third Year</option>
-                  <option value="4th Year">Final Year</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="department" class="form-label">
-                  <i class="fas fa-building me-1"></i> Department
-                </label>
-                <select class="form-select" id="department" name="department" required>
-                  <option value="" disabled selected>Select Department</option>
-                  <option value="Computer">Computer</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Civil">Civil</option>
-                  <option value="ENTC">ENTC</option>
-                  <option value="Instrumentation">Instrumentation</option>
-                  <option value="Mechanical">Mechanical</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="password" class="form-label">
-                  <i class="fas fa-lock me-1"></i> Password
-                </label>
-                <div class="icon-input">
-                  <i class="fas fa-lock"></i>
-                  <input type="password" class="form-control" id="password" name="password" required 
-                         placeholder="Create password">
+            <!-- Teacher Registration Panel -->
+            <div class="tab-pane fade" id="teacher-panel" role="tabpanel" aria-labelledby="teacher-tab">
+              <form id="registerTeacherForm" method="POST" enctype="multipart/form-data" action="{{ url_for('register') }}">
+                <input type="hidden" name="user_type" value="teacher">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="teacher_name" class="form-label">
+                      <i class="fas fa-user me-1"></i> Full Name
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-user"></i>
+                      <input type="text" class="form-control" id="teacher_name" name="name" required 
+                             placeholder="Enter full name">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="teacher_username" class="form-label">
+                      <i class="fas fa-at me-1"></i> Username
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-at"></i>
+                      <input type="text" class="form-control" id="teacher_username" name="username" required 
+                             placeholder="Enter username">
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div class="capture-section">
-              <div class="video-container">
-                <h5 class="mb-3">
-                  <i class="fas fa-camera me-2"></i> Capture Student Photo
-                </h5>
-                <video id="video" width="320" height="240" autoplay class="mb-3"></video>
-                <button type="button" class="btn btn-outline-custom" onclick="captureImage()">
-                  <i class="fas fa-camera me-2"></i> Capture Image
-                </button>
-                <canvas id="canvas" width="320" height="240" style="display: none"></canvas>
-                <input type="hidden" name="captured_image" id="captured_image" />
-              </div>
-            </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="teacher_email" class="form-label">
+                      <i class="fas fa-envelope me-1"></i> Email Address
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-envelope"></i>
+                      <input type="email" class="form-control" id="teacher_email" name="email" required 
+                             placeholder="Enter email address">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="teacher_phone" class="form-label">
+                      <i class="fas fa-phone me-1"></i> Phone Number
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-phone"></i>
+                      <input type="tel" class="form-control" id="teacher_phone" name="phone" required 
+                             placeholder="Enter phone number">
+                    </div>
+                  </div>
+                </div>
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-              <button type="button" class="btn btn-outline-custom me-md-2" onclick="goBack()">
-                <i class="fas fa-arrow-left me-2"></i> Back
-              </button>
-              <button type="submit" class="btn btn-custom">
-                <i class="fas fa-check me-2"></i> Register Student
-              </button>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="teacher_department" class="form-label">
+                      <i class="fas fa-building me-1"></i> Department
+                    </label>
+                    <select class="form-select" id="teacher_department" name="department" required>
+                      <option value="" disabled selected>Select Department</option>
+                      <option value="Computer">Computer</option>
+                      <option value="Electrical">Electrical</option>
+                      <option value="Civil">Civil</option>
+                      <option value="ENTC">ENTC</option>
+                      <option value="Instrumentation">Instrumentation</option>
+                      <option value="Mechanical">Mechanical</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="teacher_password" class="form-label">
+                      <i class="fas fa-lock me-1"></i> Password
+                    </label>
+                    <div class="icon-input">
+                      <i class="fas fa-lock"></i>
+                      <input type="password" class="form-control" id="teacher_password" name="password" required 
+                             placeholder="Create password">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="teacher_subjects" class="form-label">
+                    <i class="fas fa-book me-1"></i> Subject Specializations
+                  </label>
+                  <textarea class="form-control" id="teacher_subjects" name="subjects" rows="3" 
+                            placeholder="Enter subject specializations (e.g., Mathematics, Physics, Computer Science)"></textarea>
+                  <div class="form-text">Enter subjects separated by commas</div>
+                </div>
+
+                <div class="capture-section">
+                  <div class="video-container">
+                    <h5 class="mb-3">
+                      <i class="fas fa-camera me-2"></i> Capture Teacher Photo
+                    </h5>
+                    <video id="video_teacher" width="320" height="240" class="mb-3" style="display: none;"></video>
+                    <button type="button" class="btn btn-outline-custom" onclick="startTeacherCamera()">
+                      <i class="fas fa-camera me-2"></i> Start Camera & Capture
+                    </button>
+                    <canvas id="canvas_teacher" width="320" height="240" style="display: none"></canvas>
+                    <input type="hidden" name="captured_image" id="captured_image_teacher" />
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="button" class="btn btn-outline-custom me-md-2" onclick="goBack()">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                  </button>
+                  <button type="submit" class="btn btn-custom">
+                    <i class="fas fa-check me-2"></i> Register Teacher
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -322,32 +494,86 @@
     function goBack() {
       window.history.back();
     }
-    // Webcam capture functionality
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const capturedInput = document.getElementById("captured_image");
 
-    // Start webcam stream
+    // Student Camera Variables
+    const videoStudent = document.getElementById("video_student");
+    const canvasStudent = document.getElementById("canvas_student");
+    const capturedInputStudent = document.getElementById("captured_image_student");
+
+    // Teacher Camera Variables
+    const videoTeacher = document.getElementById("video_teacher");
+    const canvasTeacher = document.getElementById("canvas_teacher");
+    const capturedInputTeacher = document.getElementById("captured_image_teacher");
+
+    // Start student webcam stream automatically
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(function (stream) {
-          video.srcObject = stream;
-          video.play();
+          videoStudent.srcObject = stream;
+          videoStudent.play();
         })
         .catch(function (err) {
-          alert("Could not access the camera. Please allow camera access.");
+          console.log("Could not access the camera for student registration.");
         });
-    } else {
-      alert("getUserMedia not supported in this browser.");
     }
 
-    // Capture image from video
-    function captureImage() {
-      const context = canvas.getContext("2d");
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      capturedInput.value = canvas.toDataURL("image/jpeg");
-      alert("📸 Image captured! Now click Submit.");
+    // Capture student image
+    function captureStudentImage() {
+      const context = canvasStudent.getContext("2d");
+      context.drawImage(videoStudent, 0, 0, canvasStudent.width, canvasStudent.height);
+      capturedInputStudent.value = canvasStudent.toDataURL("image/jpeg");
+      alert("📸 Student image captured! Now click Register Student.");
     }
+
+    // Start teacher camera and capture
+    function startTeacherCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (stream) {
+            videoTeacher.srcObject = stream;
+            videoTeacher.style.display = 'block';
+            videoTeacher.play();
+            
+            // Auto-capture after 3 seconds
+            setTimeout(() => {
+              captureTeacherImage();
+            }, 3000);
+          })
+          .catch(function (err) {
+            alert("Could not access the camera. Please allow camera access.");
+          });
+      } else {
+        alert("getUserMedia not supported in this browser.");
+      }
+    }
+
+    // Capture teacher image
+    function captureTeacherImage() {
+      const context = canvasTeacher.getContext("2d");
+      context.drawImage(videoTeacher, 0, 0, canvasTeacher.width, canvasTeacher.height);
+      capturedInputTeacher.value = canvasTeacher.toDataURL("image/jpeg");
+      
+      // Stop the video stream
+      if (videoTeacher.srcObject) {
+        videoTeacher.srcObject.getTracks().forEach(track => track.stop());
+        videoTeacher.style.display = 'none';
+      }
+      
+      alert("📸 Teacher image captured! Now click Register Teacher.");
+    }
+
+    // Tab switching animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+      tabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+          const target = document.querySelector(e.target.getAttribute('data-bs-target'));
+          target.style.animation = 'none';
+          target.offsetHeight; // Trigger reflow
+          target.style.animation = 'fadeIn 0.5s ease-out';
+        });
+      });
+    });
   </script>
 </body>
 </html>

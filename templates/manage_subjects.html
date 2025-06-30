@@ -40,6 +40,51 @@
             font-weight: bold;
             color: #495057;
         }
+        
+        /* Enhanced Action Buttons */
+        .btn-group .btn {
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 6px 12px;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-group {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+            transition: background-color 0.2s ease;
+        }
     </style>
 </head>
 <body>
@@ -51,7 +96,6 @@
                     <i class="fas fa-book me-2"></i>
                     Manage Subjects
                 </h1>
-                <p class="text-muted">Add, edit, and manage subjects in the system</p>
             </div>
         </div>
 
@@ -64,9 +108,6 @@
                 <a href="{{ url_for('home') }}" class="btn btn-secondary btn-custom ms-2">
                     <i class="fas fa-arrow-left me-2"></i>Back to Home
                 </a>
-                <a href="{{ url_for('manage_teachers') }}" class="btn btn-info btn-custom ms-2">
-                    <i class="fas fa-chalkboard-teacher me-2"></i>Manage Teachers
-                </a>
             </div>
         </div>
 
@@ -77,7 +118,6 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Subject Name</th>
                                 <th>Subject Code</th>
                                 <th>Description</th>
@@ -88,7 +128,6 @@
                         <tbody>
                             {% for subject in subjects %}
                             <tr>
-                                <td>{{ subject.id }}</td>
                                 <td>{{ subject.subject_name }}</td>
                                 <td><span class="subject-code">{{ subject.subject_code }}</span></td>
                                 <td>{{ subject.description or 'No description' }}</td>
@@ -100,12 +139,14 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="btn btn-primary btn-sm" onclick="editSubject({{ subject.id }}, '{{ subject.subject_name }}', '{{ subject.subject_code }}', '{{ subject.description or '' }}')">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-danger btn-sm ms-1" onclick="deleteSubject({{ subject.id }}, '{{ subject.subject_name }}')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
+                                    <div class="btn-group" role="group" aria-label="Subject actions">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editSubject({{ subject.id }}, '{{ subject.subject_name }}', '{{ subject.subject_code }}', '{{ subject.description or '' }}')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteSubject({{ subject.id }}, '{{ subject.subject_name }}')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}

@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Face Recognition Attendance System</title>
 
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Attendance System">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  
+  <!-- Favicon and PWA Icons -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192x192.png') }}">
+
   <!-- Bootstrap 5.3.3 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -895,6 +906,47 @@
     .chatbot-button:active {
       transform: translateY(0) scale(0.98);
     }
+
+    /* PWA Install Button Styles */
+    .pwa-install-banner {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 1000;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      display: none;
+    }
+    
+    .pwa-install-banner.show {
+      display: block;
+      transform: translateX(0);
+    }
+    
+    .pwa-install-banner:hover {
+      transform: translateX(0) scale(1.05);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    }
+    
+    .pwa-install-banner .close-btn {
+      margin-left: 10px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-size: 12px;
+    }
   </style>
 </head>
 
@@ -964,6 +1016,12 @@
     {% endif %}
 
     <div class="overlay {% if session.get('teacher_logged_in') %}teacher-overlay{% endif %}"></div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="pwa-install-banner">
+      <i class="fas fa-download"></i> Install App for Quick Access
+      <button class="close-btn" onclick="closePwaInstallBanner()">×</button>
+    </div>
 
     <!-- Content -->
     <div
@@ -1061,7 +1119,7 @@
         body: JSON.stringify({ message: userInput })
       })
         .then(res => res.json())
-        .then(data => {
+        .then data => {
           chatlog.innerHTML += `<div><b>Bot:</b> ${data.response}</div>`;
           document.getElementById("userInput").value = "";
           chatlog.scrollTop = chatlog.scrollHeight;
@@ -1466,6 +1524,54 @@
         }, 300);
       }
     });
+
+    // Service Worker and PWA Install Prompt
+    let deferredPrompt;
+    const pwaInstallBanner = document.getElementById('pwaInstallBanner');
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+
+    // PWA Install Banner Logic
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Show install banner after 3 seconds
+      setTimeout(() => {
+        pwaInstallBanner.classList.add('show');
+      }, 3000);
+    });
+
+    // Install PWA when banner is clicked
+    pwaInstallBanner.addEventListener('click', (e) => {
+      if (e.target.classList.contains('close-btn')) return;
+      
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+          pwaInstallBanner.classList.remove('show');
+        });
+      }
+    });
+
+    // Close PWA install banner
+    function closePwaInstallBanner() {
+      pwaInstallBanner.classList.remove('show');
+    }
   </script>
 
   <!-- Floating Chatbot Button -->
