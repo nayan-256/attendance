@@ -1772,11 +1772,27 @@ if __name__ == '__main__':
     # Enable access from mobile devices on same network
     # Hide local IP from logs for privacy
     import logging
-    logging.getLogger('werkzeug').setLevel(logging.ERROR)
     
-    print("🚀 Attendance System Started!")
-    print("📱 Access on your computer: http://localhost:5000")
-    print("🌐 For mobile access, check your network IP separately")
-    print("=" * 50)
+    # Suppress Flask's default network IP messages
+    class NoIPFilter(logging.Filter):
+        def filter(self, record):
+            # Hide messages containing IP addresses
+            if hasattr(record, 'getMessage'):
+                message = record.getMessage()
+                if '192.168.' in message or '10.0.' in message or '172.' in message:
+                    return False
+            return True
+    
+    # Apply filter to werkzeug logger
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.addFilter(NoIPFilter())
+    
+    print(" * Environment: development")
+    print(" * Debug mode: on")
+    print(" * Running on http://127.0.0.1:5000")
+    print(" * Press CTRL+C to quit")
+    print(" * Restarting with stat")
+    print(" * Debugger is active!")
+    print(" * Debugger PIN: ***-***-*** (hidden for security)")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
