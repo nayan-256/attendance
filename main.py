@@ -37,6 +37,11 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.secret_key = '123'
 
+# Performance optimizations
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year
+app.config['JSON_SORT_KEYS'] = False  # Don't sort JSON keys (faster)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False  # Compact JSON (faster)
+
 # Dummy admin credentials
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin123'
@@ -1769,30 +1774,34 @@ def service_worker():
     return send_file('static/sw.js', mimetype='application/javascript')
 
 if __name__ == '__main__':
-    # Enable access from mobile devices on same network
-    # Hide local IP from logs for privacy
+    # Fast startup with IP filtering
     import logging
     
-    # Suppress Flask's default network IP messages
-    class NoIPFilter(logging.Filter):
+    # Optimize logging for speed
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    
+    # Fast IP filter
+    class QuickIPFilter(logging.Filter):
         def filter(self, record):
-            # Hide messages containing IP addresses
-            if hasattr(record, 'getMessage'):
-                message = record.getMessage()
-                if '192.168.' in message or '10.0.' in message or '172.' in message:
-                    return False
-            return True
+            msg = str(record.msg)
+            return not ('192.168.' in msg or '10.0.' in msg or '172.' in msg or 'PIN:' in msg)
     
-    # Apply filter to werkzeug logger
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.addFilter(NoIPFilter())
+    # Apply filter
+    logging.getLogger('werkzeug').addFilter(QuickIPFilter())
     
-    print(" * Environment: development")
-    print(" * Debug mode: on")
+    # Print custom startup message in your preferred order
+    print("WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.")
+    print(" * Running on all addresses (0.0.0.0)")
     print(" * Running on http://127.0.0.1:5000")
-    print(" * Press CTRL+C to quit")
-    print(" * Restarting with stat")
-    print(" * Debugger is active!")
-    print(" * Debugger PIN: ***-***-*** (hidden for security)")
+    print(" * Serving Flask app 'main'")
+    print(" * Debug mode: on")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Fast startup configuration
+    app.run(
+        debug=True, 
+        host='0.0.0.0', 
+        port=5000,
+        threaded=True,
+        use_reloader=False,  # Disable reloader for faster startup
+        use_debugger=False   # Disable debugger for speed
+    )
