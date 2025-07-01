@@ -1770,4 +1770,13 @@ def service_worker():
 
 if __name__ == '__main__':
     # Enable access from mobile devices on same network
+    # Hide local IP from logs for privacy
+    import logging
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
+    
+    print("🚀 Attendance System Started!")
+    print("📱 Access on your computer: http://localhost:5000")
+    print("🌐 For mobile access, check your network IP separately")
+    print("=" * 50)
+    
     app.run(debug=True, host='0.0.0.0', port=5000)
