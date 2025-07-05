@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Resources - Teacher Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .upload-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .resources-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .resource-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .resource-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .resource-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .file-types {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Resource Management</h1>
+            <p>Upload and manage study materials for your subjects</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary">🏠 Dashboard</a>
+            <a href="{{ url_for('teacher_logout') }}" class="btn btn-danger">🚪 Logout</a>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="upload-section">
+            <h3>📤 Upload New Resource</h3>
+            <form action="{{ url_for('upload_resource') }}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="subject_id">Subject:</label>
+                    <select name="subject_id" id="subject_id" class="form-control" required>
+                        <option value="">Select a subject</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject[0] }}">{{ subject[1] }} ({{ subject[2] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Resource Title:</label>
+                    <input type="text" name="title" id="title" class="form-control" placeholder="e.g., Lecture 1 - Introduction to Algorithms" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea name="description" id="description" class="form-control" rows="3" placeholder="Brief description of the resource content"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">Choose File:</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" name="file" id="file" required onchange="updateFileName(this)">
+                        <label for="file" class="file-input-label">
+                            <span id="file-name">📎 Click to select file or drag and drop</span>
+                        </label>
+                    </div>
+                    <div class="file-types">
+                        <strong>Supported formats:</strong> PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, ZIP, RAR (Max: 16MB)
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">🚀 Upload Resource</button>
+            </form>
+        </div>
+
+        <div class="resources-section">
+            <h3>📋 Your Uploaded Resources</h3>
+            {% if resources %}
+                <div class="resources-grid">
+                    {% for resource in resources %}
+                        <div class="resource-card">
+                            <div class="resource-title">{{ resource[1] }}</div>
+                            <div class="resource-meta">
+                                <strong>Subject:</strong> {{ resource[6] }} ({{ resource[7] }})<br>
+                                <strong>File:</strong> {{ resource[3] }}<br>
+                                <strong>Size:</strong> {{ "%.2f"|format(resource[4] / 1024 / 1024) }} MB<br>
+                                <strong>Uploaded:</strong> {{ resource[5][:10] }}
+                            </div>
+                            {% if resource[2] %}
+                                <p style="color: #666; margin-bottom: 15px;">{{ resource[2] }}</p>
+                            {% endif %}
+                            <div class="resource-actions">
+                                <a href="{{ url_for('delete_resource', resource_id=resource[0]) }}" 
+                                   class="btn btn-danger" 
+                                   onclick="return confirm('Are you sure you want to delete this resource?')">
+                                   🗑️ Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #666; font-style: italic; padding: 40px;">
+                    📝 No resources uploaded yet. Upload your first resource above!
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name || 'Click to select file or drag and drop';
+            document.getElementById('file-name').textContent = '📎 ' + fileName;
+        }
+
+        // Add drag and drop functionality
+        const fileInputWrapper = document.querySelector('.file-input-wrapper');
+        const fileInput = document.getElementById('file');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputWrapper.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileInputWrapper.querySelector('.file-input-label').style.backgroundColor = '#e9ecef';
+            fileInputWrapper.querySelector('.file-input-label').style.borderColor = '#667eea';
+        }
+
+        function unhighlight(e) {
+            fileInputWrapper.querySelector('.file-input-label').style.backgroundColor = '#f8f9fa';
+            fileInputWrapper.querySelector('.file-input-label').style.borderColor = '#ddd';
+        }
+
+        fileInputWrapper.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileName(fileInput);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import os
+import glob
 # import cv2
 # import pickle
 # import face_recognition
@@ -12,6 +13,8 @@ import base64
 import csv
 import pandas as pd
 import uuid
+import random
+import logging
 from datetime import datetime,timedelta
 from collections import defaultdict
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify
@@ -35,7 +38,24 @@ except ImportError:
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['RESOURCES_FOLDER'] = 'static/resources'
 app.secret_key = '123'
+
+# Create upload and resources folders if they don't exist
+try:
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+    if not os.path.exists(app.config['RESOURCES_FOLDER']):
+        os.makedirs(app.config['RESOURCES_FOLDER'])
+except Exception as e:
+    logging.error(f"Error creating directories: {str(e)}")
+
+# File upload settings
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'jpg', 'jpeg', 'png', 'zip', 'rar'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Performance optimizations
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # Cache static files for 1 year
@@ -140,6 +160,35 @@ def init_db():
         FOREIGN KEY(teacher_id) REFERENCES teachers(id),
         FOREIGN KEY(subject_id) REFERENCES subjects(id),
         UNIQUE(teacher_id, subject_id)
+    )''')
+
+    # Add default teacher-subject mappings
+    cur.execute("SELECT id FROM teachers WHERE username='teacher1'")
+    teacher_result = cur.fetchone()
+    if teacher_result:
+        teacher_id = teacher_result[0]
+        # Assign first 3 subjects to teacher1 for demo
+        for i in range(1, 4):
+            cur.execute("""
+                INSERT OR IGNORE INTO teacher_subjects (teacher_id, subject_id) 
+                VALUES (?, ?)
+            """, (teacher_id, i))
+
+    # Create resources table for file uploads
+    cur.execute('''CREATE TABLE IF NOT EXISTS resources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        file_path TEXT NOT NULL,
+        original_filename TEXT NOT NULL,
+        file_size INTEGER,
+        file_type TEXT,
+        subject_id INTEGER,
+        teacher_id INTEGER,
+        upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_active INTEGER DEFAULT 1,
+        FOREIGN KEY(subject_id) REFERENCES subjects(id),
+        FOREIGN KEY(teacher_id) REFERENCES teachers(id)
     )''')
 
     conn.commit()
@@ -946,6 +995,227 @@ def teacher_dashboard():
         weekly_summary=weekly_summary,
         monthly_summary=monthly_summary
     )
+@app.route('/teacher_resources')
+def teacher_resources():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        # Get teacher's subjects
+        teacher_username = session.get('teacher_username')
+        cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
+        teacher_result = cur.fetchone()
+        
+        if teacher_result:
+            teacher_id = teacher_result[0]
+            
+            # Get subjects assigned to this teacher
+            cur.execute('''
+                SELECT s.id, s.subject_name, s.subject_code 
+                FROM subjects s 
+                JOIN teacher_subjects ts ON s.id = ts.subject_id 
+                WHERE ts.teacher_id = ?
+            ''', (teacher_id,))
+            subjects = cur.fetchall()
+            
+            # Get resources uploaded by this teacher
+            cur.execute('''
+                SELECT r.id, r.title, r.description, r.original_filename, 
+                       r.file_size, r.upload_date, s.subject_name, s.subject_code
+                FROM resources r 
+                JOIN subjects s ON r.subject_id = s.id 
+                WHERE r.teacher_id = ? AND r.is_active = 1
+                ORDER BY r.upload_date DESC
+            ''', (teacher_id,))
+            resources = cur.fetchall()
+        else:
+            subjects = []
+            resources = []
+        
+        conn.close()
+        return render_template('teacher_resources.html', subjects=subjects, resources=resources)
+        
+    except Exception as e:
+        logging.error(f"Error in teacher_resources: {str(e)}")
+        flash('Error loading teacher resources. Please try again.', 'error')
+        return redirect(url_for('home'))
+
+@app.route('/upload_resource', methods=['POST'])
+def upload_resource():
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    try:
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(url_for('teacher_resources'))
+        
+        file = request.files['file']
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        subject_id = request.form.get('subject_id')
+        
+        if file.filename == '' or not title or not subject_id:
+            flash('Please fill all required fields', 'error')
+            return redirect(url_for('teacher_resources'))
+        
+        if file and allowed_file(file.filename):
+            # Create unique filename
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_{secure_filename(file.filename)}"
+            file_path = os.path.join(app.config['RESOURCES_FOLDER'], filename)
+            
+            # Ensure resources directory exists
+            os.makedirs(app.config['RESOURCES_FOLDER'], exist_ok=True)
+            
+            file.save(file_path)
+            file_size = os.path.getsize(file_path)
+            file_type = file.filename.rsplit('.', 1)[1].lower()
+            
+            # Get teacher ID
+            conn = sqlite3.connect('database.db')
+            cur = conn.cursor()
+            teacher_username = session.get('teacher_username')
+            cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
+            teacher_result = cur.fetchone()
+            
+            if teacher_result:
+                teacher_id = teacher_result[0]
+                
+                # Insert resource record
+                cur.execute('''
+                    INSERT INTO resources (title, description, file_path, original_filename, 
+                                         file_size, file_type, subject_id, teacher_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (title, description, file_path, file.filename, file_size, file_type, subject_id, teacher_id))
+                
+                conn.commit()
+                flash('Resource uploaded successfully!', 'success')
+            else:
+                flash('Error: Teacher not found', 'error')
+            
+            conn.close()
+            
+        else:
+            flash('Invalid file type. Allowed types: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, ZIP, RAR', 'error')
+    
+    except Exception as e:
+        logging.error(f"Error in upload_resource: {str(e)}")
+        flash(f'Error uploading file: {str(e)}', 'error')
+    
+    return redirect(url_for('teacher_resources'))
+
+@app.route('/delete_resource/<int:resource_id>')
+def delete_resource(resource_id):
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+    
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    
+    # Get teacher ID
+    teacher_username = session.get('teacher_username')
+    cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
+    teacher_result = cur.fetchone()
+    
+    if teacher_result:
+        teacher_id = teacher_result[0]
+        
+        # Check if resource belongs to this teacher and get file path
+        cur.execute('SELECT file_path FROM resources WHERE id=? AND teacher_id=?', (resource_id, teacher_id))
+        resource = cur.fetchone()
+        
+        if resource:
+            file_path = resource[0]
+            
+            # Delete file from filesystem
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file: {e}")
+            
+            # Mark resource as inactive in database
+            cur.execute('UPDATE resources SET is_active=0 WHERE id=?', (resource_id,))
+            conn.commit()
+            flash('Resource deleted successfully!')
+        else:
+            flash('Resource not found or unauthorized')
+    
+    conn.close()
+    return redirect(url_for('teacher_resources'))
+
+@app.route('/student_resources')
+def student_resources():
+    if not session.get('student_id'):
+        return redirect(url_for('student_login'))
+    
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        # Get all available resources grouped by subject
+        cur.execute('''
+            SELECT r.id, r.title, r.description, r.original_filename, 
+                   r.file_size, r.upload_date, s.subject_name, s.subject_code,
+                   t.username as teacher_name
+            FROM resources r 
+            JOIN subjects s ON r.subject_id = s.id 
+            JOIN teachers t ON r.teacher_id = t.id
+            WHERE r.is_active = 1
+            ORDER BY s.subject_name, r.upload_date DESC
+        ''')
+        resources = cur.fetchall()
+        
+        # Group resources by subject
+        resources_by_subject = {}
+        for resource in resources:
+            subject_name = resource[6]  # subject_name is at index 6
+            if subject_name not in resources_by_subject:
+                resources_by_subject[subject_name] = []
+            resources_by_subject[subject_name].append(resource)
+        
+        conn.close()
+        return render_template('student_resources.html', resources_by_subject=resources_by_subject)
+    
+    except Exception as e:
+        logging.error(f"Error in student_resources: {str(e)}")
+        flash('Error loading resources. Please try again.', 'error')
+        return redirect(url_for('student_home'))
+
+@app.route('/download_resource/<int:resource_id>')
+def download_resource(resource_id):
+    if not session.get('student_id'):
+        return redirect(url_for('student_login'))
+    
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        # Get resource details
+        cur.execute('''
+            SELECT file_path, original_filename 
+            FROM resources 
+            WHERE id=? AND is_active=1
+        ''', (resource_id,))
+        resource = cur.fetchone()
+        
+        conn.close()
+        
+        if resource and len(resource) >= 2 and os.path.exists(resource[0]):
+            return send_file(resource[0], as_attachment=True, download_name=resource[1])
+        else:
+            flash('File not found or has been removed.', 'error')
+            return redirect(url_for('student_resources'))
+            
+    except Exception as e:
+        logging.error(f"Error in download_resource: {str(e)}")
+        flash('Error downloading file. Please try again.', 'error')
+        return redirect(url_for('student_resources'))
+
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
     if request.method == 'POST':
@@ -1361,7 +1631,6 @@ def chatbot_response():
                 "admin": ["'System overview'", "'Manage students'", "'Generate reports'"],
                 "guest": ["'How to mark attendance?'", "'Login help'", "'System features'"]
             }
-            import random
             suggestion = random.choice(suggestions[user_role])
             return jsonify({'response': f"🤔 I'm not sure about that. Try asking: {suggestion}\n\nOr type 'help' to see what I can do for {user_role}s!"})
             
@@ -1613,6 +1882,7 @@ def add_subject():
                    (subject_name, subject_code, description))
         conn.commit()
         return jsonify({'success': True, 'message': 'Subject added successfully'})
+   
     except sqlite3.IntegrityError:
         return jsonify({'success': False, 'message': 'Subject name or code already exists'})
     except Exception as e:
@@ -1658,114 +1928,6 @@ def delete_subject(subject_id):
         return jsonify({'success': False, 'message': str(e)})
     finally:
         conn.close()
-
-# === QR Code Routes for PWA ===
-@app.route('/qr_scanner')
-def qr_scanner():
-    """QR Code scanner page for mobile attendance"""
-    if not session.get('logged_in'):
-        return redirect(url_for('student_login'))
-    return render_template('qr_scanner.html')
-
-# QR Code generator route - DISABLED
-# @app.route('/generate_qr')
-# def generate_qr():
-#     """QR Code generator page for teachers"""
-#     if not session.get('teacher_logged_in'):
-#         return redirect(url_for('teacher_login'))
-#     return render_template('generate_qr.html')
-
-@app.route('/api/qr_attendance', methods=['POST'])
-def qr_attendance():
-    """API endpoint for QR code attendance marking"""
-    try:
-        data = request.get_json()
-        qr_code = data.get('qr_code')
-        student_id = session.get('student_id')
-        
-        if not student_id:
-            return jsonify({'success': False, 'message': 'Not logged in'})
-        
-        # Verify QR code format (should contain subject and timestamp info)
-        # Format: "ATTENDANCE_SUBJECT_TIMESTAMP"
-        if not qr_code or not qr_code.startswith('ATTENDANCE_'):
-            return jsonify({'success': False, 'message': 'Invalid QR code'})
-        
-        # Extract subject from QR code
-        parts = qr_code.split('_')
-        if len(parts) < 3:
-            return jsonify({'success': False, 'message': 'Invalid QR code format'})
-        
-        subject = parts[1]
-        timestamp = parts[2]
-        
-        # Check if QR code is still valid (within 30 minutes)
-        qr_time = datetime.fromtimestamp(int(timestamp))
-        current_time = datetime.now()
-        if (current_time - qr_time).total_seconds() > 1800:  # 30 minutes
-            return jsonify({'success': False, 'message': 'QR code expired'})
-        
-        # Mark attendance
-        conn = sqlite3.connect('database.db')
-        cur = conn.cursor()
-        
-        # Get student details
-        cur.execute("SELECT name FROM users WHERE id = ?", (student_id,))
-        student = cur.fetchone()
-        if not student:
-            return jsonify({'success': False, 'message': 'Student not found'})
-        
-        # Check if already marked attendance for today
-        today = datetime.now().date()
-        cur.execute("SELECT * FROM attendance WHERE name = ? AND subject = ? AND date = ?", 
-                   (student[0], subject, today))
-        existing = cur.fetchone()
-        
-        if existing:
-            return jsonify({'success': False, 'message': 'Attendance already marked for today'})
-        
-        # Mark attendance
-        cur.execute("INSERT INTO attendance (name, subject, date, time, status) VALUES (?, ?, ?, ?, ?)",
-                   (student[0], subject, today, current_time.strftime('%H:%M:%S'), 'Present'))
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'message': f'Attendance marked for {subject}'})
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
-
-# QR Code generation API - DISABLED
-# @app.route('/api/generate_qr_code', methods=['POST'])
-# def generate_qr_code():
-#     """API endpoint to generate QR codes for attendance"""
-#     try:
-#         data = request.get_json()
-#         subject = data.get('subject')
-#         qr_type = data.get('type', 'single')  # single, bulk, custom
-#         
-#         if not session.get('teacher_logged_in'):
-#             return jsonify({'success': False, 'message': 'Not authorized'})
-#         
-#         if not subject:
-#             return jsonify({'success': False, 'message': 'Subject is required'})
-#         
-#         # Generate QR code data
-#         timestamp = str(int(datetime.now().timestamp()))
-#         qr_data = f"ATTENDANCE_{subject}_{timestamp}"
-#         
-#         # For demo purposes, we'll return the QR data
-#         # In a real implementation, you'd use a QR code library like qrcode
-#         return jsonify({
-#             'success': True, 
-#             'qr_data': qr_data,
-#             'subject': subject,
-#             'valid_until': (datetime.now() + timedelta(minutes=30)).isoformat()
-#         })
-#         
-#     except Exception as e:
-#         return jsonify({'success': False, 'message': str(e)})
 
 # === PWA Service Worker Route ===
 @app.route('/static/sw.js')

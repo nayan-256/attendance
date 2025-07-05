@@ -1,7 +1,7 @@
 {
   "name": "Smart Attendance System",
   "short_name": "Attendance",
-  "description": "Modern attendance management system with QR code and biometric features",
+  "description": "Modern attendance management system with biometric features",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",
@@ -90,13 +90,6 @@
       "description": "Quick access to teacher login",
       "url": "/teacher_login",
       "icons": [{ "src": "/static/icons/teacher-icon.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "QR Scanner",
-      "short_name": "Scan QR",
-      "description": "Quick QR code attendance",
-      "url": "/qr_scanner",
-      "icons": [{ "src": "/static/icons/qr-icon.png", "sizes": "96x96" }]
     }
   ]
 }
