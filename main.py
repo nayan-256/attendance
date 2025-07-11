@@ -15,6 +15,7 @@ import pandas as pd
 import uuid
 import random
 import logging
+import json
 from datetime import datetime,timedelta
 from collections import defaultdict
 from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify
@@ -65,6 +66,133 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False  # Compact JSON (faster)
 # Dummy admin credentials
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin123'
+
+# Language translations
+TRANSLATIONS = {
+    'en': {
+        'welcome': 'Welcome to Attendance System',
+        'dashboard': 'Dashboard',
+        'view_profile': 'View Profile',
+        'edit_profile': 'Edit Profile',
+        'logout': 'Logout',
+        'login': 'Login',
+        'register': 'Register',
+        'attendance': 'Attendance',
+        'students': 'Students',
+        'teachers': 'Teachers',
+        'settings': 'Settings',
+        'dark_mode': 'Dark Mode',
+        'language': 'Language',
+        'english': 'English',
+        'hindi': 'हिंदी',
+        'marathi': 'मराठी',
+        'student_login': 'Student Login',
+        'teacher_login': 'Teacher Login',
+        'admin_login': 'Admin Login',
+        'student_id': 'Student ID',
+        'password': 'Password',
+        'name': 'Name',
+        'class_year': 'Class Year',
+        'department': 'Department',
+        'save_changes': 'Save Changes',
+        'cancel': 'Cancel',
+        'apply': 'Apply',
+        'back': 'Back',
+        'settings_updated': 'Settings updated successfully!',
+        'teacher_dashboard': 'Teacher Dashboard',
+        'student_dashboard': 'Student Dashboard',
+        'monitor_attendance': 'Monitor and analyze student attendance patterns',
+        'welcome_back': 'Welcome back',
+        'attendance_records': 'Attendance Records',
+        'attendance_records_dashboard': 'Attendance Records Dashboard'
+    },
+    'hi': {
+        'welcome': 'उपस्थिति प्रणाली में आपका स्वागत है',
+        'dashboard': 'डैशबोर्ड',
+        'view_profile': 'प्रोफ़ाइल देखें',
+        'edit_profile': 'प्रोफ़ाइल संपादित करें',
+        'logout': 'लॉग आउट',
+        'login': 'लॉग इन',
+        'register': 'पंजीकृत करें',
+        'attendance': 'उपस्थिति',
+        'students': 'छात्र',
+        'teachers': 'शिक्षक',
+        'settings': 'सेटिंग्स',
+        'dark_mode': 'डार्क मोड',
+        'language': 'भाषा',
+        'english': 'English',
+        'hindi': 'हिंदी',
+        'marathi': 'मराठी',
+        'student_login': 'छात्र लॉग इन',
+        'teacher_login': 'शिक्षक लॉग इन',
+        'admin_login': 'व्यवस्थापक लॉग इन',
+        'student_id': 'छात्र आईडी',
+        'password': 'पासवर्ड',
+        'name': 'नाम',
+        'class_year': 'कक्षा वर्ष',
+        'department': 'विभाग',
+        'save_changes': 'परिवर्तन सहेजें',
+        'cancel': 'रद्द करें',
+        'apply': 'लागू करें',
+        'back': 'वापस',
+        'settings_updated': 'सेटिंग्स सफलतापूर्वक अपडेट हुईं!',
+        'teacher_dashboard': 'शिक्षक डैशबोर्ड',
+        'student_dashboard': 'छात्र डैशबोर्ड',
+        'monitor_attendance': 'छात्र उपस्थिति पैटर्न की निगरानी और विश्लेषण करें',
+        'welcome_back': 'वापसी पर स्वागत है',
+        'attendance_records': 'उपस्थिति रिकॉर्ड',
+        'attendance_records_dashboard': 'उपस्थिति रिकॉर्ड डैशबोर्ड'
+    },
+    'mr': {
+        'welcome': 'उपस्थिती प्रणालीमध्ये आपले स्वागत आहे',
+        'dashboard': 'डॅशबोर्ड',
+        'view_profile': 'प्रोफाइल पहा',
+        'edit_profile': 'प्रोफाइल संपादित करा',
+        'logout': 'लॉग आउट',
+        'login': 'लॉग इन',
+        'register': 'नोंदणी करा',
+        'attendance': 'उपस्थिती',
+        'students': 'विद्यार्थी',
+        'teachers': 'शिक्षक',
+        'settings': 'सेटिंग्ज',
+        'dark_mode': 'डार्क मोड',
+        'language': 'भाषा',
+        'english': 'English',
+        'hindi': 'हिंदी',
+        'marathi': 'मराठी',
+        'student_login': 'विद्यार्थी लॉग इन',
+        'teacher_login': 'शिक्षक लॉग इन',
+        'admin_login': 'प्रशासक लॉग इन',
+        'student_id': 'विद्यार्थी आयडी',
+        'password': 'पासवर्ड',
+        'name': 'नाव',
+        'class_year': 'वर्ग वर्ष',
+        'department': 'विभाग',
+        'save_changes': 'बदल जतन करा',
+        'cancel': 'रद्द करा',
+        'apply': 'लागू करा',
+        'back': 'परत',
+        'settings_updated': 'सेटिंग्ज यशस्वीरित्या अपडेट झाल्या!',
+        'teacher_dashboard': 'शिक्षक डॅशबोर्ड',
+        'student_dashboard': 'विद्यार्थी डॅशबोर्ड',
+        'monitor_attendance': 'विद्यार्थी उपस्थिती पॅटर्नचे निरीक्षण आणि विश्लेषण करा',
+        'welcome_back': 'परत आल्याबद्दल स्वागत',
+        'attendance_records': 'उपस्थिती रेकॉर्ड',
+        'attendance_records_dashboard': 'उपस्थिती रेकॉर्ड डॅशबोर्ड'
+    }
+}
+
+def get_text(key, lang=None):
+    """Get translated text for the given key and language"""
+    if lang is None:
+        lang = session.get('language', 'en')
+    return TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, key)
+
+# Make get_text available to all templates
+@app.template_global()
+def get_text_global(key, lang=None):
+    """Template global version of get_text"""
+    return get_text(key, lang)
 # === Setup Database ===
 
 def init_db():
@@ -199,7 +327,14 @@ init_db()
 
 @app.route('/', endpoint='home')
 def home():
-    return render_template('index.html')
+    # Set default preferences if not set
+    if 'language' not in session:
+        session['language'] = 'en'
+    if 'theme' not in session:
+        session['theme'] = 'light'
+    return render_template('index.html', get_text=get_text,
+                         current_lang=session.get('language', 'en'),
+                         current_theme=session.get('theme', 'light'))
     
 
 @app.route('/student_dashboard')
@@ -261,7 +396,67 @@ def student_login():
 def student_home():
     if 'student_id' not in session:
         return redirect(url_for('student_login'))
-    return render_template('student_home.html')
+    
+    try:
+        # Set default language and theme if not set
+        if 'language' not in session:
+            session['language'] = 'en'
+        if 'theme' not in session:
+            session['theme'] = 'light'
+        
+        # Create a simple translation context for the template
+        current_lang = session.get('language', 'en')
+        translations = TRANSLATIONS.get(current_lang, TRANSLATIONS['en'])
+        
+        return render_template('student_home.html', 
+                             get_text=get_text,
+                             translations=translations,
+                             current_lang=current_lang,
+                             current_theme=session.get('theme', 'light'))
+    except Exception as e:
+        # Log the error and fall back to basic template
+        logging.error(f"Error in student_home: {str(e)}")
+        return render_template('student_home.html', 
+                             get_text=lambda key, lang=None: key,  # Fallback function
+                             translations={},
+                             current_lang='en',
+                             current_theme='light')
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    # Check if user is logged in (student, teacher, or admin)
+    if not (session.get('student_id') or session.get('teacher_logged_in') or session.get('logged_in')):
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        # Update language preference
+        language = request.form.get('language', 'en')
+        if language in TRANSLATIONS:
+            session['language'] = language
+        
+        # Update theme preference
+        theme = request.form.get('theme', 'light')
+        if theme in ['light', 'dark']:
+            session['theme'] = theme
+        
+        flash(get_text('settings_updated', session.get('language', 'en')), 'success')
+        return redirect(request.referrer or url_for('home'))
+    
+    return render_template('settings.html', get_text=get_text,
+                         current_lang=session.get('language', 'en'),
+                         current_theme=session.get('theme', 'light'))
+
+@app.route('/toggle_theme')
+def toggle_theme():
+    current_theme = session.get('theme', 'light')
+    session['theme'] = 'dark' if current_theme == 'light' else 'light'
+    return jsonify({'theme': session['theme']})
+
+@app.route('/set_language/<lang>')
+def set_language(lang):
+    if lang in TRANSLATIONS:
+        session['language'] = lang
+    return redirect(request.referrer or url_for('home'))
 
 
 @app.route('/login', methods=['GET', 'POST'])

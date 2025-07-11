@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="{{ session.get('language', 'en') }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Home</title>
+  <title>{% if get_text %}{{ get_text('welcome') }}{% else %}Welcome to Attendance System{% endif %}</title>
 
   <!-- Bootstrap 5.3.3 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
+  
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+  
   <!-- AOS Animation Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -23,15 +22,6 @@
       --primary-color: #667eea;
       --secondary-color: #764ba2;
       --success-color: #28a745;
-      --info-color: #17a2b8;
-      --warning-color: #ffc107;
-      --danger-color: #dc3545;
-      --light-color: #f8f9fa;
-      --dark-color: #343a40;
-    }
-
-    * {
-      box-sizing: border-box;
     }
 
     body {
@@ -57,107 +47,54 @@
     .main-container {
       max-width: 900px;
       width: 90%;
-      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.9);
       border-radius: 25px;
-      padding: 50px;
+      padding: 60px 40px;
       box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.15),
         0 0 0 1px rgba(255, 255, 255, 0.1);
       text-align: center;
       position: relative;
-      animation: containerFloat 6s ease-in-out infinite;
-    }
-
-    @keyframes containerFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .main-container::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
-      border-radius: 25px;
-      z-index: -1;
-      opacity: 0.3;
-      animation: borderGlow 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes borderGlow {
-      0% { opacity: 0.3; }
-      100% { opacity: 0.6; }
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
     }
 
     .welcome-title {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 2.8rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      animation: titlePulse 2s ease-in-out infinite;
-      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    @keyframes titlePulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .subtitle {
-      color: #6c757d;
-      font-size: 1.2rem;
-      font-weight: 300;
-      margin-bottom: 40px;
-      opacity: 0;
-      animation: fadeInUp 1s ease-out 0.5s forwards;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      animation: fadeInUp 1s ease-out;
     }
 
     .button-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      justify-content: center;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
       margin-top: 40px;
-      opacity: 0;
-      animation: fadeInUp 1s ease-out 1s forwards;
     }
 
     .nav-btn {
-      position: relative;
-      min-width: 200px;
-      padding: 18px 30px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 15px;
+      padding: 20px 30px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
       text-decoration: none;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
       border: none;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-      transform: translateY(0);
-      will-change: transform;
+      gap: 10px;
     }
 
     .nav-btn::before {
@@ -180,226 +117,27 @@
       box-shadow: 
         0 15px 35px rgba(0, 0, 0, 0.2),
         0 5px 15px rgba(0, 0, 0, 0.1);
+      color: white;
       text-decoration: none;
     }
 
-    .nav-btn:active {
-      transform: translateY(-6px);
-      transition: all 0.1s ease;
-    }
+    .btn-dashboard { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .btn-profile { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .btn-edit { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .btn-logout { background: linear-gradient(135deg, #ff512f, #f09819); }
 
-    .nav-btn i {
-      transition: transform 0.3s ease;
-      margin-right: 8px;
-    }
-
-    .nav-btn:hover i {
-      transform: scale(1.1);
-    }
-
-    /* Prevent any unwanted scaling during interactions */
-    .nav-btn:focus {
-      outline: none;
-      transform: translateY(-6px);
-    }
-
-    .nav-btn:visited {
-      color: inherit;
-    }
-
-    .btn-dashboard {
-      background: linear-gradient(135deg, #17a2b8, #20c997);
-      color: white;
-      border: 2px solid transparent;
-      box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
-    }
-
-    .btn-dashboard:hover {
-      background: linear-gradient(135deg, #138496, #1e7e34);
-      color: white;
-      box-shadow: 0 12px 35px rgba(23, 162, 184, 0.4);
-    }
-
-    .btn-profile {
-      background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.05));
-      color: #007bff;
-      border: 2px solid #007bff;
-      box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
-    }
-
-    .btn-profile:hover {
-      background: linear-gradient(135deg, #007bff, #0056b3);
-      color: white;
-      border-color: #0056b3;
-      box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
-    }
-
-    .btn-edit {
-      background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
-      color: #ffc107;
-      border: 2px solid #ffc107;
-      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.2);
-    }
-
-    .btn-edit:hover {
-      background: linear-gradient(135deg, #ffc107, #e0a800);
-      color: #212529;
-      border-color: #e0a800;
-      box-shadow: 0 12px 35px rgba(255, 193, 7, 0.4);
-    }
-
-    .btn-resources {
-      background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
-      color: #28a745;
-      border: 2px solid #28a745;
-      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
-    }
-
-    .btn-resources:hover {
-      background: linear-gradient(135deg, #28a745, #218838);
-      color: white;
-      border-color: #218838;
-      box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4);
-    }
-
-    .btn-logout {
-      background: linear-gradient(135deg, #dc3545, #c82333);
-      color: white;
-      border: 2px solid transparent;
-      box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
-    }
-
-    .btn-logout:hover {
-      background: linear-gradient(135deg, #c82333, #a71e2a);
-      color: white;
-      box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4);
-    }
-
-    .nav-btn[style*="background: #28a745"]:hover {
-      background: #218838 !important;
-    }
-
-    .nav-btn[style*="background: #17a2b8"]:hover {
-      background: #138496 !important;
-    }
-
-    .chatbot-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 65px;
-      height: 65px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.6rem;
-      text-decoration: none;
-      box-shadow: 
-        0 8px 25px rgba(102, 126, 234, 0.4),
-        0 0 0 0 rgba(102, 126, 234, 0.5);
-      z-index: 1000;
-      transition: all 0.3s ease;
-      animation: chatbotPulse 3s infinite;
-    }
-
-    @keyframes chatbotPulse {
-      0% {
-        box-shadow: 
-          0 8px 25px rgba(102, 126, 234, 0.4),
-          0 0 0 0 rgba(102, 126, 234, 0.5);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
       }
-      70% {
-        box-shadow: 
-          0 8px 25px rgba(102, 126, 234, 0.4),
-          0 0 0 15px rgba(102, 126, 234, 0);
-      }
-      100% {
-        box-shadow: 
-          0 8px 25px rgba(102, 126, 234, 0.4),
-          0 0 0 0 rgba(102, 126, 234, 0);
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
-    .chatbot-btn:hover {
-      background: linear-gradient(135deg, #5a6fd8, #6a5a9e);
-      color: white;
-      transform: scale(1.15) rotate(10deg);
-      text-decoration: none;
-      animation: none;
-      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
-    }
-
-    .floating-particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .particle:nth-child(1) { 
-      width: 20px; height: 20px; 
-      left: 10%; animation-delay: 0s; 
-    }
-    .particle:nth-child(2) { 
-      width: 15px; height: 15px; 
-      left: 20%; animation-delay: 2s; 
-    }
-    .particle:nth-child(3) { 
-      width: 25px; height: 25px; 
-      left: 30%; animation-delay: 4s; 
-    }
-    .particle:nth-child(4) { 
-      width: 18px; height: 18px; 
-      left: 40%; animation-delay: 1s; 
-    }
-    .particle:nth-child(5) { 
-      width: 22px; height: 22px; 
-      left: 50%; animation-delay: 3s; 
-    }
-    .particle:nth-child(6) { 
-      width: 16px; height: 16px; 
-      left: 60%; animation-delay: 5s; 
-    }
-    .particle:nth-child(7) { 
-      width: 24px; height: 24px; 
-      left: 70%; animation-delay: 1.5s; 
-    }
-    .particle:nth-child(8) { 
-      width: 19px; height: 19px; 
-      left: 80%; animation-delay: 3.5s; 
-    }
-    .particle:nth-child(9) { 
-      width: 21px; height: 21px; 
-      left: 90%; animation-delay: 2.5s; 
-    }
-
-    @keyframes float {
-      0%, 100% { 
-        transform: translateY(100vh) rotate(0deg); 
-        opacity: 0; 
-      }
-      10%, 90% { 
-        opacity: 0.3; 
-      }
-      50% { 
-        transform: translateY(0vh) rotate(180deg); 
-        opacity: 0.6; 
-      }
-    }
-
+    /* Responsive design */
     @media (max-width: 768px) {
       .main-container {
         width: 95%;
@@ -408,230 +146,80 @@
       }
       
       .welcome-title {
-        font-size: 2.2rem;
-      }
-
-      .subtitle {
-        font-size: 1rem;
+        font-size: 2rem;
       }
       
       .button-container {
         grid-template-columns: 1fr;
         gap: 15px;
-        margin-top: 30px;
-      }
-
-      .inline-buttons {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .inline-buttons .nav-btn {
-        max-width: 100%;
-        min-width: 100%;
       }
       
       .nav-btn {
-        min-width: 100%;
-        padding: 15px 25px;
+        padding: 15px 20px;
         font-size: 1rem;
-      }
-
-      .chatbot-btn {
-        bottom: 20px;
-        right: 20px;
-        width: 55px;
-        height: 55px;
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .welcome-title {
-        font-size: 1.8rem;
-      }
-      
-      .nav-btn {
-        padding: 12px 20px;
-        font-size: 0.95rem;
-      }
-    }
-
-    /* Loading animation */
-    .main-container {
-      opacity: 0;
-      animation: containerFadeIn 1.2s ease-out forwards;
-    }
-
-    @keyframes containerFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(50px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    /* Hover effects for entire container */
-    .main-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.15);
-    }
-
-    /* Ripple effect */
-    .nav-btn {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-btn:active::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      transform: translate(-50%, -50%);
-      animation: ripple 0.6s ease-out;
-    }
-
-    @keyframes ripple {
-      to {
-        width: 300px;
-        height: 300px;
-        opacity: 0;
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- Floating Particles Background -->
-  <div class="floating-particles">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-  </div>
-
   <div class="main-container" data-aos="fade-up" data-aos-duration="1000">
     <h1 class="welcome-title">
       <i class="fas fa-graduation-cap me-3"></i>
-      Welcome to Attendance System
+      {% if get_text %}{{ get_text('welcome') }}{% else %}Welcome to Attendance System{% endif %}
     </h1>
     
     <div class="button-container">
       <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
         <i class="fas fa-tachometer-alt me-2"></i>
-        Dashboard
+        {% if get_text %}{{ get_text('dashboard') }}{% else %}Dashboard{% endif %}
       </a>
       
       <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="400">
         <i class="fas fa-user me-2"></i>
-        View Profile
+        {% if get_text %}{{ get_text('view_profile') }}{% else %}View Profile{% endif %}
       </a>
       
       <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit" data-aos="zoom-in" data-aos-delay="600">
         <i class="fas fa-edit me-2"></i>
-        Edit Profile
+        {% if get_text %}{{ get_text('edit_profile') }}{% else %}Edit Profile{% endif %}
       </a>
       
-      <a href="{{ url_for('student_resources') }}" class="nav-btn btn-resources" data-aos="zoom-in" data-aos-delay="800">
-        <i class="fas fa-book me-2"></i>
-        Study Resources
-      </a>
-      
-      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="1000">
+      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="800">
         <i class="fas fa-sign-out-alt me-2"></i>
-        Logout
+        {% if get_text %}{{ get_text('logout') }}{% else %}Logout{% endif %}
       </a>
     </div>
   </div>
 
-  <!-- Enhanced Floating Chatbot Button -->
-  <a href="/chatbot" class="chatbot-btn" target="_blank" rel="noopener noreferrer" data-aos="bounce-in" data-aos-delay="1000">
-    <i class="fas fa-comments"></i>
-  </a>
-
-  <!-- Bootstrap JavaScript -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
-  <!-- AOS Animation JavaScript -->
+  <!-- AOS Animation JS -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  
+
   <script>
-    // Initialize AOS
+    // Initialize AOS animations
     AOS.init({
-      duration: 800,
-      easing: 'ease-in-out',
+      duration: 1000,
       once: true,
-      mirror: false
+      offset: 100
     });
 
-    // Add click ripple effect and prevent scaling
+    // Add click ripple effect for buttons
     document.querySelectorAll('.nav-btn').forEach(button => {
       button.addEventListener('click', function(e) {
-        // Immediately redirect without animation delay
-        if (this.href) {
-          e.preventDefault();
-          
-          // Add a quick click feedback without scaling
-          this.style.transform = 'translateY(-6px)';
-          this.style.transition = 'all 0.1s ease';
-          
-          // Navigate after very short delay
-          setTimeout(() => {
-            window.location.href = this.href;
-          }, 50);
-          
-          return;
-        }
-        
-        // Keep ripple effect for visual feedback
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.classList.add('ripple-effect');
-        
-        this.appendChild(ripple);
+        // Quick click feedback
+        this.style.transform = 'translateY(-6px)';
+        this.style.transition = 'all 0.1s ease';
         
         setTimeout(() => {
-          ripple.remove();
-        }, 600);
+          if (this.href) {
+            window.location.href = this.href;
+          }
+        }, 150);
       });
     });
-
-    // Add subtle parallax effect on mouse move
-    document.addEventListener('mousemove', (e) => {
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
-      
-      const container = document.querySelector('.main-container');
-      const chatbot = document.querySelector('.chatbot-btn');
-      
-      container.style.transform = `translate(${mouseX * 10 - 5}px, ${mouseY * 10 - 5}px)`;
-      chatbot.style.transform = `translate(${mouseX * 5 - 2.5}px, ${mouseY * 5 - 2.5}px)`;
-    });
-
-    // Smooth scrolling for better UX
-    document.documentElement.style.scrollBehavior = 'smooth';
   </script>
 </body>
 </html>

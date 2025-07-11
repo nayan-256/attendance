@@ -40,6 +40,35 @@
             position: relative;
             overflow-x: hidden;
         }
+        
+        /* Settings Button Styles */
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+
 
         /* Advanced Background Animation */
         @keyframes gradientShift {
@@ -312,6 +341,11 @@
     </style>
 </head>
 <body>
+    <!-- Settings Button -->
+    <a href="{{ url_for('settings') }}" class="settings-btn" title="Settings">
+        <i class="fas fa-cog"></i>
+    </a>
+    
     <!-- Floating Particles Background -->
     <div class="floating-particles">
         <div class="particle" style="left: 10%; animation-delay: 0s;"></div>

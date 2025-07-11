@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session.get('language', 'en') }}">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Face Recognition Attendance System</title>
+  <title>{{ get_text('welcome') if get_text else 'Face Recognition Attendance System' }}</title>
 
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#4f46e5">
@@ -31,6 +31,61 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
+    :root {
+      /* Dark/Light mode CSS variables */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --card-bg: #ffffff;
+      --navbar-bg: #ffffff;
+      --button-bg: #007bff;
+      --button-text: #ffffff;
+    }
+    
+    /* Dark mode variables */
+    [data-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --border-color: #404040;
+      --shadow-color: rgba(255, 255, 255, 0.1);
+      --card-bg: #2d2d2d;
+      --navbar-bg: #1a1a1a;
+      --button-bg: #0d6efd;
+      --button-text: #ffffff;
+    }
+    
+    /* Settings Button Styles */
+    .settings-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      text-decoration: none;
+    }
+
+    .settings-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      color: white;
+      text-decoration: none;
+    }
+    
     /* Enhanced Background with New Animations */
     .bg-image {
       background-size: 400% 400%;
@@ -951,6 +1006,11 @@
 </head>
 
 <body>
+  <!-- Settings Button -->
+  <a href="{{ url_for('settings') }}" class="settings-btn" title="{% if get_text %}{{ get_text('settings') }}{% else %}Settings{% endif %}">
+    <i class="fas fa-cog"></i>
+  </a>
+  
   <!-- Calendar Floating Button -->
   <div class="calendar-floating-btn" onclick="toggleCalendar()">
     📅

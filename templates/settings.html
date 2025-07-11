@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ get_text('settings') }} - Attendance System</title>
+    
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d3748;
+            --border-color: #4a5568;
+            --light-color: #2d3748;
+            --dark-color: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(-45deg, var(--primary-color), var(--secondary-color), #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(-45deg, #2d3748, #4a5568, #1a202c, #2b6cb0);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .settings-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .settings-header h1 {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .setting-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .setting-group {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .setting-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .setting-label i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: var(--light-color);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .language-option {
+            padding: 15px;
+            background: var(--light-color);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .language-option:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: var(--primary-color);
+            color: var(--text-color);
+        }
+
+        .language-option.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                margin: 20px;
+                padding: 20px;
+            }
+            
+            .language-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="{{ current_theme }}">
+    <a href="javascript:history.back()" class="back-button">
+        <i class="fas fa-arrow-left me-2"></i>{{ get_text('back') }}
+    </a>
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1><i class="fas fa-cog me-3"></i>{{ get_text('settings') }}</h1>
+        </div>
+
+        <!-- Theme Setting -->
+        <div class="setting-group">
+            <div class="setting-label">
+                <i class="fas fa-moon"></i>
+                {{ get_text('dark_mode') }}
+            </div>
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <span>{{ get_text('dark_mode') }}</span>
+                <label class="theme-switch">
+                    <input type="checkbox" id="themeToggle" {{ 'checked' if current_theme == 'dark' else '' }}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Language Setting -->
+        <div class="setting-group">
+            <div class="setting-label">
+                <i class="fas fa-language"></i>
+                {{ get_text('language') }}
+            </div>
+            <div class="language-options">
+                <a href="{{ url_for('set_language', lang='en') }}" 
+                   class="language-option {{ 'active' if current_lang == 'en' else '' }}">
+                    🇺🇸 {{ get_text('english') }}
+                </a>
+                <a href="{{ url_for('set_language', lang='hi') }}" 
+                   class="language-option {{ 'active' if current_lang == 'hi' else '' }}">
+                    🇮🇳 {{ get_text('hindi') }}
+                </a>
+                <a href="{{ url_for('set_language', lang='mr') }}" 
+                   class="language-option {{ 'active' if current_lang == 'mr' else '' }}">
+                    🇮🇳 {{ get_text('marathi') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function toggleTheme() {
+            fetch('/toggle_theme')
+                .then(response => response.json())
+                .then(data => {
+                    document.body.setAttribute('data-theme', data.theme);
+                    document.getElementById('themeToggle').checked = data.theme === 'dark';
+                    
+                    // Update localStorage for persistence
+                    localStorage.setItem('theme', data.theme);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Apply saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || '{{ current_theme }}';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        });
+    </script>
+</body>
+</html>
