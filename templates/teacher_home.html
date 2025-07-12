@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('language', 'en') }}">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% if get_text %}{{ get_text('teacher_dashboard') }}{% else %}Teacher Dashboard{% endif %}</title>
+  <title>Teacher Dashboard</title>
 
   <!-- Bootstrap 5.3.3 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -177,38 +177,38 @@
   <div class="main-container" data-aos="fade-up" data-aos-duration="1000">
     <h1 class="welcome-title">
       <i class="fas fa-chalkboard-teacher me-3"></i>
-      {% if get_text %}{{ get_text('teacher_dashboard') }}{% else %}Teacher Dashboard{% endif %}
+      Teacher Dashboard
     </h1>
     
     <div class="button-container">
       <a href="{{ url_for('teacher_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
         <i class="fas fa-tachometer-alt me-2"></i>
-        {% if get_text %}{{ get_text('dashboard') }}{% else %}Dashboard{% endif %}
+        Dashboard
       </a>
       
       <a href="{{ url_for('students') }}" class="nav-btn btn-students" data-aos="zoom-in" data-aos-delay="300">
         <i class="fas fa-users me-2"></i>
-        {% if get_text %}{{ get_text('manage_students') }}{% else %}Manage Students{% endif %}
+        Manage Students
       </a>
       
       <a href="{{ url_for('teacher_subjects') }}" class="nav-btn btn-subjects" data-aos="zoom-in" data-aos-delay="400">
         <i class="fas fa-book me-2"></i>
-        {% if get_text %}{{ get_text('my_subjects') }}{% else %}My Subjects{% endif %}
+        My Subjects
       </a>
       
       <a href="{{ url_for('manage_subjects') }}" class="nav-btn btn-attendance" data-aos="zoom-in" data-aos-delay="500">
         <i class="fas fa-clipboard-check me-2"></i>
-        {% if get_text %}{{ get_text('attendance') }}{% else %}Attendance{% endif %}
+        Attendance
       </a>
       
       <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="600">
         <i class="fas fa-user me-2"></i>
-        {% if get_text %}{{ get_text('profile') }}{% else %}Profile{% endif %}
+        Profile
       </a>
       
-      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="700">
+      <a href="{{ url_for('teacher_logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="800">
         <i class="fas fa-sign-out-alt me-2"></i>
-        {% if get_text %}{{ get_text('logout') }}{% else %}Logout{% endif %}
+        Logout
       </a>
     </div>
   </div>
@@ -227,20 +227,6 @@
       offset: 100
     });
 
-    // Add click ripple effect for buttons
-    document.querySelectorAll('.nav-btn').forEach(button => {
-      button.addEventListener('click', function(e) {
-        // Quick click feedback
-        this.style.transform = 'translateY(-6px)';
-        this.style.transition = 'all 0.1s ease';
-        
-        setTimeout(() => {
-          if (this.href) {
-            window.location.href = this.href;
-          }
-        }, 150);
-      });
-    });
-  </script>
+      </script>
 </body>
 </html>

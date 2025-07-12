@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('language', 'en') }}">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% if get_text %}{{ get_text('welcome') }}{% else %}Welcome to Attendance System{% endif %}</title>
+  <title>Welcome to Attendance System</title>
 
   <!-- Bootstrap 5.3.3 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -39,10 +39,6 @@
       align-items: center;
       justify-content: center;
       overflow-x: hidden;
-    }
-
-    [data-theme="dark"] body {
-      background: linear-gradient(-45deg, #2d3748, #4a5568, #1a202c, #2b6cb0);
     }
 
     @keyframes gradientShift {
@@ -171,58 +167,35 @@
 
 <body>
   <!-- Settings Button -->
-  <a href="{{ url_for('settings') }}" class="settings-btn" title="{% if get_text %}{{ get_text('settings') }}{% else %}Settings{% endif %}">
+  <a href="{{ url_for('settings') }}" class="settings-btn" title="Settings">
     <i class="fas fa-cog"></i>
   </a>
   
-  <!-- Theme Toggle Button -->
-  <button class="theme-toggle-btn" onclick="toggleTheme()" title="{% if get_text %}{{ get_text('dark_mode') }}{% else %}Toggle Dark Mode{% endif %}">
-    <i class="fas fa-moon" id="themeIcon"></i>
-  </button>
-  
-  <!-- Language Selector -->
-  <button class="language-selector" onclick="toggleLanguageDropdown()" title="Change Language">
-    <span id="currentLang">{{ session.get('language', 'en').upper() }}</span>
-  </button>
-  
-  <!-- Language Dropdown -->
-  <div class="language-dropdown" id="languageDropdown">
-    <div class="language-option {{ 'active' if session.get('language', 'en') == 'en' else '' }}" onclick="changeLanguage('en')">
-      🇺🇸 English
-    </div>
-    <div class="language-option {{ 'active' if session.get('language', 'en') == 'hi' else '' }}" onclick="changeLanguage('hi')">
-      🇮🇳 हिंदी
-    </div>
-    <div class="language-option {{ 'active' if session.get('language', 'en') == 'mr' else '' }}" onclick="changeLanguage('mr')">
-      🇮🇳 मराठी
-    </div>
-  </div>
-
   <div class="main-container" data-aos="fade-up" data-aos-duration="1000">
     <h1 class="welcome-title">
       <i class="fas fa-graduation-cap me-3"></i>
-      {% if get_text %}{{ get_text('welcome') }}{% else %}Welcome to Attendance System{% endif %}
+      Welcome to Attendance System
     </h1>
     
     <div class="button-container">
       <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
         <i class="fas fa-tachometer-alt me-2"></i>
-        {% if get_text %}{{ get_text('dashboard') }}{% else %}Dashboard{% endif %}
+        Dashboard
       </a>
       
       <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="400">
         <i class="fas fa-user me-2"></i>
-        {% if get_text %}{{ get_text('view_profile') }}{% else %}View Profile{% endif %}
+        View Profile
       </a>
       
       <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit" data-aos="zoom-in" data-aos-delay="600">
         <i class="fas fa-edit me-2"></i>
-        {% if get_text %}{{ get_text('edit_profile') }}{% else %}Edit Profile{% endif %}
+        Edit Profile
       </a>
       
       <a href="{{ url_for('logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="800">
         <i class="fas fa-sign-out-alt me-2"></i>
-        {% if get_text %}{{ get_text('logout') }}{% else %}Logout{% endif %}
+        Logout
       </a>
     </div>
   </div>

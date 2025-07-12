@@ -1256,14 +1256,21 @@
       const newYear = currentYear + direction;
 
       if (newYear >= minYear && newYear <= maxYear) {
-        currentYear = newYear; renderCalendar(currentYear); // Update button
-    states updateYearButtons();
+        currentYear = newYear;
+        renderCalendar(currentYear);
+        // Update button states
+        updateYearButtons();
       }
-    } // Update year navigation button states function updateYearButtons() { const
-    prevBtn = document.querySelector('.year-nav-btn[onclick="changeYear(-1)" ]'); const
-      nextBtn = document.querySelector('.year-nav-btn[onclick="changeYear(1)" ]'); if (prevBtn) {
-        prevBtn.disabled = currentYear <= 2022; prevBtn.style.opacity = currentYear <= 2022 ? '0.5' : '1';
-      } if (nextBtn) {
+    }
+    // Update year navigation button states
+    function updateYearButtons() {
+      const prevBtn = document.querySelector('.year-nav-btn[onclick="changeYear(-1)" ]');
+      const nextBtn = document.querySelector('.year-nav-btn[onclick="changeYear(1)" ]');
+      if (prevBtn) {
+        prevBtn.disabled = currentYear <= 2022;
+        prevBtn.style.opacity = currentYear <= 2022 ? '0.5' : '1';
+      }
+      if (nextBtn) {
         nextBtn.disabled = currentYear >= 2028;
         nextBtn.style.opacity = currentYear >= 2028 ? '0.5' : '1';
       }
@@ -1309,16 +1316,29 @@
         `;
 
         // Add empty cells for days before month starts
-        for (let i = 0; i < firstDay; i++) { calendarHTML += '<div class="calendar-day"></div>'; } // Add days of the
-          month const today = new Date(); for (let day = 1; day <= daysInMonth; day++) {
-          const date = `${year}-${String(month +
-            1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const holiday = getHolidayByDate(year, date); const
-              currentDate = new Date(year, month, day); let dayClasses = 'calendar-day'; let dayTitle = ''; // Check if it's
-          today if (currentDate.getDate() === today.getDate() && currentDate.getMonth() === today.getMonth() &&
-            currentDate.getFullYear() === today.getFullYear()) { dayClasses += ' today'; } // Check if it's a holiday if
-          (holiday) {
-            dayClasses += ` holiday ${holiday.type}`; dayTitle = `title="${holiday.name} - ${holiday.reason}" `;
-          } calendarHTML += ` <div class="${dayClasses}" ${dayTitle}>
+        for (let i = 0; i < firstDay; i++) { calendarHTML += '<div class="calendar-day"></div>'; }
+        // Add days of the month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const holiday = getHolidayByDate(year, date);
+          const currentDate = new Date(year, month, day);
+          let dayClasses = 'calendar-day';
+          let dayTitle = '';
+          // Check if it's today
+          if (
+            currentDate.getDate() === today.getDate() &&
+            currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()
+          ) {
+            dayClasses += ' today';
+          }
+          // Check if it's a holiday
+          if (holiday) {
+            dayClasses += ` holiday ${holiday.type}`;
+            dayTitle = `title="${holiday.name} - ${holiday.reason}" `;
+          }
+          calendarHTML += ` <div class="${dayClasses}" ${dayTitle}>
           ${day}
           ${holiday ? '<div class="holiday-indicator"></div>' : ''}
       </div>
@@ -1405,8 +1425,8 @@
         `;
         });
 
-        holidaysHTML += '
-      </div > ';
+        holidaysHTML += `
+      </div > `;
       });
 
       holidaysList.innerHTML = holidaysHTML;

@@ -49,35 +49,6 @@
             overflow-x: hidden;
         }
         
-        /* Settings Button Styles */
-        .settings-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            text-decoration: none;
-        }
-
-        .settings-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-
-
         @keyframes gradientFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -527,11 +498,6 @@
 </head>
 
 <body>
-    <!-- Settings Button -->
-    <a href="{{ url_for('settings') }}" class="settings-btn" title="Settings">
-        <i class="fas fa-cog"></i>
-    </a>
-    
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -556,10 +522,6 @@
 
             <!-- Enhanced Action Buttons -->
             <div class="action-buttons mb-5" data-aos="fade-up" data-aos-delay="200">
-                <a href="{{ url_for('teacher_resources') }}" class="btn-enhanced" style="background: var(--warning-gradient);">
-                    <i class="fas fa-upload"></i>
-                    Manage Resources
-                </a>
                 <a href="{{ url_for('manage_teachers') }}" class="btn-enhanced" style="background: var(--success-gradient);">
                     <i class="fas fa-chalkboard-teacher"></i>
                     Manage Teachers
@@ -734,14 +696,14 @@
         // Chart data from Flask
         let weeklyData = {};
         let monthlyData = {};
-        
+
         try {
-            weeklyData = {{ weekly_summary | default('{}') | tojson | safe }};
-            monthlyData = {{ monthly_summary | default('{}') | tojson | safe }};
+            weeklyData = JSON.parse('{{ weekly_summary | default({}) | tojson | safe }}');
+            monthlyData = JSON.parse('{{ (monthly_summary | default({})) | tojson | safe }}');
         } catch (e) {
             console.error('Error parsing chart data:', e);
         }
-    
+
         console.log('Weekly Data:', weeklyData);
         console.log('Monthly Data:', monthlyData);
 

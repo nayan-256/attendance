@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('language', 'en') }}">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ get_text('welcome') if get_text else 'Face Recognition Attendance System' }}</title>
+  <title>Face Recognition Attendance System</title>
 
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#4f46e5">
@@ -45,18 +45,21 @@
       --button-text: #ffffff;
     }
     
-    /* Dark mode variables */
-    [data-theme="dark"] {
-      --bg-primary: #1a1a1a;
-      --bg-secondary: #2d2d2d;
-      --text-primary: #ffffff;
-      --text-secondary: #b0b0b0;
-      --border-color: #404040;
-      --shadow-color: rgba(255, 255, 255, 0.1);
-      --card-bg: #2d2d2d;
-      --navbar-bg: #1a1a1a;
-      --button-bg: #0d6efd;
-      --button-text: #ffffff;
+    /* Body Background Animation */
+    body {
+      background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+      background-size: 400% 400%;
+      animation: gradientFlow 20s ease infinite;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
     
     /* Settings Button Styles */
@@ -1007,7 +1010,7 @@
 
 <body>
   <!-- Settings Button -->
-  <a href="{{ url_for('settings') }}" class="settings-btn" title="{% if get_text %}{{ get_text('settings') }}{% else %}Settings{% endif %}">
+  <a href="{{ url_for('settings') }}" class="settings-btn" title="Settings">
     <i class="fas fa-cog"></i>
   </a>
   
@@ -1061,15 +1064,7 @@
 
   <!-- Conditional Background Image -->
   <!-- Dynamic Background for Different User Types -->
-  <div class="bg-image {% if session.get('teacher_logged_in') %}teacher-bg{% else %}{% endif %}" style="
-  {% if not session.get('teacher_logged_in') %}
-  {% if session.get('logged_in') %}
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  {% else %}
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  {% endif %}
-  {% endif %}
-">
+<div class="bg-image {% if session.get('teacher_logged_in') %}teacher-bg{% else %}{% endif %}">
     <!-- Animated particles for teacher background -->
     {% if session.get('teacher_logged_in') %}
     <div class="teacher-particles" id="teacherParticles"></div>
@@ -1118,18 +1113,16 @@
         <a href="/logout" class="btn btn-danger btn-lg">
           <i class="fas fa-sign-out-alt me-2"></i>Logout (Admin)
         </a>
-
-        <!-- Teacher View -->
         {% elif session.get('teacher_logged_in') %}
+        <!-- Teacher View -->
         <a href="/teacher_dashboard" class="btn teacher-nav-btn btn-lg me-2">
           <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard
         </a>
         <a href="/teacher_logout" class="btn teacher-nav-btn btn-lg">
           <i class="fas fa-sign-out-alt me-2"></i>Logout
         </a>
-
-        <!-- Student View -->
         {% elif session.get('student_id') %}
+        <!-- Student View -->
         <a href="/student_dashboard" class="btn btn-info btn-lg me-2">
           <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
         </a>
@@ -1142,9 +1135,8 @@
         <a href="/logout" class="btn btn-danger btn-lg">
           <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
         </a>
-
-        <!-- Guest View -->
         {% else %}
+        <!-- Guest View -->
         <a href="/login" class="btn btn-secondary btn-lg me-2">
           <i class="fas fa-user-shield me-2"></i>Admin Login
         </a>
@@ -1179,7 +1171,7 @@
         body: JSON.stringify({ message: userInput })
       })
         .then(res => res.json())
-        .then data => {
+        .then(data => {
           chatlog.innerHTML += `<div><b>Bot:</b> ${data.response}</div>`;
           document.getElementById("userInput").value = "";
           chatlog.scrollTop = chatlog.scrollHeight;

@@ -332,7 +332,7 @@
 
         <div class="nav-buttons">
             <a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">🏠 Dashboard</a>
-            <a href="{{ url_for('student_logout') }}" class="btn btn-danger">🚪 Logout</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">🚪 Logout</a>
         </div>
 
         {% with messages = get_flashed_messages() %}
