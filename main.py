@@ -18,7 +18,7 @@ import logging
 import json
 from datetime import datetime,timedelta
 from collections import defaultdict
-from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify
+from flask import Flask, flash, send_file, render_template, request, redirect, url_for, session,jsonify, make_response
 from werkzeug.utils import secure_filename
 
 # Optional imports that might cause issues
@@ -200,13 +200,13 @@ init_db()
 @app.route('/')
 def home():
     return render_template('index.html')
-    
+
 
 @app.route('/student_dashboard')
 def student_dashboard():
     student_id = session.get('student_id')
     if not student_id:
-        return redirect(url_for('login'))
+        return redirect(url_for('student_login'))
 
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
@@ -216,7 +216,7 @@ def student_dashboard():
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
     student = cur.fetchone()
 
-    # Get recent attendance (ignore status from DB)
+    # Get recent attendance
     cur.execute('''
         SELECT DATE(timestamp) AS date, TIME(timestamp) AS time
         FROM attendance
@@ -226,7 +226,6 @@ def student_dashboard():
     ''', (student['id'],))
     db_records = cur.fetchall()
 
-    # Always set status to "Present"
     attendance_records = []
     for record in db_records:
         attendance_records.append({
@@ -236,7 +235,18 @@ def student_dashboard():
         })
 
     conn.close()
-    return render_template('student_dashboard.html', student=student, attendance_records=attendance_records)
+
+    # Render the dashboard and set cache control
+    response = make_response(render_template(
+        'student_dashboard.html',
+        student=student,
+        attendance_records=attendance_records
+    ))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
 @app.route('/student_login', methods=['GET', 'POST'])
 def student_login():
     if request.method == 'POST':
@@ -259,39 +269,56 @@ def student_login():
 
 @app.route('/student_home')
 def student_home():
-    if 'student_id' not in session:
-        return redirect(url_for('student_login'))
-    
     try:
-        # Set default language and theme if not set
-        if 'language' not in session:
-            session['language'] = 'en'
-        if 'theme' not in session:
-            session['theme'] = 'light'
+        # Check if student is logged in
+        if 'student_id' not in session:
+            flash("Please log in to access this page", "warning")
+            return redirect(url_for('student_login'))
         
-        # Create a simple translation context for the template
-        current_lang = session.get('language', 'en')
-        translations = TRANSLATIONS.get(current_lang, TRANSLATIONS['en'])
+        student_id = session.get('student_id')
         
-        return render_template('student_home.html', 
-                             get_text=get_text,
-                             translations=translations,
-                             current_lang=current_lang,
-                             current_theme=session.get('theme', 'light'))
+        # Connect to database
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        
+        # Get student details
+        cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
+        student = cur.fetchone()
+        
+        if not student:
+            flash("Student not found in database", "error")
+            session.clear()  # Clear invalid session
+            conn.close()
+            return redirect(url_for('student_login'))
+        
+        # Convert to dict for template
+        student_data = {
+            'student_id': student['student_id'],
+            'name': student['name'] or 'Unknown',
+            'class_year': student['class_year'] or 'N/A',
+            'department': student['department'] or 'N/A'
+        }
+        
+        conn.close()
+        
+        # Render template with student data
+        return render_template('student_home.html', student=student_data)
+        
     except Exception as e:
-        # Log the error and fall back to basic template
-        logging.error(f"Error in student_home: {str(e)}")
-        return render_template('student_home.html', 
-                             get_text=lambda key, lang=None: key,  # Fallback function
-                             translations={},
-                             current_lang='en',
-                             current_theme='light')
+        # Log the error (in production, use proper logging)
+        print(f"Error in student_home route: {e}")
+        flash("An error occurred. Please try again.", "error")
+        return redirect(url_for('student_login'))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     # Check if user is logged in (student, teacher, or admin)
     if not (session.get('student_id') or session.get('teacher_logged_in') or session.get('logged_in')):
         return redirect(url_for('home'))
+    
+    # Settings functionality can be added here
+    return render_template('settings.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -610,7 +637,7 @@ def edit_profile():
         if not new_image_path:  # Only show general success if no image success was shown
             flash("Profile updated successfully!", "success")
         
-        return redirect(url_for('profile'))
+        return redirect(url_for('student_home'))
 
     # GET: load existing user data with image path
     cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
@@ -1020,226 +1047,7 @@ def teacher_dashboard():
         weekly_summary=weekly_summary,
         monthly_summary=monthly_summary
     )
-@app.route('/teacher_resources')
-def teacher_resources():
-    if not session.get('teacher_logged_in'):
-        return redirect(url_for('teacher_login'))
-    
-    try:
-        conn = sqlite3.connect('database.db')
-        cur = conn.cursor()
-        
-        # Get teacher's subjects
-        teacher_username = session.get('teacher_username')
-        cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
-        teacher_result = cur.fetchone()
-        
-        if teacher_result:
-            teacher_id = teacher_result[0]
-            
-            # Get subjects assigned to this teacher
-            cur.execute('''
-                SELECT s.id, s.subject_name, s.subject_code 
-                FROM subjects s 
-                JOIN teacher_subjects ts ON s.id = ts.subject_id 
-                WHERE ts.teacher_id = ?
-            ''', (teacher_id,))
-            subjects = cur.fetchall()
-            
-            # Get resources uploaded by this teacher
-            cur.execute('''
-                SELECT r.id, r.title, r.description, r.original_filename, 
-                       r.file_size, r.upload_date, s.subject_name, s.subject_code
-                FROM resources r 
-                JOIN subjects s ON r.subject_id = s.id 
-                WHERE r.teacher_id = ? AND r.is_active = 1
-                ORDER BY r.upload_date DESC
-            ''', (teacher_id,))
-            resources = cur.fetchall()
-        else:
-            subjects = []
-            resources = []
-        
-        conn.close()
-        return render_template('teacher_resources.html', subjects=subjects, resources=resources)
-        
-    except Exception as e:
-        logging.error(f"Error in teacher_resources: {str(e)}")
-        flash('Error loading teacher resources. Please try again.', 'error')
-        return redirect(url_for('home'))
 
-@app.route('/upload_resource', methods=['POST'])
-def upload_resource():
-    if not session.get('teacher_logged_in'):
-        return redirect(url_for('teacher_login'))
-    
-    try:
-        if 'file' not in request.files:
-            flash('No file selected', 'error')
-            return redirect(url_for('teacher_resources'))
-        
-        file = request.files['file']
-        title = request.form.get('title', '').strip()
-        description = request.form.get('description', '').strip()
-        subject_id = request.form.get('subject_id')
-        
-        if file.filename == '' or not title or not subject_id:
-            flash('Please fill all required fields', 'error')
-            return redirect(url_for('teacher_resources'))
-        
-        if file and allowed_file(file.filename):
-            # Create unique filename
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{timestamp}_{secure_filename(file.filename)}"
-            file_path = os.path.join(app.config['RESOURCES_FOLDER'], filename)
-            
-            # Ensure resources directory exists
-            os.makedirs(app.config['RESOURCES_FOLDER'], exist_ok=True)
-            
-            file.save(file_path)
-            file_size = os.path.getsize(file_path)
-            file_type = file.filename.rsplit('.', 1)[1].lower()
-            
-            # Get teacher ID
-            conn = sqlite3.connect('database.db')
-            cur = conn.cursor()
-            teacher_username = session.get('teacher_username')
-            cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
-            teacher_result = cur.fetchone()
-            
-            if teacher_result:
-                teacher_id = teacher_result[0]
-                
-                # Insert resource record
-                cur.execute('''
-                    INSERT INTO resources (title, description, file_path, original_filename, 
-                                         file_size, file_type, subject_id, teacher_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (title, description, file_path, file.filename, file_size, file_type, subject_id, teacher_id))
-                
-                conn.commit()
-                flash('Resource uploaded successfully!', 'success')
-            else:
-                flash('Error: Teacher not found', 'error')
-            
-            conn.close()
-            
-        else:
-            flash('Invalid file type. Allowed types: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, ZIP, RAR', 'error')
-    
-    except Exception as e:
-        logging.error(f"Error in upload_resource: {str(e)}")
-        flash(f'Error uploading file: {str(e)}', 'error')
-    
-    return redirect(url_for('teacher_resources'))
-
-@app.route('/delete_resource/<int:resource_id>')
-def delete_resource(resource_id):
-    if not session.get('teacher_logged_in'):
-        return redirect(url_for('teacher_login'))
-    
-    conn = sqlite3.connect('database.db')
-    cur = conn.cursor()
-    
-    # Get teacher ID
-    teacher_username = session.get('teacher_username')
-    cur.execute('SELECT id FROM teachers WHERE username=?', (teacher_username,))
-    teacher_result = cur.fetchone()
-    
-    if teacher_result:
-        teacher_id = teacher_result[0]
-        
-        # Check if resource belongs to this teacher and get file path
-        cur.execute('SELECT file_path FROM resources WHERE id=? AND teacher_id=?', (resource_id, teacher_id))
-        resource = cur.fetchone()
-        
-        if resource:
-            file_path = resource[0]
-            
-            # Delete file from filesystem
-            try:
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception as e:
-                print(f"Error deleting file: {e}")
-            
-            # Mark resource as inactive in database
-            cur.execute('UPDATE resources SET is_active=0 WHERE id=?', (resource_id,))
-            conn.commit()
-            flash('Resource deleted successfully!')
-        else:
-            flash('Resource not found or unauthorized')
-    
-    conn.close()
-    return redirect(url_for('teacher_resources'))
-
-@app.route('/student_resources')
-def student_resources():
-    if not session.get('student_id'):
-        return redirect(url_for('student_login'))
-    
-    try:
-        conn = sqlite3.connect('database.db')
-        cur = conn.cursor()
-        
-        # Get all available resources grouped by subject
-        cur.execute('''
-            SELECT r.id, r.title, r.description, r.original_filename, 
-                   r.file_size, r.upload_date, s.subject_name, s.subject_code,
-                   t.username as teacher_name
-            FROM resources r 
-            JOIN subjects s ON r.subject_id = s.id 
-            JOIN teachers t ON r.teacher_id = t.id
-            WHERE r.is_active = 1
-            ORDER BY s.subject_name, r.upload_date DESC
-        ''')
-        resources = cur.fetchall()
-        
-        # Group resources by subject
-        resources_by_subject = {}
-        for resource in resources:
-            subject_name = resource[6]  # subject_name is at index 6
-            if subject_name not in resources_by_subject:
-                resources_by_subject[subject_name] = []
-            resources_by_subject[subject_name].append(resource)
-        
-        conn.close()
-        return render_template('student_resources.html', resources_by_subject=resources_by_subject)
-    
-    except Exception as e:
-        logging.error(f"Error in student_resources: {str(e)}")
-        flash('Error loading resources. Please try again.', 'error')
-        return redirect(url_for('student_home'))
-
-@app.route('/download_resource/<int:resource_id>')
-def download_resource(resource_id):
-    if not session.get('student_id'):
-        return redirect(url_for('student_login'))
-    
-    try:
-        conn = sqlite3.connect('database.db')
-        cur = conn.cursor()
-        
-        # Get resource details
-        cur.execute('''
-            SELECT file_path, original_filename 
-            FROM resources 
-            WHERE id=? AND is_active=1
-        ''', (resource_id,))
-        resource = cur.fetchone()
-        
-        conn.close()
-        
-        if resource and len(resource) >= 2 and os.path.exists(resource[0]):
-            return send_file(resource[0], as_attachment=True, download_name=resource[1])
-        else:
-            flash('File not found or has been removed.', 'error')
-            return redirect(url_for('student_resources'))
-            
-    except Exception as e:
-        logging.error(f"Error in download_resource: {str(e)}")
-        flash('Error downloading file. Please try again.', 'error')
-        return redirect(url_for('student_resources'))
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_attendance():
@@ -1984,11 +1792,8 @@ if __name__ == '__main__':
     print(" * Debug mode: on")
     
     # Fast startup configuration
-    app.run(
-        debug=True, 
-        host='0.0.0.0', 
-        port=5000,
-        threaded=True,
-        use_reloader=False,  # Disable reloader for faster startup
-        use_debugger=False   # Disable debugger for speed
-    )
+if __name__ == '__main__':
+    app.secret_key = 'your-secret-key'  # Make sure this is set
+    app.run(debug=True, use_reloader=False)
+
+

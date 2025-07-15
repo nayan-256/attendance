@@ -170,10 +170,12 @@
     </h1>
     
     <div class="button-container">
-      <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
-        <i class="fas fa-tachometer-alt me-2"></i>
-        Dashboard
-      </a>
+    <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
+  <i class="fas fa-tachometer-alt me-2"></i>
+  Dashboard
+</a>
+
+
       
       <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="400">
         <i class="fas fa-user me-2"></i>
@@ -205,21 +207,8 @@
       once: true,
       offset: 100
     });
-
-    // Add click ripple effect for buttons
-    document.querySelectorAll('.nav-btn').forEach(button => {
-      button.addEventListener('click', function(e) {
-        // Quick click feedback
-        this.style.transform = 'translateY(-6px)';
-        this.style.transition = 'all 0.1s ease';
-        
-        setTimeout(() => {
-          if (this.href) {
-            window.location.href = this.href;
-          }
-        }, 150);
-      });
-    });
   </script>
+
+
 </body>
 </html>

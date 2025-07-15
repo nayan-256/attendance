@@ -210,17 +210,22 @@
       <i class="fas fa-user-edit me-2"></i>Edit Profile
     </h2>
     
-    <!-- Current Photo Display -->
-    <div class="text-center mb-4">
-      <h5 class="mb-3"><i class="fas fa-camera me-2"></i>Current Photo</h5>
-      {% set current_img_path = user.image_path if user.image_path else 'default_profile.svg' %}
-      <img src="{{ url_for('static', filename=current_img_path) }}" 
-           alt="Current Profile" 
+  <!-- Current Photo Display -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3"><i class="fas fa-camera me-2"></i>Current Photo</h5>
+    {% if user.image_path %}
+      <img src="{{ url_for('static', filename=user.image_path) }}"
+           alt="Current Profile"
            class="current-photo"
-           onerror="this.onerror=null;this.src='{{ url_for('static', filename='default_profile.svg') }}';">
-    </div>
-    
-    <form method="POST" enctype="multipart/form-data" id="editForm">
+           onerror="handleImageError(this)">
+    {% else %}
+      <img src="{{ url_for('static', filename='default_profile.svg') }}"
+           alt="Default Profile"
+           class="current-photo">
+    {% endif %}
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="editForm">
       <!-- Photo Upload Section -->
       <div class="mb-4">
         <label class="form-label">
@@ -338,6 +343,12 @@
   <!-- JavaScript for Photo Upload and Camera -->
   <script>
     let stream = null;
+    
+    // Handle image loading errors
+    function handleImageError(img) {
+      img.onerror = null; // Prevent infinite loop
+      img.src = "{{ url_for('static', filename='default_profile.svg') }}";
+    }
     
     // Drag and drop functionality
     const uploadArea = document.querySelector('.photo-upload-area');
