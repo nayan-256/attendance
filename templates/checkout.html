@@ -223,25 +223,78 @@
           const setVoice = () => {
             const voices = speechSynthesis.getVoices();
             
-            // Try to find a female voice (look for common female voice names)
-            const femaleVoice = voices.find(voice => 
+            // Enhanced female voice detection with priority order
+            let femaleVoice = null;
+            
+            // Priority 1: Look for voices with explicit female indicators
+            femaleVoice = voices.find(voice => 
               voice.name.toLowerCase().includes('female') ||
-              voice.name.toLowerCase().includes('zira') ||
-              voice.name.toLowerCase().includes('siri') ||
-              voice.name.toLowerCase().includes('samantha') ||
-              voice.name.toLowerCase().includes('susan') ||
-              voice.name.toLowerCase().includes('hazel') ||
-              voice.gender === 'female' ||
-              (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
+              voice.gender === 'female'
             );
             
+            // Priority 2: Look for common female voice names
+            if (!femaleVoice) {
+              femaleVoice = voices.find(voice => 
+                voice.name.toLowerCase().includes('zira') ||
+                voice.name.toLowerCase().includes('eva') ||
+                voice.name.toLowerCase().includes('siri') ||
+                voice.name.toLowerCase().includes('samantha') ||
+                voice.name.toLowerCase().includes('susan') ||
+                voice.name.toLowerCase().includes('hazel') ||
+                voice.name.toLowerCase().includes('cortana') ||
+                voice.name.toLowerCase().includes('helena') ||
+                voice.name.toLowerCase().includes('karen') ||
+                voice.name.toLowerCase().includes('linda') ||
+                voice.name.toLowerCase().includes('melissa') ||
+                voice.name.toLowerCase().includes('sara') ||
+                voice.name.toLowerCase().includes('sarah') ||
+                voice.name.toLowerCase().includes('emily') ||
+                voice.name.toLowerCase().includes('anna') ||
+                voice.name.toLowerCase().includes('claire') ||
+                voice.name.toLowerCase().includes('kate') ||
+                voice.name.toLowerCase().includes('alice') ||
+                voice.name.toLowerCase().includes('helen')
+              );
+            }
+            
+            // Priority 3: Filter out obvious male voices and pick the first remaining
+            if (!femaleVoice) {
+              const nonMaleVoices = voices.filter(voice => 
+                !voice.name.toLowerCase().includes('male') &&
+                !voice.name.toLowerCase().includes('david') &&
+                !voice.name.toLowerCase().includes('mark') &&
+                !voice.name.toLowerCase().includes('james') &&
+                !voice.name.toLowerCase().includes('richard') &&
+                !voice.name.toLowerCase().includes('daniel') &&
+                !voice.name.toLowerCase().includes('paul') &&
+                !voice.name.toLowerCase().includes('michael') &&
+                !voice.name.toLowerCase().includes('john') &&
+                !voice.name.toLowerCase().includes('robert') &&
+                !voice.name.toLowerCase().includes('george') &&
+                !voice.name.toLowerCase().includes('alex') &&
+                !voice.name.toLowerCase().includes('ryan') &&
+                !voice.name.toLowerCase().includes('tom') &&
+                !voice.name.toLowerCase().includes('ben') &&
+                !voice.name.toLowerCase().includes('chris')
+              );
+              
+              if (nonMaleVoices.length > 0) {
+                femaleVoice = nonMaleVoices[0];
+              }
+            }
+            
+            // Set the selected voice
             if (femaleVoice) {
               utterance.voice = femaleVoice;
+              console.log('Selected female voice:', femaleVoice.name);
+            } else {
+              // Fallback: use default voice but adjust pitch for feminine sound
+              console.log('No female voice found, using default with feminine pitch');
             }
             
             // Set speech parameters for a pleasant female voice
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
+            utterance.rate = 0.85;
+            utterance.pitch = 1.2; // Higher pitch for more feminine sound
             utterance.volume = 0.8;
             
             speechSynthesis.speak(utterance);

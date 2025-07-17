@@ -107,7 +107,8 @@
                                             <img src="{{ url_for('static', filename=student.image_path) }}" 
                                                  alt="Profile"
                                                  class="profile-img"
-                                                 onerror="this.onerror=null;this.src='{{ url_for('static', filename='default_profile.svg') }}';">
+                                                 data-fallback="{{ url_for('static', filename='default_profile.svg') }}"
+                                                 onerror="handleImageError(this)">
                                         </td>
                                         <td>
                                             <strong>{{ student.name }}</strong>
@@ -173,5 +174,13 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function handleImageError(img) {
+            // Prevent infinite loop
+            img.onerror = null;
+            // Set fallback image
+            img.src = img.dataset.fallback;
+        }
+    </script>
 </body>
 </html>

@@ -792,71 +792,86 @@ def dashboard():
     # Ensure the user is logged in before proceeding
     if not session.get('logged_in'):
         flash("Please log in as admin to view attendance records", "warning")
-        return redirect(url_for('login'))  # Redirect to login page if not logged in
+        return redirect(url_for('login'))
     
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
     
-    # Fetch all unique names and dates for the dropdowns
+    # Get data for dropdowns
     cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
     names = cur.fetchall()
     
     cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
     dates = cur.fetchall()
     
-    # Initialize variables
+    # Default values
     records = []
-    not_found = False
     show_results = False
+    not_found = False
     
+    # Handle form submission
     if request.method == 'POST':
-        show_results = True
-        selected_name = request.form.get('name')
-        selected_date = request.form.get('date')
-        show_all = request.form.get('show_all')
+        # Get form data
+        selected_name = request.form.get('name', '').strip()
+        selected_date = request.form.get('date', '').strip()
+        show_all = request.form.get('show_all', '')
         
-        # Query for all attendance records (including historical data)
-        # Show all statuses to provide complete attendance history
-        query = '''
-            SELECT 
-                users.name,
-                users.student_id,
-                users.class_year, 
-                users.department, 
-                DATE(attendance.timestamp) AS date, 
-                TIME(attendance.timestamp) AS time, 
-                attendance.status 
-            FROM attendance 
-            JOIN users ON attendance.user_id = users.id
-        '''
-        conditions = []
-        params = []
-        
-        # If show_all button is clicked, don't add additional filters
-        if not show_all:
-            if selected_name and selected_name != '':
-                conditions.append("users.name = ?")
+        # Determine if we should show results
+        if show_all == 'true':
+            # Show all records
+            show_results = True
+            query = '''
+                SELECT 
+                    users.name,
+                    users.student_id,
+                    users.class_year, 
+                    users.department, 
+                    DATE(attendance.timestamp) AS date, 
+                    TIME(attendance.timestamp) AS time, 
+                    attendance.status 
+                FROM attendance 
+                JOIN users ON attendance.user_id = users.id
+                ORDER BY attendance.timestamp DESC
+            '''
+            cur.execute(query)
+            records = cur.fetchall()
+            
+        elif selected_name or selected_date:
+            # Show filtered records
+            show_results = True
+            query = '''
+                SELECT 
+                    users.name,
+                    users.student_id,
+                    users.class_year, 
+                    users.department, 
+                    DATE(attendance.timestamp) AS date, 
+                    TIME(attendance.timestamp) AS time, 
+                    attendance.status 
+                FROM attendance 
+                JOIN users ON attendance.user_id = users.id
+                WHERE 1=1
+            '''
+            params = []
+            
+            if selected_name:
+                query += " AND users.name = ?"
                 params.append(selected_name)
             
-            if selected_date and selected_date != '':
-                conditions.append("DATE(attendance.timestamp) = ?")
+            if selected_date:
+                query += " AND DATE(attendance.timestamp) = ?"
                 params.append(selected_date)
+            
+            query += " ORDER BY attendance.timestamp DESC"
+            cur.execute(query, params)
+            records = cur.fetchall()
         
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-        
-        query += " ORDER BY attendance.timestamp DESC"
-        
-        cur.execute(query, tuple(params))
-        records = cur.fetchall()
-        
-        # If no records are found, display a "not found" message
-        not_found = len(records) == 0
-    
-    # For GET request, don't show any records by default
-    # Records will only be shown when search is performed
+        # Check if no records found
+        if show_results and len(records) == 0:
+            not_found = True
     
     conn.close()
+    
     return render_template('dashboard.html', 
                          records=records, 
                          names=names, 
