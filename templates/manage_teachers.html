@@ -106,8 +106,8 @@
                 <button class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
                     <i class="fas fa-plus me-2"></i>Add New Teacher
                 </button>
-                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-custom ms-2">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Home
+                <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary btn-custom ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                 </a>
             </div>
         </div>
@@ -139,10 +139,14 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="Teacher actions">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="editTeacher({{ teacher.id }}, '{{ teacher.username }}')">
+                                        <button class="btn btn-outline-primary btn-sm edit-teacher-btn" 
+                                                data-teacher-id="{{ teacher.id }}" 
+                                                data-teacher-username="{{ teacher.username }}">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteTeacher({{ teacher.id }}, '{{ teacher.username }}')">
+                                        <button class="btn btn-outline-danger btn-sm delete-teacher-btn" 
+                                                data-teacher-id="{{ teacher.id }}" 
+                                                data-teacher-username="{{ teacher.username }}">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     </div>
@@ -316,6 +320,27 @@
                 });
             }
         }
+
+        // Add event listeners for edit and delete buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit teacher buttons
+            document.querySelectorAll('.edit-teacher-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const teacherId = this.getAttribute('data-teacher-id');
+                    const teacherUsername = this.getAttribute('data-teacher-username');
+                    editTeacher(parseInt(teacherId), teacherUsername);
+                });
+            });
+
+            // Delete teacher buttons
+            document.querySelectorAll('.delete-teacher-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const teacherId = this.getAttribute('data-teacher-id');
+                    const teacherUsername = this.getAttribute('data-teacher-username');
+                    deleteTeacher(parseInt(teacherId), teacherUsername);
+                });
+            });
+        });
     </script>
 </body>
 </html>

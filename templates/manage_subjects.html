@@ -105,8 +105,8 @@
                 <button class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
                     <i class="fas fa-plus me-2"></i>Add New Subject
                 </button>
-                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-custom ms-2">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Home
+                <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary btn-custom ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                 </a>
             </div>
         </div>
@@ -140,10 +140,16 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="Subject actions">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="editSubject({{ subject.id }}, '{{ subject.subject_name }}', '{{ subject.subject_code }}', '{{ subject.description or '' }}')">
+                                        <button class="btn btn-outline-primary btn-sm edit-subject-btn" 
+                                                data-subject-id="{{ subject.id }}" 
+                                                data-subject-name="{{ subject.subject_name }}" 
+                                                data-subject-code="{{ subject.subject_code }}" 
+                                                data-subject-description="{{ subject.description or '' }}">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteSubject({{ subject.id }}, '{{ subject.subject_name }}')">
+                                        <button class="btn btn-outline-danger btn-sm delete-subject-btn" 
+                                                data-subject-id="{{ subject.id }}" 
+                                                data-subject-name="{{ subject.subject_name }}">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     </div>
@@ -292,6 +298,29 @@
                 });
             }
         }
+
+        // Add event listeners for edit and delete buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit subject buttons
+            document.querySelectorAll('.edit-subject-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subjectId = this.getAttribute('data-subject-id');
+                    const subjectName = this.getAttribute('data-subject-name');
+                    const subjectCode = this.getAttribute('data-subject-code');
+                    const subjectDescription = this.getAttribute('data-subject-description');
+                    editSubject(parseInt(subjectId), subjectName, subjectCode, subjectDescription);
+                });
+            });
+
+            // Delete subject buttons
+            document.querySelectorAll('.delete-subject-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subjectId = this.getAttribute('data-subject-id');
+                    const subjectName = this.getAttribute('data-subject-name');
+                    deleteSubject(parseInt(subjectId), subjectName);
+                });
+            });
+        });
     </script>
 </body>
 </html>

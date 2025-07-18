@@ -478,13 +478,6 @@
                 >
                   <i class="fas fa-list me-2"></i>Show All Records
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-outline-light"
-                  onclick="clearForm()"
-                >
-                  <i class="fas fa-times me-2"></i>Clear Filters
-                </button>
               </div>
             </div>
           </form>
@@ -505,7 +498,8 @@
       {% endif %}
 
       <!-- Enhanced Attendance Records Table -->
-      {% if show_results and records %}
+      {% if show_results %}
+        {% if records %}
       <div class="card glass-container" data-aos="fade-up" data-aos-delay="400">
         <div class="card-header bg-transparent border-0">
           <h5 class="text-white mb-0">
@@ -519,72 +513,38 @@
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table enhanced-table mb-0">
+            <table class="table table-dark table-striped">
               <thead>
-                <tr>
-                  <th><i class="fas fa-user me-1"></i>Student Name</th>
-                  <th><i class="fas fa-id-card me-1"></i>Student ID</th>
-                  <th><i class="fas fa-graduation-cap me-1"></i>Class Year</th>
-                  <th><i class="fas fa-building me-1"></i>Department</th>
-                  <th><i class="fas fa-calendar me-1"></i>Date</th>
-                  <th><i class="fas fa-clock me-1"></i>Time</th>
-                  <th><i class="fas fa-check-circle me-1"></i>Status</th>
+                <tr style="background-color: rgba(255,255,255,0.1);">
+                  <th style="color: white;">Student Name</th>
+                  <th style="color: white;">Student ID</th>
+                  <th style="color: white;">Class Year</th>
+                  <th style="color: white;">Department</th>
+                  <th style="color: white;">Date</th>
+                  <th style="color: white;">Time</th>
+                  <th style="color: white;">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {% for record in records %}
-                <tr data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-circle me-2">
-                        <i class="fas fa-user"></i>
-                      </div>
-                      <div>
-                        <span
-                          style="
-                            color: #fff !important;
-                            font-weight: bold;
-                            font-size: 14px;
-                          "
-                        >
-                          {{ record[0] if record[0] and record[0].strip() else
-                          'Unknown Student' }}
-                        </span>
-                      </div>
-                    </div>
+                <tr>
+                  <td style="color: white !important; font-weight: bold;">
+                    <i class="fas fa-user me-2"></i>{{ record[0] }}
                   </td>
-                  <td>
+                  <td style="color: white !important;">
                     <span class="badge bg-info">{{ record[1] }}</span>
                   </td>
+                  <td style="color: white !important;">{{ record[2] }}</td>
+                  <td style="color: white !important;">{{ record[3] }}</td>
+                  <td style="color: white !important;">{{ record[4] }}</td>
+                  <td style="color: white !important;">{{ record[5] }}</td>
                   <td>
-                    {{ record[2] if record[2] and record[2] != 'None' else 'N/A'
-                    }}
-                  </td>
-                  <td>
-                    {{ record[3] if record[3] and record[3] != 'None' else 'N/A'
-                    }}
-                  </td>
-                  <td>
-                    <i class="fas fa-calendar-day me-1"></i>{{ record[4] }}
-                  </td>
-                  <td><i class="fas fa-clock me-1"></i>{{ record[5] }}</td>
-                  <td>
-                    {% if record[6] == 'Present' or record[6] == 'Check-In' %}
-                    <span class="status-badge status-present">
-                      <i class="fas fa-check me-1"></i>{{ record[6] }}
-                    </span>
+                    {% if record[6] == 'Check-In' %}
+                    <span class="badge bg-success">{{ record[6] }}</span>
                     {% elif record[6] == 'Check-Out' %}
-                    <span class="status-badge status-checkout">
-                      <i class="fas fa-sign-out-alt me-1"></i>{{ record[6] }}
-                    </span>
-                    {% elif record[6] == 'Absent' %}
-                    <span class="status-badge status-absent">
-                      <i class="fas fa-times me-1"></i>{{ record[6] }}
-                    </span>
+                    <span class="badge bg-warning">{{ record[6] }}</span>
                     {% else %}
-                    <span class="status-badge status-other">
-                      <i class="fas fa-question me-1"></i>{{ record[6] }}
-                    </span>
+                    <span class="badge bg-secondary">{{ record[6] }}</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -594,7 +554,7 @@
           </div>
         </div>
       </div>
-      {% elif show_results and not records %}
+        {% else %}
       <div
         class="card glass-container text-center"
         data-aos="fade-up"
@@ -608,6 +568,7 @@
           </p>
         </div>
       </div>
+        {% endif %}
       {% else %}
       <div
         class="card glass-container text-center"
@@ -670,28 +631,22 @@
           return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
-        // Add loading animation to form submit
-        $("#searchForm").on("submit", function () {
-          const submitBtn = $(this).find('button[type="submit"]');
-          const originalHTML = submitBtn.html();
-          submitBtn.html(
-            '<i class="fas fa-spinner fa-spin me-2"></i>Searching...'
-          );
-          submitBtn.prop("disabled", true);
-
-          // Re-enable after form submission (this won't execute if form submits successfully)
+        // Simple form submission handling - don't interfere with submission
+        $("#searchForm button[type='submit']").on("click", function() {
+          const btn = $(this);
+          const isShowAll = btn.attr('name') === 'show_all';
+          
+          // Just add loading state, don't prevent submission
           setTimeout(() => {
-            submitBtn.html(originalHTML);
-            submitBtn.prop("disabled", false);
-          }, 3000);
+            if (isShowAll) {
+              btn.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading All Records...');
+            } else {
+              btn.html('<i class="fas fa-spinner fa-spin me-2"></i>Searching...');
+            }
+            btn.prop("disabled", true);
+          }, 10);
         });
       });
-
-      // Clear form function
-      function clearForm() {
-        document.getElementById("searchForm").reset();
-        $(".select2").val(null).trigger("change");
-      }
 
       // Add random delay to particles
       document.querySelectorAll(".particle").forEach((particle, index) => {

@@ -789,7 +789,6 @@ def view_attendance():
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    # Ensure the user is logged in before proceeding
     if not session.get('logged_in'):
         flash("Please log in as admin to view attendance records", "warning")
         return redirect(url_for('login'))
@@ -804,23 +803,25 @@ def dashboard():
     cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
     dates = cur.fetchall()
     
-    # Default values
+    # Initialize variables
     records = []
     show_results = False
     not_found = False
     
-    # Handle form submission
+    # Handle POST requests only
     if request.method == 'POST':
-        # Get form data
-        selected_name = request.form.get('name', '').strip()
-        selected_date = request.form.get('date', '').strip()
-        show_all = request.form.get('show_all', '')
+        show_all = request.form.get('show_all')
         
-        # Determine if we should show results
+        print(f"POST request received. show_all: '{show_all}'")
+        print(f"All form data: {dict(request.form)}")
+        
+        # ALWAYS show results when form is submitted
+        show_results = True
+        
+        # If "Show All Records" button was clicked
         if show_all == 'true':
-            # Show all records
-            show_results = True
-            query = '''
+            print("Show All Records button clicked!")
+            cur.execute('''
                 SELECT 
                     users.name,
                     users.student_id,
@@ -832,13 +833,15 @@ def dashboard():
                 FROM attendance 
                 JOIN users ON attendance.user_id = users.id
                 ORDER BY attendance.timestamp DESC
-            '''
-            cur.execute(query)
+            ''')
             records = cur.fetchall()
+            print(f"Found {len(records)} records for show all")
             
-        elif selected_name or selected_date:
-            # Show filtered records
-            show_results = True
+        else:
+            # Handle search filters
+            selected_name = request.form.get('name', '').strip()
+            selected_date = request.form.get('date', '').strip()
+            
             query = '''
                 SELECT 
                     users.name,
@@ -865,19 +868,52 @@ def dashboard():
             query += " ORDER BY attendance.timestamp DESC"
             cur.execute(query, params)
             records = cur.fetchall()
+            print(f"Found {len(records)} records for search")
         
-        # Check if no records found
-        if show_results and len(records) == 0:
+        # Set not_found if no records
+        if len(records) == 0:
             not_found = True
+        
+        print(f"Final: show_results={show_results}, records={len(records)}, not_found={not_found}")
     
     conn.close()
-    
-    return render_template('dashboard.html', 
+    return render_template('dashboard_simple.html', 
                          records=records, 
                          names=names, 
                          dates=dates, 
                          not_found=not_found,
-                         show_results=show_results)
+                         show_results=show_results,
+                         request=request)
+
+# Simple test route to verify show all functionality
+@app.route('/test_show_all_route')
+def test_show_all_route():
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute('''
+        SELECT 
+            users.name,
+            users.student_id,
+            users.class_year, 
+            users.department, 
+            DATE(attendance.timestamp) AS date, 
+            TIME(attendance.timestamp) AS time, 
+            attendance.status 
+        FROM attendance 
+        JOIN users ON attendance.user_id = users.id
+        ORDER BY attendance.timestamp DESC
+        LIMIT 10
+    ''')
+    records = cur.fetchall()
+    conn.close()
+    
+    html = f"<h1>Test Route - Found {len(records)} records</h1>"
+    html += "<table border='1' style='color: black;'>"
+    html += "<tr><th>Name</th><th>ID</th><th>Year</th><th>Dept</th><th>Date</th><th>Time</th><th>Status</th></tr>"
+    for record in records:
+        html += f"<tr><td>{record[0]}</td><td>{record[1]}</td><td>{record[2]}</td><td>{record[3]}</td><td>{record[4]}</td><td>{record[5]}</td><td>{record[6]}</td></tr>"
+    html += "</table>"
+    return html
 
 # Direct attendance viewing route (for easier access during testing)
 @app.route('/view_all_attendance')
