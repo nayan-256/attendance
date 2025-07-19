@@ -94,16 +94,6 @@
       border: 1px solid var(--glass-border);
       transition: all 0.3s ease;
       z-index: 2;
-      animation: containerFloat 6s ease-in-out infinite;
-    }
-
-    @keyframes containerFloat {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
     }
 
     .main-container::before {
@@ -140,39 +130,32 @@
 
     .button-container {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 25px;
       margin-top: 40px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .nav-btn {
-      padding: 20px 30px;
+      padding: 25px 30px;
       color: white;
       text-decoration: none;
-      border-radius: 15px;
+      border-radius: 20px;
       font-weight: 600;
       font-size: 1.1rem;
       box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.12),
-        0 5px 10px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
+        0 15px 35px rgba(0, 0, 0, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s ease;
       position: relative;
       overflow: hidden;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       min-height: 80px;
-      width: 100%;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
-      transform: translateY(0);
     }
 
     .nav-btn::before {
@@ -182,114 +165,49 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
       transition: left 0.5s ease;
-    }
-
-    .nav-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s ease, height 0.6s ease;
     }
 
     .nav-btn:hover::before {
       left: 100%;
     }
 
-    .nav-btn:hover::after {
-      width: 300px;
-      height: 300px;
-    }
-
     .nav-btn:hover {
-      transform: translateY(-8px);
+      transform: translateY(-8px) scale(1.02);
       box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.2),
-        0 5px 15px rgba(0, 0, 0, 0.1);
+        0 25px 50px rgba(0, 0, 0, 0.25),
+        0 10px 25px rgba(0, 0, 0, 0.15);
       color: white;
       text-decoration: none;
     }
 
     .nav-btn:active {
-      transform: translateY(-4px);
+      transform: translateY(-4px) scale(1.01);
       transition: all 0.1s ease;
     }
 
     .nav-btn i {
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-      margin-right: 8px;
-      z-index: 2;
-      position: relative;
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
     }
 
     .nav-btn:hover i {
-      transform: scale(1.1);
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      transform: scale(1.1) rotate(5deg);
     }
 
-    .nav-btn span {
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      z-index: 2;
-      position: relative;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Button specific gradients with enhanced effects */
+    /* Button specific gradients */
     .btn-dashboard { 
       background: var(--primary-gradient);
-      box-shadow: 
-        0 15px 35px rgba(102, 126, 234, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.1);
     }
     .btn-profile { 
       background: var(--warning-gradient);
-      box-shadow: 
-        0 15px 35px rgba(240, 147, 251, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.1);
     }
     .btn-edit { 
       background: var(--info-gradient);
-      box-shadow: 
-        0 15px 35px rgba(79, 172, 254, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.1);
     }
     .btn-logout { 
       background: var(--danger-gradient);
-      box-shadow: 
-        0 15px 35px rgba(255, 81, 47, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Enhanced hover effects for each button */
-    .btn-dashboard:hover {
-      box-shadow: 
-        0 25px 50px rgba(102, 126, 234, 0.4),
-        0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-    .btn-profile:hover {
-      box-shadow: 
-        0 25px 50px rgba(240, 147, 251, 0.4),
-        0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-    .btn-edit:hover {
-      box-shadow: 
-        0 25px 50px rgba(79, 172, 254, 0.4),
-        0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-    .btn-logout:hover {
-      box-shadow: 
-        0 25px 50px rgba(255, 81, 47, 0.4),
-        0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     @keyframes fadeInUp {
@@ -308,40 +226,8 @@
       50% { transform: scale(1.05); }
     }
 
-    @keyframes bounce {
-      0%, 20%, 53%, 80%, 100% {
-        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-        transform: translate3d(0, 0, 0);
-      }
-      40%, 43% {
-        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-        transform: translate3d(0, -8px, 0);
-      }
-      70% {
-        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-        transform: translate3d(0, -4px, 0);
-      }
-      90% {
-        transform: translate3d(0, -2px, 0);
-      }
-    }
-
     .welcome-title i {
       animation: pulse 2s ease-in-out infinite;
-    }
-
-    /* Button entrance animations */
-    .nav-btn:nth-child(1) {
-      animation: fadeInUp 0.6s ease-out 0.2s both;
-    }
-    .nav-btn:nth-child(2) {
-      animation: fadeInUp 0.6s ease-out 0.4s both;
-    }
-    .nav-btn:nth-child(3) {
-      animation: fadeInUp 0.6s ease-out 0.6s both;
-    }
-    .nav-btn:nth-child(4) {
-      animation: fadeInUp 0.6s ease-out 0.8s both;
     }
 
     /* Responsive design */
@@ -362,22 +248,13 @@
       
       .button-container {
         grid-template-columns: 1fr;
-        gap: 15px;
-        max-width: 400px;
+        gap: 20px;
       }
       
       .nav-btn {
-        padding: 15px 20px;
+        padding: 20px 25px;
         font-size: 1rem;
-        min-height: 60px;
-      }
-
-      .nav-btn i {
-        font-size: 1.1rem;
-      }
-
-      .nav-btn span {
-        font-size: 1rem;
+        min-height: 70px;
       }
     }
 
@@ -386,28 +263,15 @@
         font-size: 2rem;
       }
       
-      .button-container {
-        gap: 12px;
-        max-width: 320px;
-      }
-      
       .nav-btn {
-        padding: 12px 15px;
-        min-height: 55px;
-      }
-
-      .nav-btn i {
-        font-size: 1rem;
-      }
-
-      .nav-btn span {
-        font-size: 0.9rem;
+        padding: 18px 20px;
+        min-height: 65px;
       }
     }
 
     /* Loading animation */
     .main-container {
-      animation: slideInUp 0.8s ease-out, containerFloat 8s ease-in-out 1s infinite;
+      animation: slideInUp 0.8s ease-out;
     }
 
     @keyframes slideInUp {
@@ -419,39 +283,6 @@
         opacity: 1;
         transform: translateY(0);
       }
-    }
-
-    @keyframes containerFloat {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-8px);
-      }
-    }
-
-    /* Enhanced button ripple effect */
-    .nav-btn {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-btn:before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .nav-btn:active:before {
-      width: 300px;
-      height: 300px;
     }
   </style>
 </head>
@@ -505,37 +336,27 @@
       easing: 'ease-out-cubic'
     });
 
-    // Enhanced interactive effects
-    document.querySelectorAll('.nav-btn').forEach((btn, index) => {
-      // Mouse enter effect
+    // Add interactive effects
+    document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
-        this.style.transition = 'all 0.3s ease';
+        this.style.transform = 'translateY(-8px) scale(1.02)';
       });
       
-      // Mouse leave effect
       btn.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
+        this.style.transform = 'translateY(0) scale(1)';
       });
     });
 
     // Add loading states for better UX
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
-        const icon = this.querySelector('i');
-        const span = this.querySelector('span');
-        const originalIcon = icon.className;
-        const originalText = span.textContent;
-        
-        // Show loading state
-        icon.className = 'fas fa-spinner fa-spin';
-        span.textContent = 'Loading...';
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
         this.style.pointerEvents = 'none';
         
-        // Reset after delay (page will likely navigate)
+        // Re-enable after a short delay (the page will likely have navigated by then)
         setTimeout(() => {
-          icon.className = originalIcon;
-          span.textContent = originalText;
+          this.innerHTML = originalText;
           this.style.pointerEvents = 'auto';
         }, 2000);
       });
@@ -545,8 +366,8 @@
     function createParticle() {
       const particle = document.createElement('div');
       particle.style.position = 'fixed';
-      particle.style.width = '3px';
-      particle.style.height = '3px';
+      particle.style.width = '4px';
+      particle.style.height = '4px';
       particle.style.background = 'rgba(255,255,255,0.1)';
       particle.style.borderRadius = '50%';
       particle.style.left = Math.random() * 100 + 'vw';
@@ -563,19 +384,7 @@
     }
 
     // Create particles periodically
-    setInterval(createParticle, 400);
-
-    // Add ripple animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(4);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
+    setInterval(createParticle, 300);
   </script>
 </body>
 </html>

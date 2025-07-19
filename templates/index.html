@@ -351,7 +351,7 @@
       padding: 3rem 2rem;
       border-radius: 25px;
       text-align: center;
-      max-width: 650px;
+      max-width: 750px;
       box-shadow:
         0 25px 50px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.2),
@@ -589,14 +589,73 @@
       opacity: 0.95;
     }
 
+    /* Navigation Container Styling */
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-top: 30px;
+      padding: 20px 0;
+    }
+
     nav a {
-      margin: 10px;
+      margin: 5px;
       min-width: 180px;
       opacity: 0.9;
+      flex: 0 1 auto;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     nav a:hover {
       opacity: 1;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive Navigation */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 12px;
+        padding: 15px 0;
+      }
+      
+      nav a {
+        min-width: 250px;
+        margin: 3px 0;
+      }
+      
+      .container {
+        max-width: 90%;
+        padding: 2rem 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav a {
+        min-width: 200px;
+        font-size: 0.9rem;
+        padding: 12px 20px;
+      }
+      
+      .container {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    /* Special styling for multi-button layouts */
+    nav:has(a:nth-child(4)) {
+      max-width: 100%;
+    }
+    
+    nav:has(a:nth-child(3)) a {
+      min-width: 160px;
     }
 
     /* Calendar Widget Styles */
@@ -794,6 +853,15 @@
       background-color: #ffebee;
       color: #c62828;
       font-weight: bold;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .calendar-day.holiday:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 10;
     }
 
     .calendar-day.holiday.national {
@@ -819,6 +887,135 @@
       height: 4px;
       background-color: #ff4444;
       border-radius: 50%;
+    }
+
+    /* Holiday Details Popup */
+    .holiday-details-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      max-width: 400px;
+      width: 90%;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid #f0f0f0;
+    }
+
+    .holiday-details-popup.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .holiday-details-popup .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .holiday-details-popup .popup-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+
+    .holiday-details-popup .close-popup {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .holiday-details-popup .close-popup:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .holiday-details-popup .holiday-info {
+      margin-bottom: 15px;
+    }
+
+    .holiday-details-popup .holiday-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .holiday-details-popup .holiday-date {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .holiday-details-popup .holiday-reason {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .holiday-details-popup .holiday-type {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .holiday-details-popup .holiday-type.national {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+    }
+
+    .holiday-details-popup .holiday-type.religious {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      color: white;
+    }
+
+    .holiday-details-popup .holiday-type.festival {
+      background: linear-gradient(135deg, #feca57, #ff9ff3);
+      color: white;
+    }
+
+    .holiday-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .holiday-popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
     }
 
     .holidays-section {
@@ -1062,6 +1259,21 @@
     </div>
   </div>
 
+  <!-- Holiday Details Popup -->
+  <div class="holiday-popup-overlay" id="holidayPopupOverlay" onclick="closeHolidayPopup()"></div>
+  <div class="holiday-details-popup" id="holidayDetailsPopup">
+    <div class="popup-header">
+      <h3 class="popup-title">🎉 Holiday Details</h3>
+      <button class="close-popup" onclick="closeHolidayPopup()">×</button>
+    </div>
+    <div class="holiday-info">
+      <div class="holiday-name" id="popupHolidayName"></div>
+      <div class="holiday-date" id="popupHolidayDate"></div>
+      <div class="holiday-reason" id="popupHolidayReason"></div>
+      <span class="holiday-type" id="popupHolidayType"></span>
+    </div>
+  </div>
+
   <!-- Conditional Background Image -->
   <!-- Dynamic Background for Different User Types -->
 <div class="bg-image {% if session.get('teacher_logged_in') %}teacher-bg{% else %}{% endif %}">
@@ -1245,6 +1457,53 @@
       overlay.classList.remove('show');
     }
 
+    // Show holiday details popup
+    function showHolidayDetails(date, name, reason, type) {
+      const popup = document.getElementById('holidayDetailsPopup');
+      const overlay = document.getElementById('holidayPopupOverlay');
+      
+      // Populate popup content
+      document.getElementById('popupHolidayName').textContent = name;
+      document.getElementById('popupHolidayDate').textContent = formatDate(date);
+      document.getElementById('popupHolidayReason').textContent = reason;
+      
+      const typeElement = document.getElementById('popupHolidayType');
+      typeElement.textContent = type;
+      typeElement.className = `holiday-type ${type}`;
+      
+      // Show popup
+      popup.classList.add('show');
+      overlay.classList.add('show');
+    }
+
+    // Close holiday details popup
+    function closeHolidayPopup() {
+      const popup = document.getElementById('holidayDetailsPopup');
+      const overlay = document.getElementById('holidayPopupOverlay');
+      
+      popup.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    // Add keyboard support for closing popups
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeHolidayPopup();
+        closeCalendar();
+      }
+    });
+
     // Change year
     function changeYear(direction) {
       currentYear += direction;
@@ -1322,7 +1581,9 @@
           }
 
           calendarHTML += `
-            <div class="${dayClasses}" ${dayTitle}>
+            <div class="${dayClasses}" ${dayTitle} 
+                 ${holiday ? `onclick="showHolidayDetails('${date}', '${holiday.name}', '${holiday.reason}', '${holiday.type}')"` : ''}
+                 ${holiday ? 'style="cursor: pointer;"' : ''}>
               ${day}
               ${holiday ? '<div class="holiday-indicator"></div>' : ''}
             </div>
