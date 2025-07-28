@@ -1296,68 +1296,102 @@
       {% if session.get('teacher_logged_in') %}
       <h1 class="teacher-title">👨‍🏫 Welcome to Teacher Dashboard</h1>
       {% elif not session.get('logged_in') %}
-      <h1>🎯 Your Face is Your ID: Welcome to Attendance System</h1>
+      <h1><i class="fas fa-crosshairs" style="color: #ff6b35; margin-right: 8px;"></i>Your Face is Your ID: Welcome to Attendance System</h1>
       {% else %}
       <h1>👨‍💼 Admin Dashboard: Manage Attendance & Users</h1>
       {% endif %}
       <nav>
         {% if not session.get('logged_in') and not session.get('teacher_logged_in') and not session.get('student_id') %}
         <!-- Show on home page (no one logged in) -->
-        <a href="/register" class="btn btn-success btn-lg me-2">
-          <i class="fas fa-user-plus me-2"></i>Register User
-        </a>
-        <a href="/checkin" class="btn btn-primary btn-lg me-2">
-          <i class="fas fa-sign-in-alt me-2"></i>Check-in
-        </a>
-        <a href="/checkout" class="btn btn-info btn-lg">
-          <i class="fas fa-sign-out-alt me-2"></i>Check-out
-        </a>
+        <div class="row g-3 justify-content-center">
+          <!-- Main Action Buttons -->
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+              <a href="/register" class="btn btn-success btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-user-plus me-2"></i>Register User
+              </a>
+              <a href="/checkin" class="btn btn-primary btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-sign-in-alt me-2"></i>Check-in
+              </a>
+              <a href="/checkout" class="btn btn-info btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Check-out
+              </a>
+            </div>
+          </div>
+          
+          <!-- Login Section -->
+          <div class="col-12">
+            <div class="text-center mb-3">
+              <h5 class="text-muted">Already Registered? Login Here</h5>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="/login" class="btn btn-outline-secondary btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-user-shield me-2"></i>Admin Login
+              </a>
+              <a href="/teacher_login" class="btn btn-outline-dark btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Login
+              </a>
+              <a href="/student_login" class="btn btn-outline-success btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-user-graduate me-2"></i>Student Login
+              </a>
+            </div>
+          </div>
+        </div>
         {% endif %}
 
         <!-- Admin View -->
         {% if session.get('logged_in') %}
-        <a href="/dashboard" class="btn btn-warning btn-lg me-2">
-          <i class="fas fa-chart-line me-2"></i>View Attendance Records
-        </a>
-        <a href="{{ url_for('show_students') }}" class="btn btn-info btn-lg me-2">
-          <i class="fas fa-users me-2"></i>All Students
-        </a>
-        <a href="/logout" class="btn btn-danger btn-lg">
-          <i class="fas fa-sign-out-alt me-2"></i>Logout (Admin)
-        </a>
+        <div class="row g-3 justify-content-center">
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="/dashboard" class="btn btn-warning btn-lg d-flex align-items-center px-4 py-3" style="min-width: 200px;">
+                <i class="fas fa-chart-line me-2"></i>View Attendance Records
+              </a>
+              <a href="{{ url_for('show_students') }}" class="btn btn-info btn-lg d-flex align-items-center px-4 py-3" style="min-width: 200px;">
+                <i class="fas fa-users me-2"></i>All Students
+              </a>
+              <a href="/logout" class="btn btn-danger btn-lg d-flex align-items-center px-4 py-3" style="min-width: 200px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout (Admin)
+              </a>
+            </div>
+          </div>
+        </div>
         {% elif session.get('teacher_logged_in') %}
         <!-- Teacher View -->
-        <a href="/teacher_dashboard" class="btn teacher-nav-btn btn-lg me-2">
-          <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard
-        </a>
-        <a href="/teacher_logout" class="btn teacher-nav-btn btn-lg">
-          <i class="fas fa-sign-out-alt me-2"></i>Logout
-        </a>
+        <div class="row g-3 justify-content-center">
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="/teacher_dashboard" class="btn teacher-nav-btn btn-lg d-flex align-items-center px-4 py-3" style="min-width: 200px;">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Dashboard
+              </a>
+              <a href="/teacher_logout" class="btn teacher-nav-btn btn-lg d-flex align-items-center px-4 py-3" style="min-width: 200px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
         {% elif session.get('student_id') %}
         <!-- Student View -->
-        <a href="/student_dashboard" class="btn btn-info btn-lg me-2">
-          <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
-        </a>
-        <a href="/profile" class="btn btn-outline-primary btn-lg me-2">
-          <i class="fas fa-user me-2"></i>View Profile
-        </a>
-        <a href="/edit_profile" class="btn btn-outline-warning btn-lg me-2">
-          <i class="fas fa-edit me-2"></i>Edit Profile
-        </a>
-        <a href="/logout" class="btn btn-danger btn-lg">
-          <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
-        </a>
-        {% else %}
-        <!-- Guest View -->
-        <a href="/login" class="btn btn-secondary btn-lg me-2">
-          <i class="fas fa-user-shield me-2"></i>Admin Login
-        </a>
-        <a href="/teacher_login" class="btn btn-dark btn-lg me-2">
-          <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Login
-        </a>
-        <a href="/student_login" class="btn btn-outline-success btn-lg">
-          <i class="fas fa-user-graduate me-2"></i>Student Login
-        </a>
+        <div class="row g-3 justify-content-center">
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
+              <a href="/student_dashboard" class="btn btn-info btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
+              </a>
+              <a href="/profile" class="btn btn-outline-primary btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-user me-2"></i>View Profile
+              </a>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="/edit_profile" class="btn btn-outline-warning btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-edit me-2"></i>Edit Profile
+              </a>
+              <a href="/logout" class="btn btn-danger btn-lg d-flex align-items-center px-4 py-3" style="min-width: 180px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
+              </a>
+            </div>
+          </div>
+        </div>
         {% endif %}
       </nav>
 

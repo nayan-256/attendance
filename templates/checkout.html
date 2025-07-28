@@ -179,54 +179,11 @@
       font-weight: 600;
     }
 
-    /* Back Button Styles */
-    .back-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50px;
-      padding: 12px 20px;
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-    }
 
-    .back-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-      color: white;
-      text-decoration: none;
-    }
-
-    .back-btn:active {
-      transform: translateY(0);
-    }
-
-    .back-btn i {
-      margin-right: 8px;
-      transition: transform 0.3s ease;
-    }
-
-    .back-btn:hover i {
-      transform: translateX(-3px);
-    }
   </style>
 </head>
 
 <body>
-  <!-- Back Button -->
-  <a href="{{ url_for('home') }}" class="back-btn animate__animated animate__fadeInLeft">
-    <i class="fas fa-arrow-left"></i>Back to Home
-  </a>
 
   <div class="checkout-box animate__animated animate__zoomIn">
     <div class="checkout-icon animate__animated animate__bounceIn">
@@ -235,33 +192,58 @@
     <h2 class="checkout-title animate__animated animate__fadeInDown">Face Recognition</h2>
     <p class="checkout-subtitle animate__animated animate__fadeInUp">Check-Out System</p>
 
-    <form id="checkinForm" method="POST">
-      <!-- Hide the button so it's not visible or clickable -->
-      <button id="checkoutBtn" type="submit" class="btn btn-checkin animate__animated animate__pulse"
-        style="display:none;">
-        <i class="fas fa-play me-2"></i>
-        <span id="btnText">Start Face Scan</span>
-        <div id="spinner" class="spinner-border text-light ms-2 d-none" role="status"></div>
-      </button>
-    </form>
-
-    <div class="progress-steps animate__animated animate__fadeInUp">
-      <div id="step1" class="step">Step 1: Position your face in front of camera</div>
-      <div id="step2" class="step">Step 2: Verifying your identity</div>
-      <div id="step3" class="step">Step 3: Completing check-out process</div>
+    {% if result %}
+    <div class="result-box animate__animated animate__fadeIn">
+      {% if 'successfully' in result %}
+      <i class="fas fa-check-circle text-success me-2"></i>{{ result }}
+      {% else %}
+      <i class="fas fa-times-circle text-danger me-2"></i>{{ result }}
+      {% endif %}
     </div>
-
-    <div id="statusMsg" class="status-message d-none animate__animated"></div>
-
     <script>
-      window.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('checkoutForm');
-        if (form) {
-          form.submit();
-        }
-      });
+      const resultText = "{{ result }}";
+      const studentName = "{{ student_name }}";
+      let speakText;
 
-      // Female voice function
+      // Debug logging
+      console.log("Result text:", resultText);
+      console.log("Student name:", studentName);
+      console.log("Student name type:", typeof studentName);
+
+      // Extract student name - try multiple methods
+      let finalStudentName = "";
+      
+      // Method 1: Use the passed student_name parameter
+      if (studentName && studentName !== "None" && studentName !== "" && studentName.trim() !== "") {
+        finalStudentName = studentName.trim();
+      }
+      
+      // Method 2: If student_name is empty, try to extract from result text
+      if (!finalStudentName && resultText && (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked out"))) {
+        const nameMatch = resultText.match(/^(.+?)\s+checked out successfully/i);
+        if (nameMatch) {
+          finalStudentName = nameMatch[1].trim();
+        }
+      }
+
+      console.log("Final student name:", finalStudentName);
+
+      // Check if check-out was successful or failed
+      if (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked out")) {
+        if (finalStudentName) {
+          speakText = `Check-out successful! Thank you ${finalStudentName} for using the attendance system. Have a wonderful day!`;
+        } else {
+          speakText = "Check-out successful! Thank you for using the attendance system. Have a wonderful day!";
+        }
+      } else if (resultText.toLowerCase().includes("not recognized")) {
+        speakText = "Sorry, your face was not recognized. Please try again or contact the administrator.";
+      } else {
+        speakText = "Check-out failed. Please try again.";
+      }
+
+      console.log("Final speech text:", speakText);
+
+      // Enhanced function to speak with female voice only
       function speakWithFemaleVoice(text) {
         return new Promise((resolve) => {
           if (!speechSynthesis) {
@@ -298,178 +280,134 @@
             if (!femaleVoice) {
               femaleVoice = voices.find(voice =>
                 voice.name.toLowerCase().includes('zira') ||
-                voice.name.toLowerCase().includes('eva') ||
                 voice.name.toLowerCase().includes('siri') ||
                 voice.name.toLowerCase().includes('samantha') ||
                 voice.name.toLowerCase().includes('susan') ||
                 voice.name.toLowerCase().includes('hazel') ||
-                voice.name.toLowerCase().includes('cortana') ||
-                voice.name.toLowerCase().includes('helena') ||
+                voice.name.toLowerCase().includes('catherine') ||
+                voice.name.toLowerCase().includes('eva') ||
                 voice.name.toLowerCase().includes('karen') ||
-                voice.name.toLowerCase().includes('linda') ||
-                voice.name.toLowerCase().includes('melissa') ||
-                voice.name.toLowerCase().includes('sara') ||
-                voice.name.toLowerCase().includes('sarah') ||
-                voice.name.toLowerCase().includes('emily') ||
-                voice.name.toLowerCase().includes('anna') ||
-                voice.name.toLowerCase().includes('claire') ||
-                voice.name.toLowerCase().includes('kate') ||
-                voice.name.toLowerCase().includes('alice') ||
-                voice.name.toLowerCase().includes('helen')
+                voice.name.toLowerCase().includes('moira') ||
+                voice.name.toLowerCase().includes('tessa') ||
+                (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
               );
             }
 
-            // Priority 3: Filter out obvious male voices
+            // Priority 3: If no female voice found, prefer English voices
             if (!femaleVoice) {
-              const nonMaleVoices = voices.filter(voice =>
-                !voice.name.toLowerCase().includes('male') &&
-                !voice.name.toLowerCase().includes('david') &&
-                !voice.name.toLowerCase().includes('mark') &&
-                !voice.name.toLowerCase().includes('james') &&
-                !voice.name.toLowerCase().includes('richard') &&
-                !voice.name.toLowerCase().includes('daniel') &&
-                !voice.name.toLowerCase().includes('paul') &&
-                !voice.name.toLowerCase().includes('michael') &&
-                !voice.name.toLowerCase().includes('john') &&
-                !voice.name.toLowerCase().includes('robert') &&
-                !voice.name.toLowerCase().includes('george') &&
-                !voice.name.toLowerCase().includes('alex') &&
-                !voice.name.toLowerCase().includes('ryan') &&
-                !voice.name.toLowerCase().includes('tom') &&
-                !voice.name.toLowerCase().includes('ben') &&
-                !voice.name.toLowerCase().includes('chris')
+              femaleVoice = voices.find(voice =>
+                voice.lang.startsWith('en') && !voice.name.toLowerCase().includes('male')
               );
+            }
 
-              if (nonMaleVoices.length > 0) {
-                femaleVoice = nonMaleVoices[0];
-              }
+            // Priority 4: Fallback to first available voice
+            if (!femaleVoice && voices.length > 0) {
+              femaleVoice = voices[0];
             }
 
             if (femaleVoice) {
               utterance.voice = femaleVoice;
-              console.log('Selected female voice:', femaleVoice.name);
-            } else {
-              console.log('No female voice found, using default');
+              console.log('Selected voice:', femaleVoice.name);
             }
 
+            // Set speech parameters for a pleasant female voice
             utterance.rate = 0.85;
             utterance.pitch = 1.2;
-            utterance.volume = 0.8;
+            utterance.volume = 0.9;
 
-            console.log('Starting speech:', text);
             speechSynthesis.speak(utterance);
           };
 
+          // If voices are already loaded
           if (speechSynthesis.getVoices().length > 0) {
             setVoice();
           } else {
-            speechSynthesis.addEventListener('voiceschanged', setVoice);
+            // Wait for voices to load
+            speechSynthesis.addEventListener('voiceschanged', setVoice, { once: true });
+            // Fallback timeout
+            setTimeout(() => {
+              if (speechSynthesis.getVoices().length === 0) {
+                console.log('No voices loaded, proceeding without voice selection');
+                speechSynthesis.speak(utterance);
+              }
+            }, 1000);
           }
         });
       }
 
-      // Handle form submission with voice feedback
-      if (form) {
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault(); // Prevent default form submission
-
-          console.log('Form submitted, starting process...');
-
-          // Show processing UI
-          document.getElementById("btnText").innerText = "Scanning...";
-          spinner.classList.remove("d-none");
-          statusMsg.classList.remove("d-none");
-          btn.disabled = true;
-
-          // Activate steps progressively
+      // Enhanced function to handle voice and redirect after completion
+      async function handleVoiceAndRedirect() {
+        try {
+          console.log('Starting voice announcement:', speakText);
+          await speakWithFemaleVoice(speakText);
+          console.log('Voice announcement completed, redirecting...');
+          
+          // Wait a brief moment after speech ends, then redirect
           setTimeout(() => {
-            document.getElementById("step1").classList.add("active");
-            statusMsg.innerHTML = "<i class='fas fa-camera me-2'></i>Please look directly at the camera";
-            statusMsg.classList.add("animate__fadeIn");
-          }, 500);
-
+            window.location.href = "/";
+          }, 800);
+        } catch (error) {
+          console.error('Voice error:', error);
+          // Fallback: redirect after 4 seconds if voice fails
           setTimeout(() => {
-            document.getElementById("step1").classList.remove("active");
-            document.getElementById("step2").classList.add("active");
-            statusMsg.innerHTML = "<i class='fas fa-search me-2'></i>Analyzing facial features...";
-          }, 2000);
-
-          setTimeout(async () => {
-            document.getElementById("step2").classList.remove("active");
-            document.getElementById("step3").classList.add("active");
-            statusMsg.innerHTML = "<i class='fas fa-check me-2'></i>Finalizing check-out...";
-
-            // Submit form and get real result
-            try {
-              const formData = new FormData(form);
-              const response = await fetch('/checkout', {
-                method: 'POST',
-                body: formData
-              });
-
-              if (response.ok) {
-                const html = await response.text();
-
-                // Extract result from response HTML
-                let resultText = '';
-                let studentName = '';
-
-                // Look for result patterns in the HTML
-                if (html.includes('checked out successfully')) {
-                  const nameMatch = html.match(/(\w+)\s+checked out successfully/);
-                  if (nameMatch) {
-                    studentName = nameMatch[1];
-                    resultText = `Check-out successful! Thank you ${studentName} for using the attendance system. Have a wonderful day!`;
-                  } else {
-                    resultText = "Check-out successful! Thank you for using the attendance system. Have a great day!";
-                  }
-                } else if (html.includes('not recognized')) {
-                  resultText = "Sorry, your face was not recognized. Please try again or contact the administrator.";
-                } else if (html.includes('Error:')) {
-                  resultText = "Check-out failed due to an error. Please try again.";
-                } else {
-                  resultText = "Check-out process completed.";
-                }
-
-                // Update UI to show completion
-                statusMsg.innerHTML = "<i class='fas fa-check-circle text-success me-2'></i>Process completed!";
-
-                // Play voice WITHOUT black screen
-                try {
-                  console.log('Playing voice message:', resultText);
-                  await speakWithFemaleVoice(resultText);
-                  console.log('Voice completed');
-                } catch (error) {
-                  console.error('Voice error:', error);
-                }
-
-                // Redirect after voice completes
-                setTimeout(() => {
-                  window.location.href = "/";
-                }, 1000);
-
-              } else {
-                // Handle error
-                statusMsg.innerHTML = "<i class='fas fa-times-circle text-danger me-2'></i>Error occurred";
-                await speakWithFemaleVoice("Check-out failed. Please try again.");
-                setTimeout(() => {
-                  window.location.href = "/";
-                }, 2000);
-              }
-
-            } catch (error) {
-              console.error('Check-out error:', error);
-              statusMsg.innerHTML = "<i class='fas fa-times-circle text-danger me-2'></i>Network error";
-              await speakWithFemaleVoice("Check-out failed. Please try again.");
-              setTimeout(() => {
-                window.location.href = "/";
-              }, 2000);
-            }
-
-          }, 3000);
-        });
+            window.location.href = "/";
+          }, 4000);
+        }
       }
+
+      // Start the voice alert and redirect process
+      handleVoiceAndRedirect();
     </script>
+
+    {% else %}
+    <form id="checkoutForm" method="POST">
+      <!-- Hide the button so it's not visible or clickable -->
+      <button id="checkoutBtn" type="submit" class="btn btn-checkin animate__animated animate__pulse"
+        style="display:none;">
+        <i class="fas fa-play me-2"></i>
+        <span id="btnText">Start Face Scan</span>
+        <div id="spinner" class="spinner-border text-light ms-2 d-none" role="status"></div>
+      </button>
+    </form>
+
+    <div class="progress-steps animate__animated animate__fadeInUp">
+      <div id="step1" class="step">Step 1: Position your face in front of camera</div>
+      <div id="step2" class="step">Step 2: Verifying your identity</div>
+      <div id="step3" class="step">Step 3: Completing check-out process</div>
+    </div>
+
+    <div id="statusMsg" class="status-message d-none animate__animated"></div>
+    {% endif %}
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('checkoutForm');
+      if (form) {
+        form.submit();
+      }
+    });
+
+    // Activate steps progressively
+    setTimeout(() => {
+      document.getElementById("step1").classList.add("active");
+      statusMsg.innerHTML = "<i class='fas fa-camera me-2'></i>Please look directly at the camera";
+      statusMsg.classList.add("animate__fadeIn");
+    }, 500);
+
+    setTimeout(() => {
+      document.getElementById("step1").classList.remove("active");
+      document.getElementById("step2").classList.add("active");
+      statusMsg.innerHTML = "<i class='fas fa-search me-2'></i>Analyzing facial features...";
+    }, 2000);
+
+    setTimeout(() => {
+      document.getElementById("step2").classList.remove("active");
+      document.getElementById("step3").classList.add("active");
+      statusMsg.innerHTML = "<i class='fas fa-check me-2'></i>Finalizing check-out...";
+    }, 4000);
+      
+  </script>
 </body>
 
 </html>

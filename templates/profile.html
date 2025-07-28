@@ -1,131 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <title>Student Profile</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2 80%);
-      min-height: 100vh;
-    }
-
-    .profile-card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
-      padding: 36px 32px 28px 32px;
-      max-width: 480px;
-      margin: 60px auto 0 auto;
-      animation: fadeInUp 1s;
-    }
-
-    .profile-img {
-      width: 180px;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 20px;
-      /* Rounded rectangle for better face visibility */
-      border: 4px solid #3391fb;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 12px rgba(51, 145, 251, 0.15);
-      background: #f0f4fa;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .profile-title {
-      font-weight: 700;
-      color: #3391fb;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-
-    .profile-table th {
-      width: 40%;
-      background: #f0f4fa;
-      color: #3391fb;
-      border-top: none;
-      border-bottom: 1px solid #e3e3e3;
-    }
-
-    .profile-table td {
-      border-top: none;
-      border-bottom: 1px solid #e3e3e3;
-    }
-
-    .edit-btn {
-      position: absolute;
-      top: 24px;
-      right: 32px;
-    }
-
-    @media (max-width: 600px) {
-      .profile-card {
-        padding: 18px 8px 18px 8px;
-      }
-
-      .edit-btn {
-        top: 12px;
-        right: 12px;
-      }
-
-      .profile-img {
-        width: 120px;
-        height: 120px;
-      }
-    }
-
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .info-value {
+            color: #212529;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
 </head>
-
 <body>
-  <div class="profile-card position-relative animate__animated animate__fadeInUp">
-    <div class="profile-title mb-3 text-center" style="font-size: 2rem; font-weight: bold; color: #343a40;">
-Student Profile</div>
-    <div class="text-center">
-      {% set img_path = user.image_path if user.image_path else 'default_profile.svg' %}
-      <img src="{{ url_for('static', filename=img_path) }}" alt="Profile Image"
-        class="profile-img mb-2 animate__animated animate__zoomIn"
-        onerror="this.onerror=null;this.src='{{ url_for('static', filename='default_profile.svg') }}';">
-      <h2 class="profile-title mb-1">{{ user.name }}</h2>
+    <div class="profile-container">
+        <a href="{{ url_for('student_home') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2><i class="fas fa-user-circle"></i> Student Profile</h2>
+            </div>
+            
+            <div class="text-center mb-4">
+                {% if user and user.image_path and user.image_path != '' %}
+                    <img src="{{ url_for('static', filename=user.image_path) }}" 
+                         alt="Profile Picture" class="profile-img">
+                {% else %}
+                    <div class="profile-img d-flex align-items-center justify-content-center" 
+                         style="background-color: #e9ecef; color: #6c757d;">
+                        <i class="fas fa-user fa-3x"></i>
+                    </div>
+                {% endif %}
+                <h4 class="mt-2">{{ user.name if user else 'Student Name' }}</h4>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-id-card"></i> Student ID:</span>
+                    <span class="info-value">{{ user.student_id if user else 'N/A' }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i> Full Name:</span>
+                    <span class="info-value">{{ user.name if user else 'N/A' }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-graduation-cap"></i> Class Year:</span>
+                    <span class="info-value">{{ user.class_year if user and user.class_year else 'Not provided' }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-building"></i> Department:</span>
+                    <span class="info-value">{{ user.department if user and user.department else 'Not provided' }}</span>
+                </div>
+        </div>
+    </div>
 
-    </div>
-    <table class="table profile-table mb-3">
-      <tr>
-        <th>Student ID</th>
-        <td>{{ user.student_id }}</td>
-      </tr>
-      <tr>
-        <th>Class Year</th>
-        <td>{{ user.class_year }}</td>
-      </tr>
-      <tr>
-        <th>Department</th>
-        <td>{{ user.department }}</td>
-      </tr>
-    </table>
-    <div class="d-grid gap-2">
-      <a href="{{ url_for('student_home') }}" class="btn btn-secondary btn-lg animate__animated animate__fadeInLeft">
-        <i class="fas fa-arrow-left me-2"></i>Back to Home
-      </a>
-    </div>
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

@@ -199,23 +199,38 @@
     </div>
     <script>
       const resultText = "{{ result }}";
+      const studentName = "{{ student_name }}";
       let speakText;
 
-      // Extract student name from result if successful
-      let studentName = "";
-      if (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked in")) {
-        const nameMatch = resultText.match(/^(.+?)\s+checked in successfully/);
+      // Debug logging
+      console.log("Result text:", resultText);
+      console.log("Student name:", studentName);
+      console.log("Student name type:", typeof studentName);
+
+      // Extract student name - try multiple methods
+      let finalStudentName = "";
+      
+      // Method 1: Use the passed student_name parameter
+      if (studentName && studentName !== "None" && studentName !== "" && studentName.trim() !== "") {
+        finalStudentName = studentName.trim();
+      }
+      
+      // Method 2: If student_name is empty, try to extract from result text
+      if (!finalStudentName && resultText && (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked in"))) {
+        const nameMatch = resultText.match(/^(.+?)\s+checked in successfully/i);
         if (nameMatch) {
-          studentName = nameMatch[1].trim();
+          finalStudentName = nameMatch[1].trim();
         }
       }
 
+      console.log("Final student name:", finalStudentName);
+
       // Check if check-in was successful or failed
       if (resultText.toLowerCase().includes("successfully") || resultText.toLowerCase().includes("checked in")) {
-        if (studentName) {
-          speakText = `Check-in successful! Welcome ${studentName} to the attendance system. Have a great day!`;
+        if (finalStudentName) {
+          speakText = `Check-in successful! Welcome ${finalStudentName} to the attendance system. Have a great day!`;
         } else {
-          speakText = "Check-in successful! Welcome to the attendance system.";
+          speakText = "Check-in successful! Welcome to the attendance system. Have a great day!";
         }
       } else if (resultText.toLowerCase().includes("not recognized")) {
         speakText = "Sorry, your face was not recognized. Please try again or contact the administrator.";
@@ -223,44 +238,79 @@
         speakText = "Check-in failed. Please try again.";
       }
 
-      // Function to speak with female voice
+      console.log("Final speech text:", speakText);
+
+      // Enhanced function to speak with female voice only
       function speakWithFemaleVoice(text) {
         return new Promise((resolve) => {
+          if (!speechSynthesis) {
+            console.log('Speech synthesis not supported');
+            resolve();
+            return;
+          }
+
           const utterance = new SpeechSynthesisUtterance(text);
 
-          // Set completion callback
           utterance.onend = () => {
+            console.log('Speech ended');
             resolve();
           };
 
-          utterance.onerror = () => {
-            resolve(); // Resolve even on error to ensure redirect
+          utterance.onerror = (event) => {
+            console.log('Speech error:', event.error);
+            resolve();
           };
 
-          // Wait for voices to load
           const setVoice = () => {
             const voices = speechSynthesis.getVoices();
+            console.log('Available voices:', voices.length);
 
-            // Try to find a female voice (look for common female voice names)
-            const femaleVoice = voices.find(voice =>
+            let femaleVoice = null;
+
+            // Priority 1: Look for voices with explicit female indicators
+            femaleVoice = voices.find(voice =>
               voice.name.toLowerCase().includes('female') ||
-              voice.name.toLowerCase().includes('zira') ||
-              voice.name.toLowerCase().includes('siri') ||
-              voice.name.toLowerCase().includes('samantha') ||
-              voice.name.toLowerCase().includes('susan') ||
-              voice.name.toLowerCase().includes('hazel') ||
-              voice.gender === 'female' ||
-              (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
+              voice.gender === 'female'
             );
+
+            // Priority 2: Look for common female voice names
+            if (!femaleVoice) {
+              femaleVoice = voices.find(voice =>
+                voice.name.toLowerCase().includes('zira') ||
+                voice.name.toLowerCase().includes('siri') ||
+                voice.name.toLowerCase().includes('samantha') ||
+                voice.name.toLowerCase().includes('susan') ||
+                voice.name.toLowerCase().includes('hazel') ||
+                voice.name.toLowerCase().includes('catherine') ||
+                voice.name.toLowerCase().includes('eva') ||
+                voice.name.toLowerCase().includes('karen') ||
+                voice.name.toLowerCase().includes('moira') ||
+                voice.name.toLowerCase().includes('tessa') ||
+                (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
+              );
+            }
+
+            // Priority 3: If no female voice found, prefer English voices
+            if (!femaleVoice) {
+              femaleVoice = voices.find(voice =>
+                voice.lang.startsWith('en') && !voice.name.toLowerCase().includes('male')
+              );
+            }
+
+            // Priority 4: Fallback to first available voice
+            if (!femaleVoice && voices.length > 0) {
+              femaleVoice = voices[0];
+            }
 
             if (femaleVoice) {
               utterance.voice = femaleVoice;
+              console.log('Selected voice:', femaleVoice.name);
             }
 
             // Set speech parameters for a pleasant female voice
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
-            utterance.volume = 0.8;
+            utterance.rate = 0.85;
+            utterance.pitch = 1.2;
+            utterance.volume = 0.9;
 
             speechSynthesis.speak(utterance);
           };
@@ -270,20 +320,31 @@
             setVoice();
           } else {
             // Wait for voices to load
-            speechSynthesis.addEventListener('voiceschanged', setVoice);
+            speechSynthesis.addEventListener('voiceschanged', setVoice, { once: true });
+            // Fallback timeout
+            setTimeout(() => {
+              if (speechSynthesis.getVoices().length === 0) {
+                console.log('No voices loaded, proceeding without voice selection');
+                speechSynthesis.speak(utterance);
+              }
+            }, 1000);
           }
         });
       }
 
-      // Play voice alert and redirect after completion
+      // Enhanced function to handle voice and redirect after completion
       async function handleVoiceAndRedirect() {
         try {
+          console.log('Starting voice announcement:', speakText);
           await speakWithFemaleVoice(speakText);
+          console.log('Voice announcement completed, redirecting...');
+          
           // Wait a brief moment after speech ends, then redirect
           setTimeout(() => {
             window.location.href = "/";
-          }, 500);
+          }, 800);
         } catch (error) {
+          console.error('Voice error:', error);
           // Fallback: redirect after 4 seconds if voice fails
           setTimeout(() => {
             window.location.href = "/";

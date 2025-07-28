@@ -727,65 +727,91 @@ def attendance():
 
 @app.route('/view_attendance', methods=['GET', 'POST'])
 def view_attendance():
-    conn = sqlite3.connect('database.db')
-    cur = conn.cursor()
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
 
-    # Get filter values from the form
-    name = request.form.get('name')
-    class_year = request.form.get('class_year')
-    department = request.form.get('department')
+        # Get filter values from the form
+        name = request.form.get('name')
+        class_year = request.form.get('class_year')
+        department = request.form.get('department')
 
-    # Base query
-    query = '''
-        SELECT u.name, u.student_id, u.class_year, u.department,
-               a.timestamp
-        FROM attendance a
-        JOIN users u ON a.user_id = u.id
-        WHERE 1=1
-    '''
-    params = []
+        # Base query - Fixed to include status and proper date/time formatting
+        query = '''
+            SELECT u.name, u.student_id, u.class_year, u.department,
+                   DATE(a.timestamp) AS date,
+                   TIME(a.timestamp) AS time,
+                   a.status,
+                   a.timestamp
+            FROM attendance a
+            JOIN users u ON a.user_id = u.id
+            WHERE 1=1
+        '''
+        params = []
 
-    if name:
-        query += " AND u.name LIKE ?"
-        params.append(f"%{name}%")
+        if name:
+            query += " AND u.name LIKE ?"
+            params.append(f"%{name}%")
 
-    if class_year:
-        query += " AND u.class_year = ?"
-        params.append(class_year)
+        if class_year:
+            query += " AND u.class_year = ?"
+            params.append(class_year)
 
-    if department:
-        query += " AND u.department = ?"
-        params.append(department)
+        if department:
+            query += " AND u.department = ?"
+            params.append(department)
 
-    cur.execute(query, params)
-    records = cur.fetchall()
-    conn.close()
+        cur.execute(query, params)
+        records = cur.fetchall()
+        conn.close()
 
-    # Convert to DataFrame for plotting
-    df = pd.DataFrame(records, columns=['name', 'student_id', 'class_year', 'department', 'timestamp'])
-
-    if df.empty:
+        # Convert to DataFrame for plotting with better error handling
         weekly_summary = []
         monthly_summary = []
-    else:
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        try:
+            df = pd.DataFrame(records, columns=['name', 'student_id', 'class_year', 'department', 'date', 'time', 'status', 'timestamp'])
 
-        # Add week and month columns
-        df['week'] = df['timestamp'].dt.to_period('W').apply(lambda r: r.start_time.strftime('%Y-%m-%d'))
-        df['month'] = df['timestamp'].dt.to_period('M').apply(lambda r: r.start_time.strftime('%Y-%m'))
+            if df.empty:
+                weekly_summary = []
+                monthly_summary = []
+            else:
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-        # Group by week and month
-        weekly_summary = df.groupby('week').size().reset_index(name='count').to_dict(orient='records')
-        monthly_summary = df.groupby('month').size().reset_index(name='count').to_dict(orient='records')
-        weekly_summary = weekly_summary if weekly_summary is not None else []
-        monthly_summary = monthly_summary if monthly_summary is not None else []
+                # Add week and month columns - Fixed the deprecated start_time method
+                df['week'] = df['timestamp'].dt.to_period('W').astype(str)
+                df['month'] = df['timestamp'].dt.to_period('M').astype(str)
 
-    return render_template(
-        "dashboard.html",
-        records=records,
-        weekly_summary=weekly_summary or [],
-        monthly_summary=monthly_summary or []
-    )
+                # Group by week and month
+                weekly_summary = df.groupby('week').size().reset_index(name='count').to_dict(orient='records')
+                monthly_summary = df.groupby('month').size().reset_index(name='count').to_dict(orient='records')
+                weekly_summary = weekly_summary if weekly_summary is not None else []
+                monthly_summary = monthly_summary if monthly_summary is not None else []
+                
+        except Exception as e:
+            print(f"Error processing DataFrame: {e}")
+            # Continue with empty summaries if DataFrame processing fails
+            weekly_summary = []
+            monthly_summary = []
+
+        return render_template(
+            "dashboard.html",
+            records=records,
+            weekly_summary=weekly_summary or [],
+            monthly_summary=monthly_summary or [],
+            show_results=True,
+            not_found=(len(records) == 0)
+        )
+        
+    except Exception as e:
+        print(f"Error in view_attendance: {e}")
+        flash(f"Error retrieving attendance records: {str(e)}", "error")
+        return render_template("dashboard.html", 
+                             records=[], 
+                             weekly_summary=[], 
+                             monthly_summary=[],
+                             show_results=True,
+                             not_found=True)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -877,7 +903,7 @@ def dashboard():
         print(f"Final: show_results={show_results}, records={len(records)}, not_found={not_found}")
     
     conn.close()
-    return render_template('dashboard_simple.html', 
+    return render_template('dashboard.html', 
                          records=records, 
                          names=names, 
                          dates=dates, 
@@ -954,6 +980,7 @@ def view_all_attendance():
                          names=names, 
                          dates=dates, 
                          not_found=False,
+                         show_results=True,
                          show_all=True)
 
 @app.route('/teacher_dashboard', methods=['GET', 'POST'])
@@ -1104,18 +1131,18 @@ def teacher_dashboard():
 def checkin_attendance():
     if request.method == 'POST':
         if not FACE_RECOGNITION_AVAILABLE or not CV2_AVAILABLE:
-            return render_template('checkin.html', result="Face recognition not available on this system.")
+            return render_template('checkin.html', result="Face recognition not available on this system.", student_name="")
         
         try:
             known_face_encodings, known_face_names = load_encoded_faces()
-            name = recognize_face(known_face_encodings, known_face_names)
+            name = recognize_face(known_face_encodings, known_face_names, tolerance=0.65)
             if name:
                 mark_attendance(name, status="Check-In")
-                return render_template('checkin.html', result=f"{name} checked in successfully!")
-            return render_template('checkin.html', result="Face not recognized.")
+                return render_template('checkin.html', result=f"{name} checked in successfully!", student_name=name)
+            return render_template('checkin.html', result="Face not recognized.", student_name="")
         except Exception as e:
-            return render_template('checkin.html', result=f"Error: {str(e)}")
-    return render_template('checkin.html', result=None)
+            return render_template('checkin.html', result=f"Error: {str(e)}", student_name="")
+    return render_template('checkin.html', result=None, student_name="")
 
 
 
@@ -1123,18 +1150,18 @@ def checkin_attendance():
 def checkout_attendance():
     if request.method == 'POST':
         if not FACE_RECOGNITION_AVAILABLE or not CV2_AVAILABLE:
-            return render_template('checkout.html', result="Face recognition not available on this system.")
+            return render_template('checkout.html', result="Face recognition not available on this system.", student_name="")
         
         try:
             known_face_encodings, known_face_names = load_encoded_faces()
-            name = recognize_face(known_face_encodings, known_face_names)
+            name = recognize_face(known_face_encodings, known_face_names, tolerance=0.65)
             if name:
                 mark_attendance(name, status="Check-Out")
-                return render_template('checkout.html', result=f"{name} checked out successfully!")
-            return render_template('checkout.html', result="Face not recognized.")
+                return render_template('checkout.html', result=f"{name} checked out successfully!", student_name=name)
+            return render_template('checkout.html', result="Face not recognized.", student_name="")
         except Exception as e:
-            return render_template('checkout.html', result=f"Error: {str(e)}")
-    return render_template('checkout.html', result=None)
+            return render_template('checkout.html', result=f"Error: {str(e)}", student_name="")
+    return render_template('checkout.html', result=None, student_name="")
 
 
 
@@ -1257,7 +1284,7 @@ def load_encoded_faces():
     return known_encodings, known_names
 
 
-def recognize_face(known_encodings, known_names, tolerance=0.5):
+def recognize_face(known_encodings, known_names, tolerance=0.6):
     if not CV2_AVAILABLE or not FACE_RECOGNITION_AVAILABLE:
         return None
         
@@ -1267,24 +1294,37 @@ def recognize_face(known_encodings, known_names, tolerance=0.5):
         cap.release()
 
         if not success:
+            print("Failed to capture frame from camera")
             return None
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
 
         if not face_locations:
+            print("No face detected in camera frame")
             return None
 
+        print(f"Found {len(face_locations)} face(s) in camera")
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
         for encoding in face_encodings:
             distances = face_recognition.face_distance(known_encodings, encoding)
             min_distance = min(distances)
+            print(f"Minimum distance: {min_distance:.3f} (tolerance: {tolerance})")
+            
             if min_distance < tolerance:
                 best_match_index = distances.tolist().index(min_distance)
-                return known_names[best_match_index]
+                matched_name = known_names[best_match_index]
+                print(f"Face matched: {matched_name} (distance: {min_distance:.3f})")
+                return matched_name
             else:
-                print("Face found but not matching any registered user")
+                print(f"Face found but distance {min_distance:.3f} > tolerance {tolerance}")
+                # Show closest matches for debugging
+                sorted_indices = sorted(range(len(distances)), key=lambda i: distances[i])
+                print("Closest matches:")
+                for i in range(min(3, len(sorted_indices))):
+                    idx = sorted_indices[i]
+                    print(f"  {known_names[idx]}: {distances[idx]:.3f}")
                 return None
 
         return None

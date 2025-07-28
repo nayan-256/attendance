@@ -12,101 +12,208 @@
   <meta name="apple-mobile-web-app-title" content="Attendance System">
   <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
   
+  <!-- Favicon and PWA Icons -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192x192.png') }}">
+
   <!-- Bootstrap 5.3.3 CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Animate.css for animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Animate.css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-  
-  <!-- AOS Animation Library -->
+
+  <!-- AOS (Animate On Scroll) Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --success-gradient: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-      --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --danger-gradient: linear-gradient(135deg, #ff512f 0%, #f09819 100%);
+      /* Dark/Light mode CSS variables */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --border-color: #dee2e6;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --card-bg: #ffffff;
+      --navbar-bg: #ffffff;
+      --button-bg: #007bff;
+      --button-text: #ffffff;
       --glass-bg: rgba(255, 255, 255, 0.1);
       --glass-border: rgba(255, 255, 255, 0.2);
     }
-
+    
+    /* Body Background Animation - Same as index.html */
     body {
-      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+      background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
       background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
+      animation: gradientFlow 20s ease infinite;
       min-height: 100vh;
       font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
       position: relative;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
     }
-
-    /* Floating particles background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      animation: float 20s linear infinite;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    @keyframes gradientShift {
+    
+    @keyframes gradientFlow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    @keyframes float {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-100vh) rotate(360deg); }
+    
+    /* Settings Button Styles - Same as index.html */
+    .settings-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      text-decoration: none;
     }
 
-    .main-container {
-      max-width: 1000px;
-      width: 95%;
+    .settings-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      color: white;
+      text-decoration: none;
+    }
+    
+    /* Enhanced Background with New Animations - Same as index.html */
+    .bg-image {
+      background-size: 400% 400%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: all 1s ease-in-out;
+      animation: gradientShift 15s ease-in-out infinite, backgroundPulse 8s ease-in-out infinite;
+      overflow: hidden;
+    }
+
+    /* New Advanced Gradient Animation */
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+      }
+
+      25% {
+        background-position: 100% 50%;
+        filter: hue-rotate(90deg);
+      }
+
+      50% {
+        background-position: 100% 100%;
+        filter: hue-rotate(180deg);
+      }
+
+      75% {
+        background-position: 0% 100%;
+        filter: hue-rotate(270deg);
+      }
+
+      100% {
+        background-position: 0% 50%;
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    /* New Pulse Animation */
+    @keyframes backgroundPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.02);
+        opacity: 0.95;
+      }
+    }
+
+    /* Floating Geometric Shapes - Same as index.html */
+    .bg-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+      background-size: 200px 200px, 150px 150px, 300px 300px, 250px 250px;
+      animation: floatingShapes 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes floatingShapes {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0.8;
+      }
+
+      25% {
+        transform: translate(20px, -30px) rotate(90deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translate(-10px, -20px) rotate(180deg);
+        opacity: 0.6;
+      }
+
+      75% {
+        transform: translate(-30px, 10px) rotate(270deg);
+        opacity: 0.9;
+      }
+    }
+
+    /* Main Container Styles - Updated to match index.html */
+    .container {
       backdrop-filter: blur(25px);
-      background: var(--glass-bg);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 30px;
       padding: 50px 40px;
+      margin: 40px auto;
+      max-width: 1000px;
       box-shadow: 
         0 25px 50px rgba(0, 0, 0, 0.15),
-        0 0 0 1px var(--glass-border),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
       text-align: center;
       position: relative;
-      border: 1px solid var(--glass-border);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       transition: all 0.3s ease;
       z-index: 2;
-      animation: containerFloat 6s ease-in-out infinite;
+      animation: fadeIn 1s ease-out;
     }
 
-    @keyframes containerFloat {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    .main-container::before {
+    .container::before {
       content: '';
       position: absolute;
       top: 0;
@@ -118,16 +225,25 @@
       z-index: -1;
     }
 
-    .welcome-title {
-      font-size: 3.5rem;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Title Styles - Updated to match index.html */
+    h1 {
+      font-size: 3rem;
       font-weight: 700;
       margin-bottom: 20px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: fadeInUp 1s ease-out;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      color: white;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      animation: slideInDown 1s ease-out;
     }
 
     .subtitle {
@@ -138,44 +254,33 @@
       text-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .button-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 25px;
-      margin-top: 40px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+    /* Button Layout - Updated to match index.html pattern */
+    nav {
+      margin-top: 30px;
     }
 
-    .nav-btn {
-      padding: 20px 30px;
-      color: white;
-      text-decoration: none;
+    /* Button Styles - Updated to match index.html */
+    .btn {
       border-radius: 15px;
       font-weight: 600;
       font-size: 1.1rem;
-      box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.12),
-        0 5px 10px rgba(0, 0, 0, 0.08);
+      padding: 15px 25px;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      text-decoration: none;
       border: none;
-      display: flex;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-height: 60px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      min-height: 80px;
-      width: 100%;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
-      transform: translateY(0);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
-    .nav-btn::before {
+    .btn::before {
       content: '';
       position: absolute;
       top: 0;
@@ -186,53 +291,563 @@
       transition: left 0.5s ease;
     }
 
-    .nav-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s ease, height 0.6s ease;
-    }
-
-    .nav-btn:hover::before {
+    .btn:hover::before {
       left: 100%;
     }
 
-    .nav-btn:hover::after {
-      width: 300px;
-      height: 300px;
-    }
-
-    .nav-btn:hover {
-      transform: translateY(-8px);
-      box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.2),
-        0 5px 15px rgba(0, 0, 0, 0.1);
-      color: white;
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-decoration: none;
     }
 
-    .nav-btn:active {
-      transform: translateY(-4px);
+    .btn:active {
+      transform: translateY(-1px);
       transition: all 0.1s ease;
     }
 
-    .nav-btn i {
+    .btn i {
       font-size: 1.2rem;
       transition: all 0.3s ease;
-      margin-right: 8px;
-      z-index: 2;
+    }
+
+    .btn:hover i {
+      transform: scale(1.1);
+    }
+
+    /* Responsive Button Grid */
+    .row {
+      margin-top: 30px;
+    }
+
+    .d-flex {
+      gap: 20px;
+    }
+
+    .d-flex.flex-wrap {
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Animation delays for buttons */
+    .btn:nth-child(1) { animation-delay: 0.1s; }
+    .btn:nth-child(2) { animation-delay: 0.2s; }
+    .btn:nth-child(3) { animation-delay: 0.3s; }
+    .btn:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Calendar Widget Styles - Same as index.html */
+    .calendar-floating-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      font-size: 1.5rem;
+      color: white;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .calendar-floating-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.1);
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .calendar-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow-y: auto;
+    }
+
+    .calendar-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .calendar-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .calendar-popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .calendar-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 20px 20px 0 0;
+      text-align: center;
       position: relative;
     }
 
-    .nav-btn:hover i {
+    .close-calendar {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .close-calendar:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .calendar-content {
+      padding: 20px;
+    }
+
+    .year-navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .year-nav-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .year-nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .month-card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .month-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .month-header {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+
+    .day-header {
+      text-align: center;
+      font-weight: bold;
+      padding: 5px;
+      background-color: #e9ecef;
+      color: #495057;
+      font-size: 0.8rem;
+      border-radius: 3px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      background-color: #e3f2fd;
       transform: scale(1.1);
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .calendar-day.today {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: bold;
+    }
+
+    .calendar-day.holiday {
+      background-color: #ffebee;
+      color: #c62828;
+      font-weight: bold;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .calendar-day.holiday:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .calendar-day.holiday.national {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .calendar-day.holiday.religious {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .calendar-day.holiday.festival {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .holiday-indicator {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 4px;
+      height: 4px;
+      background-color: #ff4444;
+      border-radius: 50%;
+    }
+
+    /* Holiday Details Popup */
+    .holiday-details-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      max-width: 400px;
+      width: 90%;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid #f0f0f0;
+    }
+
+    .holiday-details-popup.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .holiday-details-popup .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .holiday-details-popup .popup-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+
+    .holiday-details-popup .close-popup {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .holiday-details-popup .close-popup:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .holiday-details-popup .holiday-info {
+      margin-bottom: 15px;
+    }
+
+    .holiday-details-popup .holiday-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .holiday-details-popup .holiday-date {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .holiday-details-popup .holiday-reason {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .holiday-details-popup .holiday-type {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .holiday-details-popup .holiday-type.national {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+    }
+
+    .holiday-details-popup .holiday-type.religious {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      color: white;
+    }
+
+    .holiday-details-popup .holiday-type.festival {
+      background: linear-gradient(135deg, #feca57, #ff9ff3);
+      color: white;
+    }
+
+    .holiday-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .holiday-popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .holidays-section {
+      margin-top: 20px;
+      border-top: 2px solid #f0f0f0;
+      padding-top: 20px;
+    }
+
+    .holidays-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .holiday-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .holiday-group {
+      margin-bottom: 20px;
+    }
+
+    .holiday-type-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .holiday-type-header.national {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .holiday-type-header.religious {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .holiday-type-header.festival {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .holiday-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+      transition: all 0.2s;
+    }
+
+    .holiday-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .holiday-item.national {
+      border-left-color: #4caf50;
+    }
+
+    .holiday-item.religious {
+      border-left-color: #2196f3;
+    }
+
+    .holiday-item.festival {
+      border-left-color: #ff9800;
+    }
+
+    .holiday-summary {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .summary-stat {
+      margin-bottom: 15px;
+    }
+
+    .summary-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .summary-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .calendar-popup {
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .holidays-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px;
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .d-flex {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .btn {
+        width: 100%;
+        min-width: auto;
+      }
     }
 
     .nav-btn span {
@@ -457,36 +1072,98 @@
 </head>
 
 <body>
-  <div class="main-container" data-aos="fade-up" data-aos-duration="1000">
-    <h1 class="welcome-title animate__animated animate__fadeInDown">
-      <i class="fas fa-graduation-cap me-3"></i>
-      Student Portal
-    </h1>
-    
-    <p class="subtitle animate__animated animate__fadeInUp animate__delay-1s">
-      Welcome back! Access your attendance dashboard and manage your profile
-    </p>
-    
-    <div class="button-container">
-      <a href="{{ url_for('student_dashboard') }}" class="nav-btn btn-dashboard" data-aos="zoom-in" data-aos-delay="200">
-        <i class="fas fa-tachometer-alt"></i>
-        <span>Dashboard</span>
-      </a>
+  <!-- Calendar Floating Button - Same as index.html -->
+  <div class="calendar-floating-btn" onclick="toggleCalendar()">
+    📅
+  </div>
+
+  <!-- Calendar Popup Overlay -->
+  <div class="calendar-popup-overlay" id="calendarOverlay" onclick="closeCalendar()"></div>
+
+  <!-- Calendar Popup -->
+  <div class="calendar-popup" id="calendarPopup">
+    <div class="calendar-header">
+      <button class="close-calendar" onclick="closeCalendar()">×</button>
+      <h3>📅 Yearly Calendar with Holidays</h3>
+      <div class="year-navigation">
+        <button class="year-nav-btn" onclick="changeYear(-1)">
+          ← Previous Year
+        </button>
+        <h4 id="currentYear">2025</h4>
+        <button class="year-nav-btn" onclick="changeYear(1)">
+          Next Year →
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar-content">
+      <!-- Calendar Grid -->
+      <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar months will be generated by JavaScript -->
+      </div>
+
+      <!-- Holidays Section -->
+      <div class="holidays-section">
+        <h5>🎉 Holidays for <span id="holidayYear">2025</span></h5>
+        <div class="holidays-grid">
+          <div class="holiday-list" id="holidaysList">
+            <!-- Holidays will be populated by JavaScript -->
+          </div>
+          <div class="holiday-summary">
+            <h6>📊 Holiday Summary</h6>
+            <div id="holidaySummary">
+              <!-- Summary stats will be shown here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holiday Details Popup -->
+  <div class="holiday-popup-overlay" id="holidayPopupOverlay" onclick="closeHolidayPopup()"></div>
+  <div class="holiday-details-popup" id="holidayDetailsPopup">
+    <div class="popup-header">
+      <h3 class="popup-title">🎉 Holiday Details</h3>
+      <button class="close-popup" onclick="closeHolidayPopup()">×</button>
+    </div>
+    <div class="holiday-info">
+      <div class="holiday-name" id="popupHolidayName"></div>
+      <div class="holiday-date" id="popupHolidayDate"></div>
+      <div class="holiday-reason" id="popupHolidayReason"></div>
+      <span class="holiday-type" id="popupHolidayType"></span>
+    </div>
+  </div>
+
+  <!-- Dynamic Background for Student -->
+  <div class="bg-image">
+    <!-- Main Container -->
+    <div class="container animate__animated animate__fadeIn">
+      <h1><i class="fas fa-user-graduate me-2" style="color: #4facfe;"></i>Student Portal: Welcome {{ student.name if student else 'Student' }}</h1>
       
-      <a href="{{ url_for('profile') }}" class="nav-btn btn-profile" data-aos="zoom-in" data-aos-delay="400">
-        <i class="fas fa-user"></i>
-        <span>View Profile</span>
-      </a>
-      
-      <a href="{{ url_for('edit_profile') }}" class="nav-btn btn-edit" data-aos="zoom-in" data-aos-delay="600">
-        <i class="fas fa-edit"></i>
-        <span>Edit Profile</span>
-      </a>
-      
-      <a href="{{ url_for('logout') }}" class="nav-btn btn-logout" data-aos="zoom-in" data-aos-delay="800">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Logout</span>
-      </a>
+      <nav>
+        <div class="row g-3 justify-content-center">
+          <!-- Main Dashboard and Profile Actions -->
+          <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
+              <a href="{{ url_for('student_dashboard') }}" class="btn btn-info btn-lg d-flex align-items-center px-4 py-3 animate__animated animate__slideInUp" style="min-width: 200px; animation-delay: 0.1s;">
+                <i class="fas fa-tachometer-alt me-2"></i>Student Dashboard
+              </a>
+              <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-lg d-flex align-items-center px-4 py-3 animate__animated animate__slideInUp" style="min-width: 200px; animation-delay: 0.2s;">
+                <i class="fas fa-user me-2"></i>View Profile
+              </a>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+              <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-warning btn-lg d-flex align-items-center px-4 py-3 animate__animated animate__slideInUp" style="min-width: 200px; animation-delay: 0.3s;">
+                <i class="fas fa-edit me-2"></i>Edit Profile
+              </a>
+              <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg d-flex align-items-center px-4 py-3 animate__animated animate__slideInUp" style="min-width: 200px; animation-delay: 0.4s;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout (Student)
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
     </div>
   </div>
 
@@ -505,77 +1182,288 @@
       easing: 'ease-out-cubic'
     });
 
-    // Enhanced interactive effects
-    document.querySelectorAll('.nav-btn').forEach((btn, index) => {
-      // Mouse enter effect
-      btn.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
-        this.style.transition = 'all 0.3s ease';
-      });
-      
-      // Mouse leave effect
-      btn.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-      });
-    });
+    // Calendar functionality - Same as index.html
+    let currentYear = new Date().getFullYear();
 
-    // Add loading states for better UX
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        const icon = this.querySelector('i');
-        const span = this.querySelector('span');
-        const originalIcon = icon.className;
-        const originalText = span.textContent;
-        
-        // Show loading state
-        icon.className = 'fas fa-spinner fa-spin';
-        span.textContent = 'Loading...';
-        this.style.pointerEvents = 'none';
-        
-        // Reset after delay (page will likely navigate)
-        setTimeout(() => {
-          icon.className = originalIcon;
-          span.textContent = originalText;
-          this.style.pointerEvents = 'auto';
-        }, 2000);
-      });
-    });
+    // Holiday data
+    const holidays = {
+      2025: [
+        { date: '2025-01-01', name: 'New Year\'s Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-01-26', name: 'Republic Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-03-13', name: 'Holi', reason: 'Festival of Colors', type: 'religious' },
+        { date: '2025-04-18', name: 'Good Friday', reason: 'Christian Holiday', type: 'religious' },
+        { date: '2025-08-15', name: 'Independence Day', reason: 'National Holiday', type: 'national' },
+        { date: '2025-10-02', name: 'Gandhi Jayanti', reason: 'National Holiday', type: 'national' },
+        { date: '2025-10-20', name: 'Dussehra', reason: 'Hindu Festival', type: 'religious' },
+        { date: '2025-11-12', name: 'Diwali', reason: 'Festival of Lights', type: 'festival' },
+        { date: '2025-12-25', name: 'Christmas Day', reason: 'Christian Holiday', type: 'religious' }
+      ]
+    };
 
-    // Add background particles animation
-    function createParticle() {
-      const particle = document.createElement('div');
-      particle.style.position = 'fixed';
-      particle.style.width = '3px';
-      particle.style.height = '3px';
-      particle.style.background = 'rgba(255,255,255,0.1)';
-      particle.style.borderRadius = '50%';
-      particle.style.left = Math.random() * 100 + 'vw';
-      particle.style.bottom = '-10px';
-      particle.style.pointerEvents = 'none';
-      particle.style.zIndex = '1';
-      particle.style.animation = 'float 15s linear infinite';
-      
-      document.body.appendChild(particle);
-      
-      setTimeout(() => {
-        particle.remove();
-      }, 15000);
+    // Toggle calendar popup
+    function toggleCalendar() {
+      const popup = document.getElementById('calendarPopup');
+      const overlay = document.getElementById('calendarOverlay');
+
+      popup.classList.add('show');
+      overlay.classList.add('show');
+
+      // Render calendar when opened
+      renderCalendar(currentYear);
     }
 
-    // Create particles periodically
-    setInterval(createParticle, 400);
+    // Close calendar popup
+    function closeCalendar() {
+      const popup = document.getElementById('calendarPopup');
+      const overlay = document.getElementById('calendarOverlay');
 
-    // Add ripple animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(4);
-          opacity: 0;
-        }
+      popup.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    // Show holiday details popup
+    function showHolidayDetails(date, name, reason, type) {
+      const popup = document.getElementById('holidayDetailsPopup');
+      const overlay = document.getElementById('holidayPopupOverlay');
+      
+      // Populate popup content
+      document.getElementById('popupHolidayName').textContent = name;
+      document.getElementById('popupHolidayDate').textContent = formatDate(date);
+      document.getElementById('popupHolidayReason').textContent = reason;
+      
+      const typeElement = document.getElementById('popupHolidayType');
+      typeElement.textContent = type;
+      typeElement.className = `holiday-type ${type}`;
+      
+      // Show popup
+      popup.classList.add('show');
+      overlay.classList.add('show');
+    }
+
+    // Close holiday details popup
+    function closeHolidayPopup() {
+      const popup = document.getElementById('holidayDetailsPopup');
+      const overlay = document.getElementById('holidayPopupOverlay');
+      
+      popup.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    // Add keyboard support for closing popups
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeHolidayPopup();
+        closeCalendar();
       }
-    `;
-    document.head.appendChild(style);
+    });
+
+    // Change year
+    function changeYear(direction) {
+      currentYear += direction;
+      renderCalendar(currentYear);
+    }
+
+    // Get holiday by date
+    function getHolidayByDate(year, date) {
+      const yearHolidays = holidays[year] || [];
+      return yearHolidays.find(holiday => holiday.date === date);
+    }
+
+    // Render calendar
+    function renderCalendar(year) {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const currentYearEl = document.getElementById('currentYear');
+      const holidayYearEl = document.getElementById('holidayYear');
+
+      if (!calendarGrid) return;
+
+      // Clear and update year display
+      calendarGrid.innerHTML = '';
+      currentYearEl.textContent = year;
+      holidayYearEl.textContent = year;
+
+      // Generate calendar for each month
+      for (let month = 0; month < 12; month++) {
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'month-card';
+
+        const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long' });
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay();
+
+        let calendarHTML = `
+          <div class="month-header">${monthName}</div>
+          <div class="days-grid">
+            <div class="day-header">Su</div>
+            <div class="day-header">Mo</div>
+            <div class="day-header">Tu</div>
+            <div class="day-header">We</div>
+            <div class="day-header">Th</div>
+            <div class="day-header">Fr</div>
+            <div class="day-header">Sa</div>
+        `;
+
+        // Add empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+          calendarHTML += '<div class="calendar-day"></div>';
+        }
+
+        // Add days of the month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const holiday = getHolidayByDate(year, date);
+          const currentDate = new Date(year, month, day);
+
+          let dayClasses = 'calendar-day';
+          let dayTitle = '';
+
+          // Check if it's today
+          if (
+            currentDate.getDate() === today.getDate() &&
+            currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()
+          ) {
+            dayClasses += ' today';
+          }
+
+          // Check if it's a holiday
+          if (holiday) {
+            dayClasses += ` holiday ${holiday.type}`;
+            dayTitle = `title="${holiday.name} - ${holiday.reason}"`;
+          }
+
+          calendarHTML += `
+            <div class="${dayClasses}" ${dayTitle} 
+                 ${holiday ? `onclick="showHolidayDetails('${date}', '${holiday.name}', '${holiday.reason}', '${holiday.type}')"` : ''}
+                 ${holiday ? 'style="cursor: pointer;"' : ''}>
+              ${day}
+              ${holiday ? '<div class="holiday-indicator"></div>' : ''}
+            </div>
+          `;
+        }
+
+        calendarHTML += '</div>';
+        monthDiv.innerHTML = calendarHTML;
+        calendarGrid.appendChild(monthDiv);
+      }
+
+      // Render holidays list
+      renderHolidaysList(year);
+    }
+
+    // Render holidays list
+    function renderHolidaysList(year) {
+      const holidaysList = document.getElementById('holidaysList');
+      const holidaySummary = document.getElementById('holidaySummary');
+
+      if (!holidaysList) return;
+
+      const yearHolidays = holidays[year] || [];
+
+      if (yearHolidays.length === 0) {
+        holidaysList.innerHTML = '<div class="text-muted">No holidays data available for this year.</div>';
+        holidaySummary.innerHTML = '<div class="text-muted">No data</div>';
+        return;
+      }
+
+      // Group holidays by type
+      const holidaysByType = yearHolidays.reduce((acc, holiday) => {
+        if (!acc[holiday.type]) acc[holiday.type] = [];
+        acc[holiday.type].push(holiday);
+        return acc;
+      }, {});
+
+      let holidaysHTML = '';
+      Object.keys(holidaysByType).forEach(type => {
+        const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+
+        holidaysHTML += `
+          <div class="holiday-group">
+            <div class="holiday-type-header ${type}">
+              ${typeCapitalized} Holidays
+            </div>
+        `;
+
+        holidaysByType[type].forEach(holiday => {
+          const date = new Date(holiday.date);
+          const formattedDate = date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+          });
+
+          holidaysHTML += `
+            <div class="holiday-item ${type}">
+              <div>
+                <strong>${holiday.name}</strong>
+                <div style="font-size: 0.8rem; color: #666;">${holiday.reason}</div>
+              </div>
+              <div style="font-weight: bold; color: #667eea;">${formattedDate}</div>
+            </div>
+          `;
+        });
+
+        holidaysHTML += '</div>';
+      });
+
+      holidaysList.innerHTML = holidaysHTML;
+
+      // Update summary
+      const totalHolidays = yearHolidays.length;
+      const typeCount = Object.keys(holidaysByType).length;
+      const nextHoliday = getNextHoliday(year);
+
+      holidaySummary.innerHTML = `
+        <div class="summary-stat">
+          <div class="summary-number">${totalHolidays}</div>
+          <div class="summary-label">Total Holidays</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-number">${typeCount}</div>
+          <div class="summary-label">Holiday Types</div>
+        </div>
+        ${nextHoliday ? `
+          <div class="summary-stat">
+            <div style="font-size: 0.9rem; font-weight: bold; color: #667eea;">Next Holiday:</div>
+            <div style="font-size: 0.8rem;">${nextHoliday.name}</div>
+            <div style="font-size: 0.8rem; color: #666;">${new Date(nextHoliday.date).toLocaleDateString()}</div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    // Get next holiday
+    function getNextHoliday(year) {
+      const yearHolidays = holidays[year] || [];
+      const today = new Date().toISOString().split('T')[0];
+
+      return yearHolidays
+        .filter(holiday => holiday.date >= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+    }
+
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then(function(registration) {
+            console.log('ServiceWorker registration successful');
+          }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
   </script>
 </body>
 </html>
