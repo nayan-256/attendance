@@ -731,6 +731,13 @@ def view_attendance():
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
 
+        # Get data for dropdowns (same as dashboard)
+        cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
+        names = cur.fetchall()
+        
+        cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
+        dates = cur.fetchall()
+
         # Get filter values from the form
         name = request.form.get('name')
         class_year = request.form.get('class_year')
@@ -761,6 +768,7 @@ def view_attendance():
             query += " AND u.department = ?"
             params.append(department)
 
+        query += " ORDER BY a.timestamp DESC"
         cur.execute(query, params)
         records = cur.fetchall()
         conn.close()
@@ -795,23 +803,29 @@ def view_attendance():
             monthly_summary = []
 
         return render_template(
-            "dashboard.html",
+            "dashboard_simple.html",
             records=records,
+            names=names,
+            dates=dates,
             weekly_summary=weekly_summary or [],
             monthly_summary=monthly_summary or [],
             show_results=True,
-            not_found=(len(records) == 0)
+            not_found=(len(records) == 0),
+            request=request
         )
         
     except Exception as e:
         print(f"Error in view_attendance: {e}")
         flash(f"Error retrieving attendance records: {str(e)}", "error")
-        return render_template("dashboard.html", 
+        return render_template("dashboard_simple.html", 
                              records=[], 
+                             names=[],
+                             dates=[],
                              weekly_summary=[], 
                              monthly_summary=[],
                              show_results=True,
-                             not_found=True)
+                             not_found=True,
+                             request=request)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -903,7 +917,7 @@ def dashboard():
         print(f"Final: show_results={show_results}, records={len(records)}, not_found={not_found}")
     
     conn.close()
-    return render_template('dashboard.html', 
+    return render_template('dashboard_simple.html', 
                          records=records, 
                          names=names, 
                          dates=dates, 
@@ -941,47 +955,90 @@ def test_show_all_route():
     html += "</table>"
     return html
 
+# Test route for dashboard template
+@app.route('/test_dashboard_template')
+def test_dashboard_template():
+    """Test route to verify dashboard template works"""
+    try:
+        # Sample data
+        sample_records = [
+            ('John Doe', 'STU001', '2nd Year', 'Computer Science', '2025-01-15', '09:00:00', 'Check-In'),
+            ('Jane Smith', 'STU002', '3rd Year', 'Electronics', '2025-01-15', '09:15:00', 'Check-In'),
+        ]
+        
+        sample_names = [('John Doe',), ('Jane Smith',)]
+        sample_dates = [('2025-01-15',), ('2025-01-14',)]
+        
+        return render_template('dashboard_simple.html',
+                             records=sample_records,
+                             names=sample_names,
+                             dates=sample_dates,
+                             weekly_summary=[],
+                             monthly_summary=[],
+                             show_results=True,
+                             not_found=False,
+                             request=None)
+    except Exception as e:
+        return f"<h1>Template Error</h1><p>Error: {str(e)}</p>"
+
 # Direct attendance viewing route (for easier access during testing)
 @app.route('/view_all_attendance')
 def view_all_attendance():
     """Direct route to view all attendance records"""
-    conn = sqlite3.connect('database.db')
-    cur = conn.cursor()
-    
-    # Get recent attendance records (last 50)
-    query = '''
-        SELECT 
-            users.name,
-            users.student_id,
-            users.class_year, 
-            users.department, 
-            DATE(attendance.timestamp) AS date, 
-            TIME(attendance.timestamp) AS time, 
-            attendance.status 
-        FROM attendance 
-        JOIN users ON attendance.user_id = users.id
-        ORDER BY attendance.timestamp DESC 
-        LIMIT 50
-    '''
-    cur.execute(query)
-    records = cur.fetchall()
-    
-    # Get unique names and dates for filters
-    cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
-    names = cur.fetchall()
-    
-    cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC LIMIT 30')
-    dates = cur.fetchall()
-    
-    conn.close()
-    
-    return render_template('dashboard.html', 
-                         records=records, 
-                         names=names, 
-                         dates=dates, 
-                         not_found=False,
-                         show_results=True,
-                         show_all=True)
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        # Get recent attendance records (last 50)
+        query = '''
+            SELECT 
+                users.name,
+                users.student_id,
+                users.class_year, 
+                users.department, 
+                DATE(attendance.timestamp) AS date, 
+                TIME(attendance.timestamp) AS time, 
+                attendance.status 
+            FROM attendance 
+            JOIN users ON attendance.user_id = users.id
+            ORDER BY attendance.timestamp DESC 
+            LIMIT 50
+        '''
+        cur.execute(query)
+        records = cur.fetchall()
+        
+        # Get unique names and dates for filters
+        cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
+        names = cur.fetchall()
+        
+        cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC LIMIT 30')
+        dates = cur.fetchall()
+        
+        conn.close()
+        
+        return render_template('dashboard_simple.html', 
+                             records=records, 
+                             names=names, 
+                             dates=dates, 
+                             weekly_summary=[],
+                             monthly_summary=[],
+                             not_found=False,
+                             show_results=True,
+                             show_all=True,
+                             request=None)
+                             
+    except Exception as e:
+        print(f"Error in view_all_attendance: {e}")
+        return render_template('dashboard_simple.html', 
+                             records=[], 
+                             names=[], 
+                             dates=[], 
+                             weekly_summary=[],
+                             monthly_summary=[],
+                             not_found=True,
+                             show_results=True,
+                             show_all=False,
+                             request=None)
 
 @app.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
