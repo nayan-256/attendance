@@ -261,7 +261,7 @@ def student_login():
 
         if user:
             session['student_id'] = student_id
-            return redirect(url_for('student_home'))  # ✅ Redirect to new home screen
+            return redirect(url_for('student_home'))  #  Redirect to new home screen
         else:
             flash("Invalid credentials", "danger")
 
@@ -832,36 +832,58 @@ def dashboard():
     if not session.get('logged_in'):
         flash("Please log in as admin to view attendance records", "warning")
         return redirect(url_for('login'))
-    
+
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
-    
-    # Get data for dropdowns
+
+    # Dropdown data
     cur.execute('SELECT DISTINCT name FROM users ORDER BY name')
     names = cur.fetchall()
-    
+
     cur.execute('SELECT DISTINCT DATE(timestamp) FROM attendance ORDER BY timestamp DESC')
     dates = cur.fetchall()
-    
-    # Initialize variables
+
     records = []
     show_results = False
     not_found = False
-    
-    # Handle POST requests only
+
     if request.method == 'POST':
+        selected_name = request.form.get('name', '').strip()
+        selected_date = request.form.get('date', '').strip()
+        selected_department = request.form.get('department', '').strip()
+        selected_class_year = request.form.get('class_year', '').strip()
         show_all = request.form.get('show_all')
+        search_records = request.form.get('search_records')
+
+        print(f"🔍 DEBUG: POST received")
+        print(f"   selected_name: '{selected_name}' (len={len(selected_name)})")
+        print(f"   selected_date: '{selected_date}' (len={len(selected_date)})")
+        print(f"   selected_department: '{selected_department}' (len={len(selected_department)})")
+        print(f"   selected_class_year: '{selected_class_year}' (len={len(selected_class_year)})")
+        print(f"   show_all: '{show_all}'")
+        print(f"   search_records: '{search_records}'")
+        print(f"   Raw form data: {dict(request.form)}")
+
+        # ULTRA STRICT FILTER CHECK - ALL fields must be empty to block
+        name_empty = not selected_name
+        date_empty = not selected_date  
+        dept_empty = not selected_department
+        year_empty = not selected_class_year
         
-        print(f"POST request received. show_all: '{show_all}'")
-        print(f"All form data: {dict(request.form)}")
+        print(f"🔍 EMPTINESS CHECK:")
+        print(f"   name_empty: {name_empty}")
+        print(f"   date_empty: {date_empty}")
+        print(f"   dept_empty: {dept_empty}")
+        print(f"   year_empty: {year_empty}")
         
-        # ALWAYS show results when form is submitted
-        show_results = True
+        all_empty = name_empty and date_empty and dept_empty and year_empty
+        print(f"   ALL_EMPTY: {all_empty}")
         
-        # If "Show All Records" button was clicked
-        if show_all == 'true':
-            print("Show All Records button clicked!")
-            cur.execute('''
+        # Handle Show All button separately
+        if show_all:
+            print("🔄 SHOW ALL button clicked - showing all records")
+            show_results = True
+            query = '''
                 SELECT 
                     users.name,
                     users.student_id,
@@ -873,15 +895,23 @@ def dashboard():
                 FROM attendance 
                 JOIN users ON attendance.user_id = users.id
                 ORDER BY attendance.timestamp DESC
-            ''')
+            '''
+            cur.execute(query)
             records = cur.fetchall()
-            print(f"Found {len(records)} records for show all")
-            
+            if not records:
+                not_found = True
+        elif all_empty:
+            # NO FILTERS AT ALL - BLOCK EVERYTHING
+            records = []
+            show_results = False  # Critical: Hide results section
+            not_found = False
+            flash("Please select an option to search a record.", "warning")
+            print("🚫 BLOCKING: No filters provided")
+            print(f"   Final state: records={len(records)}, show_results={show_results}")
         else:
-            # Handle search filters
-            selected_name = request.form.get('name', '').strip()
-            selected_date = request.form.get('date', '').strip()
-            
+            # AT LEAST ONE FILTER PROVIDED - Allow search
+            show_results = True
+            print("✅ ALLOWING: At least one filter provided")
             query = '''
                 SELECT 
                     users.name,
@@ -896,34 +926,44 @@ def dashboard():
                 WHERE 1=1
             '''
             params = []
-            
+
             if selected_name:
                 query += " AND users.name = ?"
                 params.append(selected_name)
-            
             if selected_date:
                 query += " AND DATE(attendance.timestamp) = ?"
                 params.append(selected_date)
-            
+            if selected_department:
+                query += " AND users.department = ?"
+                params.append(selected_department)
+            if selected_class_year:
+                query += " AND users.class_year = ?"
+                params.append(selected_class_year)
+
             query += " ORDER BY attendance.timestamp DESC"
+
             cur.execute(query, params)
             records = cur.fetchall()
-            print(f"Found {len(records)} records for search")
-        
-        # Set not_found if no records
-        if len(records) == 0:
-            not_found = True
-        
-        print(f"Final: show_results={show_results}, records={len(records)}, not_found={not_found}")
-    
+            
+            if not records:
+                not_found = True
+            
+            print(f"✅ Filters applied - found {len(records)} records")
+
     conn.close()
-    return render_template('dashboard_simple.html', 
-                         records=records, 
-                         names=names, 
-                         dates=dates, 
-                         not_found=not_found,
-                         show_results=show_results,
-                         request=request)
+    
+    print(f"🎯 FINAL RENDER STATE:")
+    print(f"   records count: {len(records)}")
+    print(f"   show_results: {show_results}")
+    print(f"   not_found: {not_found}")
+    
+    return render_template('dashboard_simple.html',
+                           records=records,
+                           names=names,
+                           dates=dates,
+                           not_found=not_found,
+                           show_results=show_results,
+                           request=request)
 
 # Simple test route to verify show all functionality
 @app.route('/test_show_all_route')

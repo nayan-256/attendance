@@ -388,6 +388,18 @@
         <i class="fas fa-chart-line me-3"></i>Attendance Records Dashboard
       </h2>
 
+       <!--  Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
       <div class="row mb-4">
         <div class="col text-end">
           <form action="{{ url_for('download_excel') }}" method="get" class="d-inline">
@@ -467,7 +479,7 @@
 
             <div class="row mt-4">
               <div class="col-12 text-center">
-                <button type="submit" class="btn btn-enhanced me-3">
+                <button type="submit" name="search_records" value="true" class="btn btn-enhanced me-3">
                   <i class="fas fa-search me-2"></i>Search Records
                 </button>
                 <button
@@ -488,7 +500,7 @@
       {% if not_found and show_results %}
       <div class="not-found-card" data-aos="fade-in" data-aos-delay="300">
         <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-        <h4>No Records Found</h4>
+        <h4>Record not found</h4>
         <p>
           No attendance records match your search criteria. Try different
           filters or check if attendance data exists for the selected
@@ -498,8 +510,24 @@
       {% endif %}
 
       <!-- Enhanced Attendance Records Table -->
-      {% if show_results %}
-        {% if records %}
+      {% if request.method == 'POST' %}
+        {% set form_name = request.form.get('name', '') %}
+        {% set form_date = request.form.get('date', '') %}
+        {% set form_department = request.form.get('department', '') %}
+        {% set form_class_year = request.form.get('class_year', '') %}
+        {% set show_all_clicked = request.form.get('show_all') %}
+        {% set search_clicked = request.form.get('search_records') %}
+        
+        {% if search_clicked and not show_all_clicked %}
+          {% if not form_name and not form_date and not form_department and not form_class_year %}
+            <!-- BLOCK: No filters selected with Search Records -->
+            <div class="alert alert-warning text-center" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Please select at least one filter option above to search records.</strong>
+            </div>
+          {% else %}
+            <!-- ALLOW: Filters provided with Search Records -->
+            {% if records %}
       <div class="card glass-container" data-aos="fade-up" data-aos-delay="400">
         <div class="card-header bg-transparent border-0">
           <h5 class="text-white mb-0">
@@ -554,22 +582,76 @@
           </div>
         </div>
       </div>
-        {% else %}
-      <div
-        class="card glass-container text-center"
-        data-aos="fade-up"
-        data-aos-delay="400"
-      >
-        <div class="card-body">
-          <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-          <h4 class="text-white">No Records Found</h4>
-          <p class="text-white-50">
-            No attendance records match your search criteria.
-          </p>
-        </div>
-      </div>
+            {% else %}
+            <!-- No records found with filters -->
+            <div class="alert alert-info text-center" role="alert">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>No records found with the selected filters.</strong>
+            </div>
+            {% endif %}
+          {% endif %}
+        {% elif show_all_clicked %}
+          <!-- Show All Records clicked -->
+          {% if records %}
+          <div class="card glass-container" data-aos="fade-up" data-aos-delay="400">
+            <div class="card-header bg-transparent border-0">
+              <h5 class="text-white mb-0">
+                <i class="fas fa-history me-2"></i>All Attendance Records
+                <span class="badge bg-info ms-2">{{ records|length }} Records</span>
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark table-striped">
+                  <thead>
+                    <tr style="background-color: rgba(255,255,255,0.1);">
+                      <th style="color: white;">Student Name</th>
+                      <th style="color: white;">Student ID</th>
+                      <th style="color: white;">Class</th>
+                      <th style="color: white;">Department</th>
+                      <th style="color: white;">Date</th>
+                      <th style="color: white;">Time</th>
+                      <th style="color: white;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for record in records %}
+                    <tr>
+                      <td style="color: white !important; font-weight: bold;">
+                        <i class="fas fa-user me-2"></i>{{ record[0] }}
+                      </td>
+                      <td style="color: white !important;">
+                        <span class="badge bg-info">{{ record[1] }}</span>
+                      </td>
+                      <td style="color: white !important;">{{ record[2] }}</td>
+                      <td style="color: white !important;">{{ record[3] }}</td>
+                      <td style="color: white !important;">{{ record[4] }}</td>
+                      <td style="color: white !important;">{{ record[5] }}</td>
+                      <td style="color: white !important;">
+                        {% if record[6] == 'Check-In' %}
+                        <span class="badge bg-success">{{ record[6] }}</span>
+                        {% elif record[6] == 'Check-Out' %}
+                        <span class="badge bg-warning">{{ record[6] }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ record[6] }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="alert alert-info text-center" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>No attendance records found.</strong>
+          </div>
+          {% endif %}
         {% endif %}
       {% else %}
+      <!-- GET request - show instruction -->
       <div
         class="card glass-container text-center"
         data-aos="fade-up"
@@ -579,9 +661,7 @@
           <i class="fas fa-search fa-3x text-white mb-3"></i>
           <h4 class="text-white">Search for Attendance Records</h4>
           <p class="text-white-50">
-            Use the search form above to filter attendance records by name or
-            date, or click "Show All Records" to view complete attendance
-            history including all statuses.
+            Use the search form above to filter attendance records by name, date, department, or class.
           </p>
         </div>
       </div>

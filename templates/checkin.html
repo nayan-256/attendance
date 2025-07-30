@@ -264,6 +264,11 @@
           const setVoice = () => {
             const voices = speechSynthesis.getVoices();
             console.log('Available voices:', voices.length);
+            
+            // Debug: List all available voices
+            voices.forEach((voice, index) => {
+              console.log(`Voice ${index}: ${voice.name} (${voice.lang}) - Gender: ${voice.gender || 'unknown'}`);
+            });
 
             let femaleVoice = null;
 
@@ -273,7 +278,7 @@
               voice.gender === 'female'
             );
 
-            // Priority 2: Look for common female voice names
+            // Priority 2: Look for common female voice names (expanded list)
             if (!femaleVoice) {
               femaleVoice = voices.find(voice =>
                 voice.name.toLowerCase().includes('zira') ||
@@ -286,14 +291,32 @@
                 voice.name.toLowerCase().includes('karen') ||
                 voice.name.toLowerCase().includes('moira') ||
                 voice.name.toLowerCase().includes('tessa') ||
+                voice.name.toLowerCase().includes('helena') ||
+                voice.name.toLowerCase().includes('anna') ||
+                voice.name.toLowerCase().includes('emma') ||
+                voice.name.toLowerCase().includes('sophia') ||
+                voice.name.toLowerCase().includes('aria') ||
+                voice.name.toLowerCase().includes('joanna') ||
+                voice.name.toLowerCase().includes('kimberly') ||
+                voice.name.toLowerCase().includes('salli') ||
+                voice.name.toLowerCase().includes('kendra') ||
+                voice.name.toLowerCase().includes('ivy') ||
                 (voice.name.toLowerCase().includes('microsoft') && voice.name.toLowerCase().includes('zira'))
               );
             }
 
-            // Priority 3: If no female voice found, prefer English voices
+            // Priority 3: Exclude obviously male voices and prefer remaining ones
             if (!femaleVoice) {
               femaleVoice = voices.find(voice =>
-                voice.lang.startsWith('en') && !voice.name.toLowerCase().includes('male')
+                voice.lang.startsWith('en') && 
+                !voice.name.toLowerCase().includes('male') &&
+                !voice.name.toLowerCase().includes('mark') &&
+                !voice.name.toLowerCase().includes('david') &&
+                !voice.name.toLowerCase().includes('alex') &&
+                !voice.name.toLowerCase().includes('james') &&
+                !voice.name.toLowerCase().includes('fred') &&
+                !voice.name.toLowerCase().includes('george') &&
+                !voice.name.toLowerCase().includes('richard')
               );
             }
 
@@ -304,13 +327,13 @@
 
             if (femaleVoice) {
               utterance.voice = femaleVoice;
-              console.log('Selected voice:', femaleVoice.name);
+              console.log('Selected voice:', femaleVoice.name, 'Gender:', femaleVoice.gender || 'unknown');
             }
 
-            // Set speech parameters for a pleasant female voice
-            utterance.rate = 0.85;
-            utterance.pitch = 1.2;
-            utterance.volume = 0.9;
+            // Enhanced speech parameters for a more feminine voice
+            utterance.rate = 0.8;      // Slightly slower for clarity
+            utterance.pitch = 1.3;     // Higher pitch for more feminine sound
+            utterance.volume = 0.9;    // Clear volume
 
             speechSynthesis.speak(utterance);
           };
