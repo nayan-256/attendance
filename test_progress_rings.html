@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Ring Test</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.8rem 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: visible;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.5s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .stat-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+      border-color: var(--card-gradient-start);
+    }
+
+    .stat-card.card-primary {
+      --card-gradient-start: #667eea;
+      --card-gradient-end: #764ba2;
+    }
+
+    .stat-card.card-success {
+      --card-gradient-start: #11998e;
+      --card-gradient-end: #38ef7d;
+    }
+
+    .stat-card.card-info {
+      --card-gradient-start: #4facfe;
+      --card-gradient-end: #00f2fe;
+    }
+
+    .stat-card.card-warning {
+      --card-gradient-start: #f093fb;
+      --card-gradient-end: #f5576c;
+    }
+
+    .progress-ring-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 1rem;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-bg {
+      fill: none;
+      stroke: #f0f0f0;
+      stroke-width: 8;
+    }
+
+    .progress-ring-progress {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 377;
+      stroke-dashoffset: 377;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .progress-ring-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .progress-ring-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .progress-ring-icon i {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .stat-content {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-weight: 600;
+      background: rgba(17, 153, 142, 0.1);
+      color: #11998e;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div style="max-width: 1200px;">
+    <h1>🎯 Progress Ring Animation Test</h1>
+    
+    <div class="stats-grid">
+      <!-- Total Registered Users -->
+      <div class="stat-card card-primary">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="140" height="140">
+            <defs>
+              <linearGradient id="gradient-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="70" cy="70" r="60" />
+            <circle class="progress-ring-progress" cx="70" cy="70" r="60" 
+                    stroke="url(#gradient-primary)" data-progress="85" />
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-ring-icon">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number" data-target="1248">0</div>
+          <div class="stat-label">Total Registered</div>
+          <div class="stat-change">
+            <i class="fas fa-arrow-up"></i>
+            <span>12% this month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Check-ins -->
+      <div class="stat-card card-success">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="140" height="140">
+            <defs>
+              <linearGradient id="gradient-success" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#11998e;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#38ef7d;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="70" cy="70" r="60" />
+            <circle class="progress-ring-progress" cx="70" cy="70" r="60" 
+                    stroke="url(#gradient-success)" data-progress="70" />
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-ring-icon">
+              <i class="fas fa-sign-in-alt"></i>
+            </div>
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number" data-target="342">0</div>
+          <div class="stat-label">Today's Check-ins</div>
+          <div class="stat-change">
+            <i class="fas fa-arrow-up"></i>
+            <span>8% vs yesterday</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Now -->
+      <div class="stat-card card-info">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="140" height="140">
+            <defs>
+              <linearGradient id="gradient-info" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="70" cy="70" r="60" />
+            <circle class="progress-ring-progress" cx="70" cy="70" r="60" 
+                    stroke="url(#gradient-info)" data-progress="60" />
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-ring-icon">
+              <i class="fas fa-user-check"></i>
+            </div>
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number" data-target="87">0</div>
+          <div class="stat-label">Active Now</div>
+          <div class="stat-change">
+            <i class="fas fa-circle"></i>
+            <span>Live</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recognition Accuracy -->
+      <div class="stat-card card-warning">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="140" height="140">
+            <defs>
+              <linearGradient id="gradient-warning" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="70" cy="70" r="60" />
+            <circle class="progress-ring-progress" cx="70" cy="70" r="60" 
+                    stroke="url(#gradient-warning)" data-progress="98" />
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-ring-icon">
+              <i class="fas fa-brain"></i>
+            </div>
+          </div>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number" data-target="98" data-suffix="%">0%</div>
+          <div class="stat-label">Recognition Accuracy</div>
+          <div class="stat-change">
+            <i class="fas fa-check-circle"></i>
+            <span>Excellent</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Animated counter
+    function animateCounter(element, target, duration = 1500, suffix = '') {
+      const start = 0;
+      const increment = target / (duration / 16);
+      let current = start;
+      
+      function updateCounter() {
+        current += increment;
+        if (current < target) {
+          element.textContent = Math.floor(current) + suffix;
+          requestAnimationFrame(updateCounter);
+        } else {
+          element.textContent = target + suffix;
+        }
+      }
+      requestAnimationFrame(updateCounter);
+    }
+
+    // Animate progress ring
+    function animateProgressRing(circle, progress, duration = 1500) {
+      const radius = circle.r.baseVal.value;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (progress / 100) * circumference;
+      
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = circumference;
+      
+      setTimeout(() => {
+        circle.style.strokeDashoffset = offset;
+      }, 100);
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      const cards = document.querySelectorAll('.stat-card');
+      
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add('visible');
+          
+          // Animate ring
+          const ring = card.querySelector('.progress-ring-progress');
+          const progress = parseInt(ring.dataset.progress);
+          animateProgressRing(ring, progress);
+          
+          // Animate counter
+          const counter = card.querySelector('.stat-number');
+          const target = parseInt(counter.dataset.target);
+          const suffix = counter.dataset.suffix || '';
+          setTimeout(() => {
+            animateCounter(counter, target, 1500, suffix);
+          }, 200);
+          
+        }, index * 200);
+      });
+    });
+  </script>
+</body>
+</html>
