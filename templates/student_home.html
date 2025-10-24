@@ -1020,6 +1020,203 @@
       }
     }
 
+    /* ============================================ */
+    /* LIVE ATTENDANCE TRACKER STYLES */
+    /* ============================================ */
+    
+    /* ============================================ */
+    /* CHATBOT FLOATING BUTTON STYLES */
+    /* ============================================ */
+    
+    .chatbot-fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .chatbot-fab:hover {
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+    }
+
+    .chatbot-fab:active {
+      transform: scale(0.95);
+    }
+
+    .chatbot-fab .chat-icon {
+      position: relative;
+    }
+
+    .chatbot-fab .notification-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    .chatbot-tooltip {
+      position: absolute;
+      right: 75px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .chatbot-fab:hover .chatbot-tooltip {
+      opacity: 1;
+      visibility: visible;
+      right: 80px;
+    }
+
+    .chatbot-tooltip::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid rgba(0, 0, 0, 0.8);
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+    }
+
+    @media (max-width: 768px) {
+      .chatbot-fab {
+        width: 56px;
+        height: 56px;
+        bottom: 20px;
+        right: 20px;
+        font-size: 1.3rem;
+      }
+
+      .chatbot-tooltip {
+        display: none;
+      }
+    }
+    
+    /* ============================================ */
+    /* LIVE ATTENDANCE TRACKER STYLES */
+    /* ============================================ */
+    
+    .hover-card {
+      transition: all 0.3s ease !important;
+      cursor: pointer;
+    }
+    
+    .hover-card:hover {
+      transform: translateY(-5px) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .status-badge {
+      transition: all 0.3s ease;
+    }
+    
+    .progress {
+      overflow: visible !important;
+    }
+    
+    .progress-bar {
+      position: relative;
+      overflow: visible;
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 6px;
+      height: calc(100% + 4px);
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 0 20px 20px 0;
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    .card-header h3 {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Mobile Responsive for Attendance Tracker */
+    @media (max-width: 768px) {
+      .attendance-tracker-container {
+        margin: 15px !important;
+      }
+      
+      .card-body {
+        padding: 20px !important;
+      }
+      
+      .overall-attendance .col-md-8,
+      .overall-attendance .col-md-4 {
+        text-align: center !important;
+      }
+      
+      .status-badge {
+        margin-top: 20px !important;
+      }
+    }
+
     /* Loading animation */
     .main-container {
       animation: slideInUp 0.8s ease-out, containerFloat 8s ease-in-out 1s infinite;
@@ -1141,6 +1338,62 @@
     <div class="container animate__animated animate__fadeIn">
       <h1><i class="fas fa-user-graduate me-2" style="color: #4facfe;"></i>Student Portal: Welcome {{ student.name if student else 'Student' }}</h1>
       
+      <!-- Live Attendance Tracker Section -->
+      <div class="attendance-tracker-container mb-4" id="attendanceTrackerContainer" style="display: none;">
+        <div class="card shadow-lg" style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; border: none;">
+          <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px 20px 0 0; padding: 20px;">
+            <h3 class="mb-0"><i class="fas fa-chart-line me-2"></i>Live Attendance Tracker</h3>
+            <small id="lastUpdated" style="opacity: 0.9;">Loading...</small>
+          </div>
+          <div class="card-body" style="padding: 30px;">
+            <!-- Overall Attendance -->
+            <div class="overall-attendance mb-4">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h5 class="mb-3"><i class="fas fa-calendar-check me-2"></i>Overall Attendance</h5>
+                  <div class="progress" style="height: 40px; border-radius: 20px; background: #e9ecef;">
+                    <div id="overallProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="font-size: 1.1rem; font-weight: bold; transition: width 1s ease, background-color 0.5s ease;">
+                      <span id="overallPercentage">0%</span>
+                    </div>
+                  </div>
+                  <div class="mt-2 d-flex justify-content-between">
+                    <span id="attendanceStats" style="font-size: 0.9rem; color: #6c757d;"></span>
+                    <span id="attendanceTrend"></span>
+                  </div>
+                </div>
+                <div class="col-md-4 text-center">
+                  <div id="overallStatus" class="status-badge" style="padding: 20px; border-radius: 15px; margin-top: 10px;">
+                    <i class="fas fa-spinner fa-spin fa-3x"></i>
+                    <div class="mt-2">Loading...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr style="margin: 30px 0;">
+
+            <!-- Subject-wise Attendance -->
+            <div class="subject-attendance">
+              <h5 class="mb-4"><i class="fas fa-book me-2"></i>Subject-wise Attendance</h5>
+              <div id="subjectsContainer" class="row g-3">
+                <!-- Subject cards will be populated here -->
+                <div class="col-12 text-center">
+                  <i class="fas fa-spinner fa-spin fa-2x" style="color: #667eea;"></i>
+                  <p class="mt-2">Loading subject data...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Refresh Button -->
+            <div class="text-center mt-4">
+              <button onclick="refreshAttendanceData()" class="btn btn-primary btn-sm">
+                <i class="fas fa-sync-alt me-2"></i>Refresh Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <nav>
         <div class="row g-3 justify-content-center">
           <!-- Main Dashboard and Profile Actions -->
@@ -1453,6 +1706,197 @@
         .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
     }
 
+    // ============================================
+    // LIVE ATTENDANCE TRACKER FUNCTIONALITY
+    // ============================================
+    
+    const studentId = '{{ student.student_id if student else "" }}';
+    
+    // Fetch attendance data from API
+    async function fetchAttendanceData() {
+      if (!studentId) {
+        console.error('Student ID not found');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/attendance_stats/${studentId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          updateAttendanceUI(data);
+          document.getElementById('attendanceTrackerContainer').style.display = 'block';
+        } else {
+          console.error('Failed to fetch attendance data:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching attendance data:', error);
+      }
+    }
+    
+    // Update UI with attendance data
+    function updateAttendanceUI(data) {
+      // Update last updated time
+      document.getElementById('lastUpdated').textContent = `Last updated: ${data.last_updated}`;
+      
+      // Update overall attendance
+      const overall = data.overall;
+      const progressBar = document.getElementById('overallProgressBar');
+      const percentage = overall.percentage;
+      
+      // Set progress bar
+      progressBar.style.width = percentage + '%';
+      progressBar.querySelector('#overallPercentage').textContent = percentage + '%';
+      
+      // Set color based on percentage
+      progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+      if (overall.status === 'danger') {
+        progressBar.classList.add('bg-danger');
+      } else if (overall.status === 'warning') {
+        progressBar.classList.add('bg-warning');
+      } else {
+        progressBar.classList.add('bg-success');
+      }
+      
+      // Update stats
+      document.getElementById('attendanceStats').innerHTML = `
+        <i class="fas fa-check-circle text-success"></i> Present: ${overall.present} &nbsp;
+        <i class="fas fa-times-circle text-danger"></i> Absent: ${overall.absent} &nbsp;
+        <i class="fas fa-calendar-alt text-primary"></i> Total: ${overall.total}
+      `;
+      
+      // Update trend
+      const trendIcon = overall.trend === 'improving' ? '📈' : (overall.trend === 'declining' ? '📉' : '➡️');
+      const trendColor = overall.trend === 'improving' ? 'success' : (overall.trend === 'declining' ? 'danger' : 'secondary');
+      document.getElementById('attendanceTrend').innerHTML = `
+        <span class="badge bg-${trendColor}">${trendIcon} ${overall.trend.charAt(0).toUpperCase() + overall.trend.slice(1)}</span>
+      `;
+      
+      // Update status badge
+      const statusDiv = document.getElementById('overallStatus');
+      if (percentage >= 85) {
+        statusDiv.innerHTML = `
+          <i class="fas fa-trophy fa-3x text-success"></i>
+          <div class="mt-2" style="font-weight: bold; color: #28a745;">Excellent!</div>
+          <div style="font-size: 0.9rem; color: #6c757d;">Keep it up!</div>
+        `;
+        statusDiv.style.background = 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)';
+      } else if (percentage >= 75) {
+        statusDiv.innerHTML = `
+          <i class="fas fa-check-circle fa-3x text-warning"></i>
+          <div class="mt-2" style="font-weight: bold; color: #ffc107;">Good</div>
+          <div style="font-size: 0.9rem; color: #6c757d;">Stay consistent!</div>
+        `;
+        statusDiv.style.background = 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)';
+      } else {
+        statusDiv.innerHTML = `
+          <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+          <div class="mt-2" style="font-weight: bold; color: #dc3545;">Low Attendance Alert!</div>
+          <div style="font-size: 0.9rem; color: #6c757d;">Below 75% threshold</div>
+        `;
+        statusDiv.style.background = 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)';
+      }
+      
+      // Update subject-wise attendance
+      updateSubjectsUI(data.subjects);
+    }
+    
+    // Update subjects UI
+    function updateSubjectsUI(subjects) {
+      const container = document.getElementById('subjectsContainer');
+      
+      if (!subjects || subjects.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center text-muted">No subject data available</div>';
+        return;
+      }
+      
+      let html = '';
+      subjects.forEach((subject, index) => {
+        const statusClass = subject.status === 'danger' ? 'danger' : (subject.status === 'warning' ? 'warning' : 'success');
+        const statusIcon = subject.status === 'danger' ? 'exclamation-triangle' : (subject.status === 'warning' ? 'exclamation-circle' : 'check-circle');
+        const alertClass = subject.percentage < 75 ? 'alert-danger' : (subject.percentage < 85 ? 'alert-warning' : 'alert-success');
+        
+        html += `
+          <div class="col-md-6 animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s;">
+            <div class="card h-100 shadow-sm hover-card" style="border: none; border-radius: 15px; transition: all 0.3s ease;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <h6 class="mb-1" style="font-weight: 600;">${subject.name}</h6>
+                    <small class="text-muted">${subject.code}</small>
+                  </div>
+                  <div class="text-end">
+                    <div class="badge bg-${statusClass}" style="font-size: 1rem; padding: 8px 12px;">
+                      ${subject.percentage}%
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="progress mb-2" style="height: 25px; border-radius: 12px; background: #e9ecef;">
+                  <div class="progress-bar bg-${statusClass} progress-bar-striped" 
+                       role="progressbar" 
+                       style="width: ${subject.percentage}%; font-size: 0.9rem; font-weight: bold;"
+                       aria-valuenow="${subject.percentage}" 
+                       aria-valuemin="0" 
+                       aria-valuemax="100">
+                    ${subject.percentage}%
+                  </div>
+                </div>
+                
+                <div class="d-flex justify-content-between text-muted" style="font-size: 0.85rem;">
+                  <span><i class="fas fa-check text-success"></i> ${subject.present}/${subject.total}</span>
+                  <span><i class="fas fa-times text-danger"></i> Absent: ${subject.absent}</span>
+                </div>
+                
+                ${subject.percentage < 75 ? `
+                  <div class="alert ${alertClass} mt-3 mb-0" role="alert" style="padding: 8px 12px; font-size: 0.85rem; border-radius: 10px;">
+                    <i class="fas fa-${statusIcon} me-1"></i>
+                    <strong>Alert:</strong> Attendance below 75%!
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    // Refresh attendance data
+    function refreshAttendanceData() {
+      const btn = event.target.closest('button');
+      const originalHTML = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+      
+      fetchAttendanceData().then(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        
+        // Show success feedback
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-success ms-2';
+        badge.textContent = 'Updated!';
+        btn.appendChild(badge);
+        
+        setTimeout(() => badge.remove(), 2000);
+      });
+    }
+    
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      if (studentId) {
+        fetchAttendanceData();
+      }
+    }, 30000);
+    
+    // Initial load
+    if (studentId) {
+      fetchAttendanceData();
+    }
+
     // Service Worker Registration for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -1463,6 +1907,21 @@
             console.log('ServiceWorker registration failed: ', err);
           });
       });
+    }
+  </script>
+
+  <!-- Chatbot Floating Action Button -->
+  <button class="chatbot-fab" onclick="openChatbot()" title="Open AI Assistant">
+    <div class="chat-icon">
+      <i class="fas fa-robot"></i>
+      <span class="notification-badge">!</span>
+    </div>
+    <div class="chatbot-tooltip">💬 Need Help? Ask AI Assistant!</div>
+  </button>
+
+  <script>
+    function openChatbot() {
+      window.open('{{ url_for("chatbot_page") }}', 'ChatbotWindow', 'width=520,height=750,resizable=yes,scrollbars=yes');
     }
   </script>
 </body>

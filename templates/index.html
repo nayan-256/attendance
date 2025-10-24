@@ -31,20 +31,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
-    :root {
-      /* Dark/Light mode CSS variables */
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8f9fa;
-      --text-primary: #212529;
-      --text-secondary: #6c757d;
-      --border-color: #dee2e6;
-      --shadow-color: rgba(0, 0, 0, 0.1);
-      --card-bg: #ffffff;
-      --navbar-bg: #ffffff;
-      --button-bg: #007bff;
-      --button-text: #ffffff;
-    }
-    
     /* Body Background Animation */
     body {
       background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
@@ -794,35 +780,40 @@
 
     .chatbot-button {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: inline-flex;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: bold;
+      justify-content: center;
+      font-size: 1.5rem;
       color: white;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
-      border-radius: 25px;
+      border-radius: 50%;
       text-decoration: none;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: float 3s ease-in-out infinite;
+      overflow: visible;
     }
 
     .chatbot-button:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
       color: white;
       text-decoration: none;
     }
 
     .chatbot-button:active {
-      transform: translateY(0) scale(0.98);
+      transform: scale(0.95);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
     }
 
     /* PWA Install Button Styles */
@@ -2146,9 +2137,8 @@
   </script>
 
   <!-- Floating Chatbot Button -->
-  <a href="/chatbot" class="chatbot-button" target="_blank" rel="noopener noreferrer" title="Open Attendance Assistant">
-    <i class="fas fa-comments"></i>
-    💬 Chatbot Assistant
+  <a href="/chatbot" class="chatbot-button" target="_blank" rel="noopener noreferrer" title="💬 Open AI Assistant - Get instant help!">
+    <i class="fas fa-robot"></i>
   </a>
 </body>
 

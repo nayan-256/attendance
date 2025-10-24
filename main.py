@@ -1466,7 +1466,14 @@ def chatbot_page():
 # Enhanced Role-Based Chatbot response API (handles user messages)
 @app.route('/chatbot', methods=['POST'])
 def chatbot_response():
-    user_input = request.json.get('message', '').lower()
+    try:
+        user_input = request.json.get('message', '').lower()
+    except Exception as e:
+        print(f"Error parsing JSON: {e}")
+        return jsonify({'response': "⚠️ Invalid request format. Please try again."}), 400
+    
+    if not user_input or user_input.strip() == '':
+        return jsonify({'response': "Please enter a message! 😊"})
     
     # Determine user role and get user info
     user_role = "guest"
@@ -1486,6 +1493,8 @@ def chatbot_response():
             user_role = "student"
             cur.execute("SELECT * FROM users WHERE student_id = ?", (student_id,))
             user_info = cur.fetchone()
+            if not user_info:
+                return jsonify({'response': "⚠️ Student profile not found. Please contact administrator."}), 404
         elif admin_logged_in:
             user_role = "admin"
             user_info = {"username": "admin"}
@@ -1508,7 +1517,7 @@ def chatbot_response():
             return jsonify({'response': "You're welcome! 😊 Feel free to reach out anytime for assistance. Have a great day!"})
         
         # STUDENT-SPECIFIC QUERIES
-        if user_role == "student":
+        if user_role == "student" and user_info:
             # Student attendance queries
             if "attendance" in user_input and ("my" in user_input or "percentage" in user_input):
                 cur.execute("""
@@ -1534,7 +1543,7 @@ def chatbot_response():
                 missed = result['missed_classes'] if result else 0
                 return jsonify({'response': f"📉 You've missed {missed} classes. {'Try to attend regularly to maintain good attendance!' if missed > 3 else 'Great job maintaining regular attendance! 👍'}"})
             
-            elif "today" in user_input and "attendance" in user_input:
+            elif "today" in user_input and ("attendance" in user_input or "attend" in user_input or "status" in user_input):
                 from datetime import date
                 today = date.today().isoformat()
                 cur.execute("""
@@ -1551,12 +1560,15 @@ def chatbot_response():
             elif "profile" in user_input or "my info" in user_input:
                 return jsonify({'response': f"👤 Your Profile:\n• Name: {user_info['name']}\n• Student ID: {user_info['student_id']}\n• Class: {user_info['class_year']}\n• Department: {user_info['department']}\n\nYou can edit your profile from the student dashboard!"})
             
-            elif "leave" in user_input or "absence" in user_input:
+            elif "leave" in user_input or "absence" in user_input or "apply" in user_input:
                 return jsonify({'response': "📝 Leave Application Process:\n1. Go to Student Dashboard\n2. Click 'Apply for Leave'\n3. Fill in dates and reason\n4. Submit for teacher approval\n5. Check status in your dashboard\n\nNeed help with a specific step?"})
+            
+            elif "improve" in user_input or "tips" in user_input or "better" in user_input:
+                return jsonify({'response': "📈 Tips to Improve Attendance:\n\n✅ Set daily reminders for classes\n✅ Plan your schedule in advance\n✅ Maintain a consistent routine\n✅ Inform teachers in case of emergencies\n✅ Review your attendance weekly\n✅ Aim for 75%+ attendance\n\n💡 Tip: Check your attendance regularly to stay on track!"})
         
         # TEACHER-SPECIFIC QUERIES
         elif user_role == "teacher":
-            if "class" in user_input and ("average" in user_input or "overall" in user_input or "statistics" in user_input):
+            if "class" in user_input and ("average" in user_input or "overall" in user_input or "statistics" in user_input or "stats" in user_input):
                 cur.execute("""
                     SELECT 
                         COUNT(DISTINCT user_id) as total_students,
@@ -1571,6 +1583,43 @@ def chatbot_response():
                 else:
                     return jsonify({'response': "📊 No attendance data available yet."})
             
+            elif ("low" in user_input and "attendance" in user_input) or ("students" in user_input and "low" in user_input):
+                # Query for students with low attendance (below 75%)
+                cur.execute("""
+                    SELECT u.name, u.student_id, 
+                           COUNT(*) as total_days,
+                           SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) as present_days,
+                           (SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) as percentage
+                    FROM users u
+                    LEFT JOIN attendance a ON u.id = a.user_id
+                    GROUP BY u.id
+                    HAVING percentage < 75
+                    ORDER BY percentage ASC
+                    LIMIT 5
+                """)
+                low_students = cur.fetchall()
+                if low_students:
+                    student_list = "\n".join([f"• {s['name']} ({s['student_id']}): {s['percentage']:.1f}%" for s in low_students])
+                    return jsonify({'response': f"📉 Students with Low Attendance (Below 75%):\n\n{student_list}\n\n{'...(showing top 5)' if len(low_students) == 5 else ''}\n⚠️ These students need attention!\n\nUse Teacher Dashboard for detailed intervention."})
+                else:
+                    return jsonify({'response': "🎉 Great news! All students have attendance above 75%!"})
+            
+            elif "today" in user_input and ("report" in user_input or "attendance" in user_input):
+                from datetime import date
+                today = date.today().isoformat()
+                cur.execute("""
+                    SELECT COUNT(*) as total_today,
+                           SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_today
+                    FROM attendance 
+                    WHERE date(timestamp) = ?
+                """, (today,))
+                result = cur.fetchone()
+                if result and result['total_today'] > 0:
+                    percentage = (result['present_today'] / result['total_today']) * 100
+                    return jsonify({'response': f"📅 Today's Attendance Report ({today}):\n• Total Records: {result['total_today']}\n• Present: {result['present_today']}\n• Absent: {result['total_today'] - result['present_today']}\n• Percentage: {percentage:.1f}%\n\nAccess detailed breakdown in Teacher Dashboard!"})
+                else:
+                    return jsonify({'response': "📅 No attendance records for today yet."})
+            
             elif "student" in user_input and ("list" in user_input or "all" in user_input):
                 cur.execute("SELECT name, student_id, class_year FROM users ORDER BY name LIMIT 10")
                 students = cur.fetchall()
@@ -1580,7 +1629,7 @@ def chatbot_response():
                 else:
                     return jsonify({'response': "👥 No students registered yet."})
             
-            elif "attendance" in user_input and ("mark" in user_input or "record" in user_input):
+            elif ("attendance" in user_input and ("mark" in user_input or "record" in user_input)) or ("export" in user_input and "data" in user_input):
                 return jsonify({'response': "📝 Attendance Management:\n• Use Teacher Dashboard for detailed student analytics\n• View attendance patterns and generate reports\n• Monitor individual student performance\n• Export attendance data to Excel\n\nAccess these features from your teacher dashboard!"})
             
             elif "dashboard" in user_input or "analytics" in user_input:
@@ -1588,7 +1637,7 @@ def chatbot_response():
         
         # ADMIN-SPECIFIC QUERIES
         elif user_role == "admin":
-            if "system" in user_input and ("status" in user_input or "overview" in user_input):
+            if ("system" in user_input and ("status" in user_input or "overview" in user_input or "statistics" in user_input)) or ("analytics" in user_input and "attendance" not in user_input):
                 cur.execute("SELECT COUNT(*) as total_students FROM users")
                 students_count = cur.fetchone()['total_students']
                 cur.execute("SELECT COUNT(*) as total_records FROM attendance")
@@ -1598,14 +1647,14 @@ def chatbot_response():
                 
                 return jsonify({'response': f"🖥️ System Overview:\n• Total Students: {students_count}\n• Total Teachers: {teachers_count}\n• Attendance Records: {records_count}\n• System Status: ✅ Active\n\nUse Admin Dashboard for detailed management!"})
             
-            elif "students" in user_input and ("manage" in user_input or "add" in user_input or "delete" in user_input):
+            elif ("students" in user_input or "users" in user_input) and ("manage" in user_input or "add" in user_input or "delete" in user_input or "how" in user_input):
                 return jsonify({'response': "👥 Student Management:\n• View all registered students\n• Add new student records\n• Delete student accounts\n• Manage student profiles\n• Export student data\n\nAccess these features from the Admin Dashboard!"})
             
-            elif "reports" in user_input or "analytics" in user_input:
+            elif ("reports" in user_input or "analytics" in user_input) and ("attendance" in user_input or "generate" in user_input):
                 return jsonify({'response': "📊 Admin Reports & Analytics:\n• Comprehensive attendance reports\n• Student performance analytics\n• Class-wise statistics\n• Export to Excel/CSV\n• Custom date range reports\n\nGenerate detailed reports from Admin Dashboard!"})
             
-            elif "backup" in user_input or "export" in user_input:
-                return jsonify({'response': "💾 Data Management:\n• Export attendance data to Excel\n• Backup student records\n• Download comprehensive reports\n• Schedule automated backups\n\nUse the export features in Admin Dashboard!"})
+            elif "backup" in user_input or "export" in user_input or "settings" in user_input:
+                return jsonify({'response': "💾 Data Management:\n• Export attendance data to Excel\n• Backup student records\n• Download comprehensive reports\n• Schedule automated backups\n• System configuration settings\n\nUse the export features in Admin Dashboard!"})
         
         # GENERAL QUERIES (for all users)
         elif "how to" in user_input and ("mark" in user_input or "attendance" in user_input):
@@ -1656,7 +1705,11 @@ def chatbot_response():
             return jsonify({'response': f"🤔 I'm not sure about that. Try asking: {suggestion}\n\nOr type 'help' to see what I can do for {user_role}s!"})
             
     except Exception as e:
-        return jsonify({'response': "⚠️ Sorry, I encountered an error. Please try again or contact support if the issue persists."})
+        # Log the actual error for debugging
+        print(f"Chatbot Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'response': f"⚠️ Sorry, I encountered an error: {str(e)}\n\nPlease try again or contact support if the issue persists."}), 500
     finally:
         if 'conn' in locals():
             conn.close()
@@ -1949,6 +2002,117 @@ def delete_subject(subject_id):
         return jsonify({'success': False, 'message': str(e)})
     finally:
         conn.close()
+
+# === Live Attendance Tracker API ===
+@app.route('/api/attendance_stats/<student_id>')
+def get_attendance_stats(student_id):
+    """Get real-time attendance statistics for a student"""
+    try:
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        
+        # Get student's user_id
+        cur.execute("SELECT id, name FROM users WHERE student_id = ?", (student_id,))
+        student = cur.fetchone()
+        
+        if not student:
+            return jsonify({'success': False, 'message': 'Student not found'}), 404
+        
+        user_id = student['id']
+        student_name = student['name']
+        
+        # Calculate overall attendance
+        cur.execute("""
+            SELECT COUNT(*) as total_days
+            FROM attendance 
+            WHERE user_id = ?
+        """, (user_id,))
+        total_days = cur.fetchone()['total_days']
+        
+        cur.execute("""
+            SELECT COUNT(*) as present_days
+            FROM attendance 
+            WHERE user_id = ? AND status = 'Present'
+        """, (user_id,))
+        present_days = cur.fetchone()['present_days']
+        
+        overall_percentage = (present_days / total_days * 100) if total_days > 0 else 0
+        
+        # Get subject-wise attendance (mock data for now since we don't have subject tracking)
+        # In a real system, you'd join with subjects table
+        subjects_stats = []
+        
+        # For demo, create some subject data based on attendance patterns
+        if total_days > 0:
+            # Simulate different subject attendances
+            subjects = [
+                {'name': 'Data Structures', 'code': 'DSA101'},
+                {'name': 'Database Management', 'code': 'DBMS201'},
+                {'name': 'Web Development', 'code': 'WD301'},
+                {'name': 'Operating Systems', 'code': 'OS201'},
+                {'name': 'Computer Networks', 'code': 'CN301'}
+            ]
+            
+            import random
+            random.seed(user_id)  # Consistent per student
+            
+            for subject in subjects:
+                # Generate realistic attendance percentages
+                subject_attendance = overall_percentage + random.randint(-10, 10)
+                subject_attendance = max(0, min(100, subject_attendance))  # Clamp 0-100
+                
+                subject_total = random.randint(max(1, total_days - 5), total_days + 5)
+                subject_present = int(subject_total * subject_attendance / 100)
+                
+                subjects_stats.append({
+                    'name': subject['name'],
+                    'code': subject['code'],
+                    'percentage': round(subject_attendance, 1),
+                    'present': subject_present,
+                    'total': subject_total,
+                    'absent': subject_total - subject_present,
+                    'status': 'danger' if subject_attendance < 75 else ('warning' if subject_attendance < 85 else 'success')
+                })
+        
+        # Calculate trend (comparing last 7 days vs previous 7 days)
+        cur.execute("""
+            SELECT 
+                SUM(CASE WHEN DATE(timestamp) >= DATE('now', '-7 days') THEN 1 ELSE 0 END) as recent_present,
+                SUM(CASE WHEN DATE(timestamp) >= DATE('now', '-14 days') AND DATE(timestamp) < DATE('now', '-7 days') THEN 1 ELSE 0 END) as prev_present
+            FROM attendance 
+            WHERE user_id = ? AND status = 'Present'
+        """, (user_id,))
+        trend_data = cur.fetchone()
+        
+        recent_present = trend_data['recent_present'] or 0
+        prev_present = trend_data['prev_present'] or 0
+        
+        trend = 'stable'
+        if recent_present > prev_present:
+            trend = 'improving'
+        elif recent_present < prev_present:
+            trend = 'declining'
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'student_name': student_name,
+            'overall': {
+                'percentage': round(overall_percentage, 1),
+                'present': present_days,
+                'total': total_days,
+                'absent': total_days - present_days,
+                'status': 'danger' if overall_percentage < 75 else ('warning' if overall_percentage < 85 else 'success'),
+                'trend': trend
+            },
+            'subjects': subjects_stats,
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # === PWA Service Worker Route ===
 @app.route('/static/sw.js')

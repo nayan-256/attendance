@@ -93,11 +93,164 @@
       margin: 0 auto 2rem;
       box-shadow: 0 15px 35px rgba(17, 153, 142, 0.3);
       animation: pulse 2s infinite;
+      position: relative;
     }
 
     .checkin-icon i {
       font-size: 3rem;
       color: white;
+    }
+
+    /* Animated Face-Scan Overlay */
+    .scan-overlay {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .scan-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3px solid rgba(56, 239, 125, 0.6);
+      animation: scanPulse 2s ease-out infinite;
+    }
+
+    .scan-ring:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    .scan-ring:nth-child(3) {
+      animation-delay: 1s;
+    }
+
+    .scan-ring:nth-child(4) {
+      animation-delay: 1.5s;
+    }
+
+    @keyframes scanPulse {
+      0% {
+        transform: scale(0.3);
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(56, 239, 125, 0.7),
+                    0 0 0 0 rgba(17, 153, 142, 0.7),
+                    inset 0 0 20px rgba(56, 239, 125, 0.5);
+      }
+      50% {
+        transform: scale(0.7);
+        opacity: 0.8;
+        box-shadow: 0 0 20px 10px rgba(56, 239, 125, 0.5),
+                    0 0 40px 20px rgba(17, 153, 142, 0.3),
+                    inset 0 0 30px rgba(56, 239, 125, 0.3);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0;
+        box-shadow: 0 0 40px 20px rgba(56, 239, 125, 0.2),
+                    0 0 60px 30px rgba(17, 153, 142, 0.1),
+                    inset 0 0 40px rgba(56, 239, 125, 0.1);
+      }
+    }
+
+    /* Corner markers for scan frame */
+    .scan-corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(56, 239, 125, 0.8);
+      animation: cornerGlow 1.5s ease-in-out infinite;
+    }
+
+    .scan-corner.top-left {
+      top: 50px;
+      left: 50px;
+      border-right: none;
+      border-bottom: none;
+      border-top-left-radius: 15px;
+    }
+
+    .scan-corner.top-right {
+      top: 50px;
+      right: 50px;
+      border-left: none;
+      border-bottom: none;
+      border-top-right-radius: 15px;
+      animation-delay: 0.2s;
+    }
+
+    .scan-corner.bottom-left {
+      bottom: 50px;
+      left: 50px;
+      border-right: none;
+      border-top: none;
+      border-bottom-left-radius: 15px;
+      animation-delay: 0.4s;
+    }
+
+    .scan-corner.bottom-right {
+      bottom: 50px;
+      right: 50px;
+      border-left: none;
+      border-top: none;
+      border-bottom-right-radius: 15px;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes cornerGlow {
+      0%, 100% {
+        border-color: rgba(56, 239, 125, 0.8);
+        box-shadow: 0 0 10px rgba(56, 239, 125, 0.5);
+      }
+      50% {
+        border-color: rgba(17, 153, 142, 1);
+        box-shadow: 0 0 20px rgba(17, 153, 142, 0.8);
+      }
+    }
+
+    /* Scanning line effect */
+    .scan-line {
+      position: absolute;
+      width: 280px;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(56, 239, 125, 0.8) 20%,
+        rgba(56, 239, 125, 1) 50%,
+        rgba(56, 239, 125, 0.8) 80%,
+        transparent);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: scanLineMove 3s linear infinite;
+      box-shadow: 0 0 10px rgba(56, 239, 125, 0.6);
+    }
+
+    @keyframes scanLineMove {
+      0% {
+        top: 10%;
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        top: 90%;
+        opacity: 0;
+      }
+    }
+
+    /* Hide scan overlay initially */
+    .scan-overlay.hidden {
+      display: none;
     }
 
     .checkin-title {
@@ -185,7 +338,23 @@
   <div class="checkin-box animate__animated animate__zoomIn">
     <div class="checkin-icon animate__animated animate__bounceIn">
       <i class="fas fa-camera"></i>
+      <!-- Animated Face-Scan Overlay -->
+      <div class="scan-overlay" id="scanOverlay">
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-ring"></div>
+        <div class="scan-line"></div>
+      </div>
     </div>
+    <!-- Scan frame corners -->
+    <div class="scan-overlay" id="scanCorners">
+      <div class="scan-corner top-left"></div>
+      <div class="scan-corner top-right"></div>
+      <div class="scan-corner bottom-left"></div>
+      <div class="scan-corner bottom-right"></div>
+    </div>
+    
     <h2 class="checkin-title animate__animated animate__fadeInDown">Face Recognition</h2>
     <p class="checkin-subtitle animate__animated animate__fadeInUp">Check-In System</p>
 
@@ -390,12 +559,6 @@
       </button>
     </form>
 
-    <div class="progress-steps animate__animated animate__fadeInUp">
-      <div id="step1" class="step">Step 1: Position your face in front of camera</div>
-      <div id="step2" class="step">Step 2: Verifying your identity</div>
-      <div id="step3" class="step">Step 3: Completing check-in process</div>
-    </div>
-
     <div id="statusMsg" class="status-message d-none animate__animated"></div>
     {% endif %}
   </div>
@@ -403,28 +566,43 @@
   <script>
     window.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('checkinForm');
+      const scanOverlay = document.getElementById('scanOverlay');
+      const scanCorners = document.getElementById('scanCorners');
+      
+      // Show scan overlays when form is present (scanning mode)
       if (form) {
+        if (scanOverlay) scanOverlay.classList.remove('hidden');
+        if (scanCorners) scanCorners.classList.remove('hidden');
         form.submit();
+      } else {
+        // Hide scan overlays when result is shown
+        if (scanOverlay) scanOverlay.classList.add('hidden');
+        if (scanCorners) scanCorners.classList.add('hidden');
       }
     });
 
-    // Activate steps progressively
+    // Show status message
     setTimeout(() => {
-      document.getElementById("step1").classList.add("active");
-      statusMsg.innerHTML = "<i class='fas fa-camera me-2'></i>Please look directly at the camera";
-      statusMsg.classList.add("animate__fadeIn");
+      const statusMsg = document.getElementById("statusMsg");
+      if (statusMsg) {
+        statusMsg.classList.remove("d-none");
+        statusMsg.innerHTML = "<i class='fas fa-camera me-2'></i>Please look directly at the camera";
+        statusMsg.classList.add("animate__fadeIn");
+      }
     }, 500);
 
     setTimeout(() => {
-      document.getElementById("step1").classList.remove("active");
-      document.getElementById("step2").classList.add("active");
-      statusMsg.innerHTML = "<i class='fas fa-search me-2'></i>Analyzing facial features...";
+      const statusMsg = document.getElementById("statusMsg");
+      if (statusMsg) {
+        statusMsg.innerHTML = "<i class='fas fa-search me-2'></i>Analyzing facial features...";
+      }
     }, 2000);
 
     setTimeout(() => {
-      document.getElementById("step2").classList.remove("active");
-      document.getElementById("step3").classList.add("active");
-      statusMsg.innerHTML = "<i class='fas fa-check me-2'></i>Finalizing check-in...";
+      const statusMsg = document.getElementById("statusMsg");
+      if (statusMsg) {
+        statusMsg.innerHTML = "<i class='fas fa-check me-2'></i>Finalizing check-in...";
+      }
     }, 4000);
       
   </script>
