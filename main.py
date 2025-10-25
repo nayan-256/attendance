@@ -197,6 +197,78 @@ def init_db():
 
 init_db()
 
+# --- Motivational Quotes Loader ---
+QUOTES_FILE = os.path.join(app.root_path, 'static', 'data', 'quotes.json')
+_QUOTES_CACHE = []
+
+def load_quotes():
+    global _QUOTES_CACHE
+    try:
+        if os.path.exists(QUOTES_FILE):
+            with open(QUOTES_FILE, 'r', encoding='utf-8') as f:
+                _QUOTES_CACHE = json.load(f)
+        else:
+            _QUOTES_CACHE = []
+    except Exception as e:
+        print(f"Error loading quotes: {e}")
+        _QUOTES_CACHE = []
+
+load_quotes()
+
+def get_daily_quote():
+    """Deterministic quote selection based on current date."""
+    if not _QUOTES_CACHE:
+        return {'text': 'Keep going — small steps lead to big changes.', 'author': ''}
+    idx = datetime.utcnow().toordinal() % len(_QUOTES_CACHE)
+    return _QUOTES_CACHE[idx]
+
+
+def get_student_quote(student_identifier, by_date=True):
+    """Return a quote tailored to the student_identifier.
+
+    If by_date is True, selection varies by date so students see a daily quote.
+    Otherwise selection is purely based on the identifier (static).
+    """
+    if not _QUOTES_CACHE:
+        return {'text': 'Keep going — small steps lead to big changes.', 'author': ''}
+    try:
+        # Normalize identifier to string
+        sid = str(student_identifier or '')
+        # Use ordinal (date) and hash of student id to pick an index
+        date_ord = datetime.utcnow().toordinal() if by_date else 0
+        h = abs(hash(sid))
+        idx = (h + date_ord) % len(_QUOTES_CACHE)
+        return _QUOTES_CACHE[idx]
+    except Exception:
+        return get_daily_quote()
+
+
+@app.context_processor
+def inject_quote():
+    try:
+        return {'daily_quote': get_daily_quote()}
+    except Exception:
+        return {'daily_quote': {'text': 'Keep learning every day.', 'author': ''}}
+
+
+@app.route('/quote')
+def quote_api():
+    """Return a random quote as JSON for client-side refresh."""
+    if not _QUOTES_CACHE:
+        return jsonify({'text': 'Keep going — small steps lead to big changes.', 'author': ''})
+    # If a student_id is provided, return a student-specific quote (deterministic)
+    student_id = request.args.get('student_id')
+    mode = request.args.get('mode', 'daily')
+    if student_id:
+        # mode 'daily' varies by date; mode 'static' uses only id
+        by_date = (mode != 'static')
+        q = get_student_quote(student_id, by_date=by_date)
+        return jsonify(q)
+
+    # Fallback: return a random quote
+    q = random.choice(_QUOTES_CACHE)
+    return jsonify(q)
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -237,10 +309,13 @@ def student_dashboard():
     conn.close()
 
     # Render the dashboard and set cache control
+    # Provide a student-specific daily quote
+    student_quote = get_student_quote(student['student_id'])
     response = make_response(render_template(
         'student_dashboard.html',
         student=student,
-        attendance_records=attendance_records
+        attendance_records=attendance_records,
+        daily_quote=student_quote
     ))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'

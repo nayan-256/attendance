@@ -33,21 +33,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      /* Dark/Light mode CSS variables */
-      --bg-primary: #ffffff;
-      --bg-secondary: #f8f9fa;
-      --text-primary: #212529;
-      --text-secondary: #6c757d;
-      --border-color: #dee2e6;
-      --shadow-color: rgba(0, 0, 0, 0.1);
-      --card-bg: #ffffff;
-      --navbar-bg: #ffffff;
-      --button-bg: #007bff;
-      --button-text: #ffffff;
-      --glass-bg: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
-    }
     
     /* Body Background Animation - Same as index.html */
     body {
@@ -135,6 +120,8 @@
         filter: hue-rotate(360deg);
       }
     }
+
+    /* Theme toggle removed — using static page styles */
 
     /* New Pulse Animation */
     @keyframes backgroundPulse {
@@ -1924,5 +1911,6 @@
       window.open('{{ url_for("chatbot_page") }}', 'ChatbotWindow', 'width=520,height=750,resizable=yes,scrollbars=yes');
     }
   </script>
+  <!-- theme toggle removed -->
 </body>
 </html>

@@ -9,8 +9,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    /* Static background — theme support removed */
     body {
-      background: linear-gradient(-45deg, #11998e, #38ef7d, #00b4db, #0083b0);
+      background: linear-gradient(-45deg, #11998e, #0083b0);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
       min-height: 100vh;
@@ -35,6 +36,8 @@
         background-position: 0% 50%;
       }
     }
+
+    /* theme toggle removed */
 
     /* Floating elements */
     body::before {
@@ -551,6 +554,7 @@
     {% else %}
     <form id="checkinForm" method="POST">
       <!-- Hide the button so it's not visible or clickable -->
+    <!-- theme toggle removed -->
       <button id="checkinBtn" type="submit" class="btn btn-checkin animate__animated animate__pulse"
         style="display:none;">
         <i class="fas fa-play me-2"></i>

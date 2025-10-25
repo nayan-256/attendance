@@ -31,21 +31,24 @@
 
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --success-gradient: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-      --danger-gradient: linear-gradient(135deg, #ff512f 0%, #f09819 100%);
-      --glass-bg: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      /* Fallback color variables (used by status badges, glass panels, and gradients) */
+      --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+      --success-gradient: linear-gradient(135deg, #28a745, #20c997);
+      --danger-gradient: linear-gradient(135deg, #dc3545, #e64980);
+      --glass-bg: rgba(255,255,255,0.12);
+      --glass-border: rgba(255,255,255,0.14);
+      --primary-text: #212529;
     }
-
+    /* Static page background (theme feature removed) */
     body {
-      background: linear-gradient(135deg, #e0eafc, #cfdef3 80%);
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
       background-size: 400% 400%;
       animation: gradientShift 15s ease infinite;
       min-height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       position: relative;
       overflow-x: hidden;
+      color: #212529;
     }
     
     /* Settings Button Styles */
@@ -99,6 +102,8 @@
       pointer-events: none;
       z-index: 1;
     }
+
+    /* theme toggle removed */
 
     .shape {
       position: absolute;
@@ -922,6 +927,22 @@
       </div>
     </div>
 
+    <!-- Motivational Quote Widget -->
+    <div class="quote-widget my-4" data-aos="fade-up" data-aos-delay="300">
+      <div class="card p-3 shadow-sm" style="border-radius:16px;">
+        <div class="d-flex align-items-start gap-3">
+          <div style="font-size:1.5rem;color:#667eea;">📚</div>
+          <div>
+            <div id="quoteText" class="fw-semibold">"{{ daily_quote.text }}"</div>
+            <div id="quoteAuthor" class="text-muted small mt-1">— {{ daily_quote.author }}</div>
+          </div>
+          <div class="ms-auto">
+            <button id="newQuoteBtn" class="btn btn-sm btn-outline-primary">New Quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Attendance Summary Cards -->
     <div class="row mb-4" data-aos="fade-up" data-aos-delay="400">
       <div class="col-md-4 mb-3">
@@ -1580,6 +1601,32 @@
   <!-- AOS (Animate On Scroll) JS -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
+  <!-- Quote refresh script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const btn = document.getElementById('newQuoteBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        // Use fetch with promise chain for broader compatibility
+        btn.disabled = true;
+        // Request a student-specific quote so each student sees different quotes
+        var sid = encodeURIComponent('{{ student.student_id }}');
+        var url = '/quote?student_id=' + sid;
+        fetch(url).then(function (res) {
+          if (!res.ok) throw new Error('Network error');
+          return res.json();
+        }).then(function (data) {
+          document.getElementById('quoteText').textContent = '"' + (data.text || '') + '"';
+          document.getElementById('quoteAuthor').textContent = data.author ? '— ' + data.author : '';
+        }).catch(function (e) {
+          console.error('Failed to fetch quote', e);
+        }).finally(function () {
+          setTimeout(function () { btn.disabled = false; }, 600);
+        });
+      });
+    });
+  </script>
+
   <script>
     // Initialize AOS
     AOS.init({
@@ -1613,9 +1660,7 @@
     }
   });
 </script>
-
-
-
+  <!-- theme toggle removed -->
 </body>
 
 </html>

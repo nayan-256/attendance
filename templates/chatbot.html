@@ -809,9 +809,7 @@
                 <i class="fas fa-download"></i> Export
             </button>
             <div class="header-controls">
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <!-- theme toggle removed -->
             </div>
             <button class="close-btn" onclick="window.close()" title="Close Chat">
                 <i class="fas fa-times"></i>
@@ -906,21 +904,7 @@
             oscillator.stop(audioContext.currentTime + 0.15);
         }
 
-        // Theme toggle
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            
-            const icon = document.querySelector('#themeToggle i');
-            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        // Load theme preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            document.querySelector('#themeToggle i').className = 'fas fa-sun';
-        }
+        // theme toggle removed — site no longer supports per-page theme switching
 
         // Connection status monitor
         function updateConnectionStatus(online) {
