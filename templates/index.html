@@ -309,7 +309,7 @@
       min-width: 160px;
     }
 
-    /* Calendar Widget Styles */
+    /* Calendar Widget Styles (copied from student_home) */
     .calendar-floating-btn {
       position: fixed;
       top: 20px;
@@ -602,55 +602,6 @@
       color: #333;
     }
 
-    .holiday-details-popup .holiday-info {
-      margin-bottom: 15px;
-    }
-
-    .holiday-details-popup .holiday-name {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-
-    .holiday-details-popup .holiday-date {
-      font-size: 1rem;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    .holiday-details-popup .holiday-reason {
-      font-size: 1rem;
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .holiday-details-popup .holiday-type {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .holiday-details-popup .holiday-type.national {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-      color: white;
-    }
-
-    .holiday-details-popup .holiday-type.religious {
-      background: linear-gradient(135deg, #4ecdc4, #44a08d);
-      color: white;
-    }
-
-    .holiday-details-popup .holiday-type.festival {
-      background: linear-gradient(135deg, #feca57, #ff9ff3);
-      color: white;
-    }
-
     .holiday-popup-overlay {
       position: fixed;
       top: 0;
@@ -764,7 +715,7 @@
       color: #666;
     }
 
-    /* Responsive Design */
+    /* Responsive tweaks for calendar */
     @media (max-width: 768px) {
       .calendar-popup {
         width: 95%;
@@ -1312,11 +1263,8 @@
 </head>
 
 <body>
-  <!-- Settings Button -->
-  <a href="{{ url_for('settings') }}" class="settings-btn" title="Settings">
-    <i class="fas fa-cog"></i>
-  </a>
-  
+  <!-- Settings icon removed as requested -->
+
   <!-- Calendar Floating Button -->
   <div class="calendar-floating-btn" onclick="toggleCalendar()">
     📅

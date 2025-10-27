@@ -28,6 +28,8 @@
 
   <!-- AOS (Animate On Scroll) Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Button effects (ripple + glow) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/button-effects.css') }}">
 
   <style>
     :root {
@@ -940,6 +942,42 @@
             <button id="newQuoteBtn" class="btn btn-sm btn-outline-primary">New Quote</button>
           </div>
         </div>
+
+          <!-- Absence Request Submission -->
+          <div class="absence-request my-4" data-aos="fade-up" data-aos-delay="350">
+            <div class="card p-3 shadow-sm" style="border-radius:16px;">
+              <div class="d-flex align-items-center gap-3">
+                <div style="font-size:1.5rem;color:#ff6b6b;">📝</div>
+                <div class="w-100">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h5 class="mb-1">Apply for Leave / Submit Absence Reason</h5>
+                      <div class="text-muted small">Submit a reason for an absence and it will be sent to your teacher for approval.</div>
+                    </div>
+                  </div>
+                  <form action="{{ url_for('submit_absence_request') }}" method="post" class="row g-2 mt-2">
+                    <div class="col-md-3">
+                      <input type="date" name="absence_date" class="form-control" value="" required>
+                    </div>
+                    <div class="col-md-3">
+                      <select name="reason" class="form-select" required>
+                        <option value="sick">Sick</option>
+                        <option value="event">Official Event</option>
+                        <option value="personal">Personal</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="text" name="details" class="form-control" placeholder="Optional details (doctor note, event name)">
+                    </div>
+                    <div class="col-md-2 text-end">
+                      <button class="btn btn-outline-danger" type="submit">Submit</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
 
@@ -1029,6 +1067,38 @@
     </div>
 
     <!-- Action Buttons -->
+        <!-- Student Absence Requests -->
+        <div class="card border-0 mt-4 p-3" style="background: rgba(255,255,255,0.06); backdrop-filter: blur(6px);" data-aos="fade-up" data-aos-delay="700">
+          <div class="card-header bg-transparent border-0 text-start">
+            <h5 class="mb-0 text-dark"><i class="fas fa-paper-plane me-2"></i>Your Absence Requests</h5>
+          </div>
+          <div class="card-body p-2">
+            {% if absence_requests and absence_requests|length > 0 %}
+            <ul class="list-group">
+              {% for req in absence_requests %}
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">{{ req['absence_date'] }} — {{ req['reason']|capitalize }}</div>
+                  <div class="small text-muted">{{ req['details'] or '—' }}<br>Submitted: {{ req['submitted_at'] }}</div>
+                </div>
+                <div class="text-end">
+                  {% if req['status'] == 'pending' %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                  {% elif req['status'] == 'approved' %}
+                  <span class="badge bg-success">Approved</span>
+                  {% else %}
+                  <span class="badge bg-danger">Rejected</span>
+                  {% endif %}
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <div class="text-muted">No absence requests submitted yet.</div>
+            {% endif %}
+          </div>
+        </div>
+
     <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="800">
       <div class="d-flex justify-content-center gap-3 flex-wrap">
         <a href="/checkin" class="btn btn-success btn-lg">
@@ -1636,6 +1706,9 @@
       offset: 100
     });
   </script>
+
+  <!-- Button effects JS -->
+  <script src="{{ url_for('static', filename='js/button-effects.js') }}"></script>
 
   <!-- PWA Service Worker Registration -->
   <script>

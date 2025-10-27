@@ -192,6 +192,21 @@ def init_db():
         FOREIGN KEY(teacher_id) REFERENCES teachers(id)
     )''')
 
+    # Create absence_requests table for student-submitted absence reasons
+    cur.execute('''CREATE TABLE IF NOT EXISTS absence_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        absence_date TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        details TEXT,
+        status TEXT DEFAULT 'pending', -- pending, approved, rejected
+        submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        reviewed_at TIMESTAMP,
+        reviewer TEXT,
+        review_notes TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )''')
+
     conn.commit()
     conn.close()
 
@@ -308,6 +323,18 @@ def student_dashboard():
 
     conn.close()
 
+    # Fetch recent absence requests submitted by this student
+    try:
+        conn2 = sqlite3.connect('database.db')
+        conn2.row_factory = sqlite3.Row
+        cur2 = conn2.cursor()
+        cur2.execute('''SELECT id, absence_date, reason, details, status, submitted_at, reviewed_at, reviewer, review_notes
+                        FROM absence_requests WHERE user_id = ? ORDER BY submitted_at DESC LIMIT 10''', (student['id'],))
+        absence_requests = cur2.fetchall()
+        conn2.close()
+    except Exception:
+        absence_requests = []
+
     # Render the dashboard and set cache control
     # Provide a student-specific daily quote
     student_quote = get_student_quote(student['student_id'])
@@ -315,7 +342,8 @@ def student_dashboard():
         'student_dashboard.html',
         student=student,
         attendance_records=attendance_records,
-        daily_quote=student_quote
+        daily_quote=student_quote,
+        absence_requests=absence_requests
     ))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
@@ -519,13 +547,78 @@ def profile():
             image_path = 'default_profile.svg'
         
         user = {
+            'id': row['id'],
             'name': row['name'],
             'student_id': row['student_id'],
             'class_year': row['class_year'],
             'department': row['department'],
             'image_path': image_path
         }
-        return render_template('profile.html', user=user)
+
+        # Compute DB-driven achievements (streaks, perfect week, attendance percent)
+        try:
+            conn2 = sqlite3.connect('database.db')
+            cur2 = conn2.cursor()
+            cur2.execute("SELECT DATE(timestamp) as dt FROM attendance WHERE user_id = ? ORDER BY timestamp DESC", (user['id'],))
+            rows = cur2.fetchall()
+            conn2.close()
+            date_set = set([r[0] for r in rows if r and r[0]])
+
+            today = datetime.utcnow().date()
+            # current consecutive streak (days with attendance including today)
+            streak = 0
+            check_day = today
+            while True:
+                if check_day.isoformat() in date_set:
+                    streak += 1
+                    check_day = check_day - timedelta(days=1)
+                else:
+                    break
+
+            # perfect last 7 days
+            perfect_week = all(((today - timedelta(days=i)).isoformat() in date_set) for i in range(0, 7))
+
+            # attendance percentage over last 30 days (presence days / 30)
+            last_30_cutoff = (today - timedelta(days=29)).isoformat()
+            recent_days = [d for d in date_set if d >= last_30_cutoff]
+            present_last_30 = len(recent_days)
+            attendance_pct_30 = round((present_last_30 / 30.0) * 100, 1)
+
+            # perfect month (28+ of last 30)
+            perfect_month = present_last_30 >= 28
+
+            achievements = []
+            achievements.append({
+                'label': f"{streak}-day Streak",
+                'earned': streak >= 1,
+                'desc': f"Current consecutive present days: {streak}"
+            })
+            achievements.append({
+                'label': '7-day Streak',
+                'earned': streak >= 7,
+                'desc': 'Present 7 days in a row'
+            })
+            achievements.append({
+                'label': 'Perfect Week',
+                'earned': perfect_week,
+                'desc': 'Present on each day of the last 7 days'
+            })
+            achievements.append({
+                'label': f'{attendance_pct_30}% (30d)',
+                'earned': attendance_pct_30 >= 90,
+                'desc': f'Attendance in last 30 days: {attendance_pct_30}%'
+            })
+            achievements.append({
+                'label': 'Perfect Month',
+                'earned': perfect_month,
+                'desc': 'Present 28+ of last 30 days'
+            })
+
+        except Exception as e:
+            print(f"Error computing achievements: {e}")
+            achievements = []
+
+        return render_template('profile.html', user=user, achievements=achievements)
     else:
         flash("Student profile not found", "danger")
         return redirect(url_for('student_login'))
@@ -1297,6 +1390,97 @@ def teacher_dashboard():
         weekly_summary=weekly_summary,
         monthly_summary=monthly_summary
     )
+
+
+@app.route('/absence_request', methods=['POST'])
+def submit_absence_request():
+    # Students submit absence reasons via this endpoint
+    student_id = session.get('student_id')
+    if not student_id:
+        flash('Please log in to submit an absence request', 'warning')
+        return redirect(url_for('student_login'))
+
+    absence_date = request.form.get('absence_date')
+    reason = request.form.get('reason')
+    details = request.form.get('details', '')
+
+    if not absence_date or not reason:
+        flash('Please provide a date and reason for absence.', 'danger')
+        return redirect(url_for('student_dashboard'))
+
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        # Resolve user id
+        cur.execute('SELECT id FROM users WHERE student_id = ?', (student_id,))
+        user = cur.fetchone()
+        if not user:
+            conn.close()
+            flash('Student record not found.', 'danger')
+            return redirect(url_for('student_dashboard'))
+
+        user_id = user[0]
+        cur.execute('''INSERT INTO absence_requests (user_id, absence_date, reason, details, status, submitted_at)
+                       VALUES (?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
+                    ''', (user_id, absence_date, reason, details))
+        conn.commit()
+        conn.close()
+        flash('Absence request submitted — awaiting teacher approval.', 'success')
+    except Exception as e:
+        print(f"Error submitting absence request: {e}")
+        flash('Failed to submit absence request. Try again later.', 'danger')
+
+    return redirect(url_for('student_dashboard'))
+
+
+@app.route('/absence_requests')
+def view_absence_requests():
+    # Teacher view of pending absence requests
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute('''SELECT ar.id, ar.absence_date, ar.reason, ar.details, ar.status, ar.submitted_at, ar.reviewed_at, ar.reviewer, ar.review_notes,
+                          u.name as student_name, u.student_id as student_identifier
+                   FROM absence_requests ar
+                   JOIN users u ON ar.user_id = u.id
+                   ORDER BY ar.submitted_at DESC
+                ''')
+    requests = cur.fetchall()
+    conn.close()
+    return render_template('absence_requests.html', requests=requests)
+
+
+@app.route('/absence_request/<int:req_id>/review', methods=['POST'])
+def review_absence_request(req_id):
+    # Teacher approves or rejects a request
+    if not session.get('teacher_logged_in'):
+        return redirect(url_for('teacher_login'))
+
+    action = request.form.get('action')  # 'approve' or 'reject'
+    notes = request.form.get('review_notes', '')
+    reviewer = session.get('teacher_username', 'teacher')
+
+    if action not in ('approve', 'reject'):
+        flash('Invalid action.', 'danger')
+        return redirect(url_for('view_absence_requests'))
+
+    new_status = 'approved' if action == 'approve' else 'rejected'
+    try:
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute('''UPDATE absence_requests SET status = ?, reviewed_at = CURRENT_TIMESTAMP, reviewer = ?, review_notes = ? WHERE id = ?''',
+                    (new_status, reviewer, notes, req_id))
+        conn.commit()
+        conn.close()
+        flash(f'Request {new_status}.', 'success')
+    except Exception as e:
+        print(f"Error reviewing absence request: {e}")
+        flash('Failed to update request. Try again later.', 'danger')
+
+    return redirect(url_for('view_absence_requests'))
 
 
 @app.route('/checkin', methods=['GET', 'POST'])

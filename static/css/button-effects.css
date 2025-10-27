@@ -1,0 +1,43 @@
+/* Ripple and glow effects for action buttons */
+.btn-action-glow {
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Glow on hover */
+.btn-action-glow:hover {
+  box-shadow: 0 10px 30px rgba(102,126,234,0.35), 0 2px 6px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+/* Active press effect */
+.btn-action-glow:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(102,126,234,0.25);
+}
+
+/* Ripple element */
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255,255,255,0.6);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Dark ripple variant */
+.btn-ripple.dark {
+  background: rgba(0,0,0,0.12);
+}
+
+/* Subtle transition for ripple */
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Note: button attachment is handled by JS (adds `.btn-action-glow` and ripple elements). */
